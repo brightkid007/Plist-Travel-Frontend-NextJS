@@ -23,7 +23,7 @@ const MainMenu = ({ style = "" }) => {
   return (
     <nav className="menu js-navList">
       <ul className={`menu__nav ${style} -is-active`}>
-        <li
+        {/* <li
           className={`${
             isActiveParentChaild(homeItems, pathname) ? "current" : ""
           } menu-item-has-children`}
@@ -44,10 +44,10 @@ const MainMenu = ({ style = "" }) => {
               </li>
             ))}
           </ul>
-        </li>
+        </li> */}
         {/* End home page menu */}
 
-        <li className={isActiveParent ? "menu-item-has-children -has-mega-menu current":'menu-item-has-children -has-mega-menu'}>
+        {/* <li className={isActiveParent ? "menu-item-has-children -has-mega-menu current":'menu-item-has-children -has-mega-menu'}>
           <a href="#">
             <span className="mr-10">Categories</span>
             <i className="icon icon-chevron-sm-down" />
@@ -55,15 +55,31 @@ const MainMenu = ({ style = "" }) => {
           <div className="mega">
             <CategoriesMegaMenu setIsActiveParent={setIsActiveParent} />
           </div>
-        </li>
+        </li> */}
         {/* End categories menu items */}
 
-        <li className={pathname === "/destinations" ? "current" : ""}>
-          <Link href="/destinations">Destinations</Link>
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/destinations">Home</Link>
+        </li>
+
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/properties">Properties</Link>
+        </li>
+
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/flights">Flights</Link>
+        </li>
+
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/attractions-events">Attractions & Events</Link>
+        </li>
+
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/rides">Rides</Link>
         </li>
         {/* End Destinatinos single menu */}
 
-        <li
+        {/* <li
           className={`${
             isActiveParentChaild(blogItems, pathname) ? "current" : ""
           } menu-item-has-children`}
@@ -84,10 +100,10 @@ const MainMenu = ({ style = "" }) => {
               </li>
             ))}
           </ul>
-        </li>
+        </li> */}
         {/* End blogIems */}
 
-        <li
+        {/* <li
           className={`${
             isActiveParentChaild(pageItems, pathname) ? "current" : ""
           } menu-item-has-children`}
@@ -108,10 +124,10 @@ const MainMenu = ({ style = "" }) => {
               </li>
             ))}
           </ul>
-        </li>
+        </li> */}
         {/* End pages items */}
 
-        <li
+        {/* <li
           className={`${
             pathname.split('/')[1] == 'dashboard'  || pathname.split('/')[1] == 'vendor-dashboard' ? "current" : ""
           } menu-item-has-children`}
@@ -133,6 +149,10 @@ const MainMenu = ({ style = "" }) => {
               </li>
             ))}
           </ul>
+        </li> */}
+
+        <li className={pathname === "/contact" ? "current" : ""}>
+          <Link href="/contact">Contact</Link>
         </li>
 
         <li className={pathname === "/contact" ? "current" : ""}>

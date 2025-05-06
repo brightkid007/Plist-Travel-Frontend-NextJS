@@ -1,7 +1,7 @@
 .cardImage {
   position: relative;
   z-index: 0;
-  border-radius: inherit;
+  // border-radius: inherit;
   height: 100%;
 
   &:hover {
@@ -21,13 +21,13 @@
     width: 100%;
     height: 100%;
     z-index: 0;
-    border-radius: inherit;
+    // border-radius: inherit;
 
     > img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: inherit;
+      // border-radius: inherit;
     }
   }
 

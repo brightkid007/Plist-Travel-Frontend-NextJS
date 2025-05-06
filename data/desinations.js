@@ -24,9 +24,9 @@ export const destinations1 = [
 export const destinations2 = [
   {
     id: 1,
-    hoverText: "14 Hotel - 22 Cars - 18 Tours - 95 Activity",
-    city: "New York",
-    img: "/img/destinations/1/1.png",
+    hoverText: "Book your ideal stay with access to thousands of hotels, from budget to luxury",
+    city: "Properties",
+    img: "/images/GroupOne.png",
   },
   {
     id: 2,
@@ -57,12 +57,6 @@ export const destinations2 = [
     hoverText: "14 Hotel - 22 Cars - 18 Tours - 95 Activity",
     city: "New York",
     img: "/img/destinations/1/1.png",
-  },
-  {
-    id: 7,
-    hoverText: "14 Hotel - 22 Cars - 18 Tours - 95 Activity",
-    city: "London",
-    img: "/img/destinations/1/2.png",
   },
 ];
 

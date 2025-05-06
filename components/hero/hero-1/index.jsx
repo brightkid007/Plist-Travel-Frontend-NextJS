@@ -4,7 +4,7 @@ const index = () => {
   return (
     <section className="masthead -type-1 z-5">
       <div className="masthead__bg">
-        <img alt="image" src="/img/masthead/1/bg.webp" className="js-lazy" />
+        <img alt="image" src="/img/masthead/1/bg.png" className="js-lazy" />
       </div>
       <div className="container">
         <div className="row justify-center">
@@ -14,14 +14,14 @@ const index = () => {
                 className="text-60 lg:text-40 md:text-30 text-white"
                 data-aos="fade-up"
               >
-                Find Next Place To Visit
+                Find Your Perfect Travel Experience
               </h1>
               <p
                 className="text-white mt-6 md:mt-10"
                 data-aos="fade-up"
                 data-aos-delay="100"
               >
-                Discover amzaing places at exclusive deals
+                Discover the best properties, flights, rides, attractions & events, and more at unbeatable prices
               </p>
             </div>
             {/* End hero title */}

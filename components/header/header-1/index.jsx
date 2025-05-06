@@ -2,6 +2,7 @@
 'use client'
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import MainMenu from "../MainMenu";
 import CurrenctyMegaMenu from "../CurrenctyMegaMenu";
@@ -34,8 +35,9 @@ const Header1 = () => {
             <div className="col-auto">
               <div className="d-flex items-center">
                 <Link href="/" className="header-logo mr-20">
-                  <img src="/img/general/logo-light.svg" alt="logo icon" />
-                  <img src="/img/general/logo-dark.svg" alt="logo icon" />
+                  <img src="/img/general/plist logo 1.png" alt="logo icon" />
+                  {/* <img src="/img/general/logo-light.svg" alt="logo icon" />
+                  <img src="/img/general/logo-dark.svg" alt="logo icon" /> */}
                 </Link>
                 {/* End logo */}
 
@@ -68,7 +70,34 @@ const Header1 = () => {
                 {/* End language and currency selector */}
 
                 {/* Start btn-group */}
-                <div className="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
+
+                <div className="row items-center x-gap-5 y-gap-20 pl-20 lg:d-none">
+                  <div className="col-auto">
+                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
+                      <i className="icon-email-2 text-20"></i>
+                    </button>
+                  </div>
+                  {/* End col-auto */}
+
+                  <div className="col-auto">
+                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
+                      <i className="icon-notification text-20"></i>
+                    </button>
+                  </div>
+                  {/* End col-auto */}
+                </div>
+                {/* End .row */}
+
+                <div className="pl-15">
+                  <Image
+                    width={50}
+                    height={50}
+                    src="/img/avatars/3.webp"
+                    alt="image"
+                    className="size-50 rounded-22 object-cover"
+                  />
+                </div>
+                {/* <div className="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
                   <Link
                     href="/login"
                     className="button px-30 fw-400 text-14 -white bg-white h-50 text-dark-1"
@@ -81,7 +110,7 @@ const Header1 = () => {
                   >
                     Sign In / Register
                   </Link>
-                </div>
+                </div> */}
                 {/* End btn-group */}
 
                 {/* Start mobile menu icon */}

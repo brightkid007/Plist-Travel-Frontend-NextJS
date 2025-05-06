@@ -66,6 +66,11 @@ const Hotels = () => {
                               height={300}
                               className="rounded-4 col-12 js-lazy"
                               src={slide}
+                              // style={{
+                              //   objectFit: 'cover', // or 'contain' depending on your needs
+                              //   // width: 'auto',
+                              //   // height: '100%',
+                              // }}
                               alt="image"
                             />
                           </SwiperSlide>

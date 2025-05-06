@@ -56,7 +56,7 @@ const HeaderDashBoard = () => {
 
                 <div className="single-field relative d-flex items-center md:d-none ml-30">
                   <input
-                    className="pl-50 border-light text-dark-1 h-50 rounded-8"
+                    className="pl-50 border-light text-dark-1 h-50 rounded-16"
                     type="email"
                     placeholder="Search"
                   />

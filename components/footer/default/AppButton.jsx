@@ -27,8 +27,8 @@ const AppButton = () => {
         >
           <i className={`${item.icon} text-24`} />
           <a href={item.link} className="ml-20 d-block">
-            <div className="text-14 text-light-1">{item.text}</div>
-            <div className="text-15 lh-1 fw-500">{item.market}</div>
+            <div className="text-10 text-light-1">{item.text}</div>
+            <div className="text-14 lh-1 fw-500">{item.market}</div>
           </a>
         </div>
       ))}
