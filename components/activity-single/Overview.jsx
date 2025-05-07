@@ -24,7 +24,7 @@ const Overview = () => {
           </a>
         </div>
 
-        <div className="col-md-6">
+        {/* <div className="col-md-6">
           <h5 className="text-16 fw-500">Available languages</h5>
           <div className="text-15 mt-10">
             German, Chinese, Portuguese, Japanese, English, Italian, Chinese,
@@ -50,10 +50,10 @@ const Overview = () => {
             <li>Explore with a guide to delve deeper into the history</li>
             <li>Great for history buffs and travelers with limited time</li>
           </ul>
-        </div>
+        </div> */}
       </div>
 
-      <div className="mt-40 border-top-light">
+      {/* <div className="mt-40 border-top-light">
         <div className="row x-gap-40 y-gap-40 pt-40">
           <div className="col-12">
             <h3 className="text-22 fw-500">What&lsquo;s Included</h3>
@@ -88,7 +88,7 @@ const Overview = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 };

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { hotelsData } from "../../../../data/hotels";
+import GuestIcon from "/public/img/icons/guest.svg";
 
 const Properties = () => {
   return (
@@ -13,7 +14,7 @@ const Properties = () => {
                   <Image
                     width={200}
                     height={200}
-                    className="rounded-4 col-12 js-lazy"
+                    className="rounded-22 col-12 js-lazy"
                     src={item.img}
                     alt="image"
                   />
@@ -28,13 +29,18 @@ const Properties = () => {
             {/* End col */}
 
             <div className="col-md">
-              <h3 className="text-18 lh-14 fw-500">{item?.title}</h3>
-              <div className="d-flex x-gap-5 items-center pt-10">
-                <i className="icon-star text-10 text-yellow-1" />
-                <i className="icon-star text-10 text-yellow-1" />
-                <i className="icon-star text-10 text-yellow-1" />
-                <i className="icon-star text-10 text-yellow-1" />
-                <i className="icon-star text-10 text-yellow-1" />
+              <div className="d-flex items-center justify-between gap-10">
+                <h3 className="text-18 lh-14 fw-500">{item?.title}</h3>
+                <div className="d-flex x-gap-5 items-center pt-10">
+                  <i className="icon-star text-10 text-yellow-1" />
+                  <i className="icon-star text-10 text-yellow-1" />
+                  <i className="icon-star text-10 text-yellow-1" />
+                  <i className="icon-star text-10 text-yellow-1" />
+                  <i className="icon-star text-10 text-yellow-1" />
+                </div>
+              </div>
+              <div>
+                <img src="/img/icons/guest.svg" alt="guest" /> Up to 2 guests • 28 m²
               </div>
 
               <div className="row x-gap-10 y-gap-10 items-center pt-20">

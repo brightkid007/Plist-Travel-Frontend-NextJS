@@ -6,18 +6,18 @@ import { Gallery, Item } from "react-photoswipe-gallery";
 import Link from "next/link";
 import React, { useState } from 'react'
 
-export default function GalleryOne({hotel}) {
-    const [isOpen, setOpen] = useState(false);
+export default function GalleryOne({ hotel }) {
+  const [isOpen, setOpen] = useState(false);
   return (
     <>
-     <ModalVideo
+      <ModalVideo
         channel="youtube"
         autoplay
         isOpen={isOpen}
         videoId="oqNZOOWF8qM"
         onClose={() => setOpen(false)}
       />
-    <section className="pt-40">
+      <section className="pt-40">
         <div className="container">
           <div className="row y-gap-20 justify-between items-end">
             <div className="col-auto">
@@ -69,12 +69,14 @@ export default function GalleryOne({hotel}) {
                 <div className="col-auto">
                   <Link
                     href="/booking-page"
-                    className="button h-50 px-24 -dark-1 bg-blue-1 text-white"
+                    className="button h-40 px-24 -dark-1 bg-blue-1 text-white"
                   >
-                    Select Room <div className="icon-arrow-top-right ml-15" />
+                    Book Now <div className="icon-arrow-top-right ml-15" />
                   </Link>
                 </div>
               </div>
+
+
             </div>
             {/* End .col */}
           </div>
@@ -175,7 +177,7 @@ export default function GalleryOne({hotel}) {
                   alt="image"
                   className="rounded-4"
                 />
-                <div className="absolute px-10 py-10 col-12 h-full d-flex justify-end items-end">
+                {/* <div className="absolute px-10 py-10 col-12 h-full d-flex justify-end items-end">
                   <Item
                     original="/img/gallery/1/5.png"
                     thumbnail="/img/gallery/1/5.png"
@@ -193,7 +195,7 @@ export default function GalleryOne({hotel}) {
                       </div>
                     )}
                   </Item>
-                </div>
+                </div> */}
               </div>
               {/* End .galleryGrid__item */}
             </div>
