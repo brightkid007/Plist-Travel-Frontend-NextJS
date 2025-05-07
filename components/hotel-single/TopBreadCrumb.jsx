@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const TopBreadCrumb = () => {
   return (
     <section className="py-10 d-flex items-center bg-light-2">
@@ -23,11 +25,15 @@ const TopBreadCrumb = () => {
             {/* End .row */}
           </div>
           {/* End .col-auto */}
-
           <div className="col-auto">
-            <a href="#" className="text-14 text-blue-1 underline">
-              All Hotel in London
-            </a>
+            <div className="row x-gap-15 y-gap-15 items-center">
+              <button className="col-auto h-30 px-24 -dark-1 bg-gray-800 text-black">
+                <img src="/img/icons/hart.svg" alt="save_button" /> Save
+              </button>
+              <button className="col-auto h-30 px-24 -dark-1 bg-gray-800 text-black">
+                <img src="/img/icons/share.svg" alt="share_button" /> Share
+              </button>
+            </div>
           </div>
           {/* End col-auto */}
         </div>

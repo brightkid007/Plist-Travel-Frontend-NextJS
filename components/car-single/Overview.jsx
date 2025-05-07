@@ -22,32 +22,8 @@ const Overview = () => {
         >
           Show More
         </a>
-        <div className="mt-60 lg:mt-40 md:mt-30">
-          <h5 className="text-16 fw-500">Highlights</h5>
-          <ul className="list-disc text-15 mt-10">
-            <li>
-              Travel between the UNESCO World Heritage sites aboard a
-              comfortable coach
-            </li>
-            <li>Explore with a guide to delve deeper into the history</li>
-            <li>Great for history buffs and travelers with limited time</li>
-          </ul>
-        </div>
       </div>
       {/* End overview */}
-
-      <div className="border-top-light mt-40 pt-40 mb-40">
-        <h3 className="text-22 fw-500">Specifications</h3>
-        <div className="col-xl-9">
-          <Specifications />
-        </div>
-      </div>
-      {/* End specifications */}
-
-      <div className="border-top-light mt-40 pt-40 mb-40">
-        <h3 className="text-22 fw-500">Amenities</h3>
-        <Amenities />
-      </div>
     </>
   );
 };
