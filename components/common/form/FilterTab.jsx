@@ -13,8 +13,6 @@ const FilterTab = ({ options, tabOption, setTabOption }) => {
 
 //   ];
 
-  console.log(tabOption, "HERE");
-
   return (
     <div className="tabs__controls row x-gap-10 y-gap-10">
       {options.map((option) => (

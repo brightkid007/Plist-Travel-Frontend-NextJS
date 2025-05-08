@@ -41,7 +41,7 @@ const AvatarUploader = () => {
   };
 
   return (
-    <div className="row y-gap-30 items-center">
+    <div className="col-12 y-gap-30 items-center">
       <div className="col-auto">
         {image ? (
           <div className="d-flex ratio ratio-1:1 w-200">
@@ -50,7 +50,7 @@ const AvatarUploader = () => {
               height={200}
               src={image}
               alt="avatar"
-              className="img-ratio rounded-4"
+              className="img-ratio rounded-full"
             />
             <div className="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
               <div
@@ -68,10 +68,10 @@ const AvatarUploader = () => {
               height={200}
               src="/img/misc/avatar-1.png"
               alt="image"
-              className="img-ratio rounded-4"
+              className="img-ratio rounded-full"
             />
             <div className="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
-              <div className="size-40 bg-white rounded-4 flex-center cursor-pointer">
+              <div className="size-40 bg-white rounded-full flex-center cursor-pointer">
                 <i className="icon-trash text-16" />
               </div>
             </div>
@@ -79,16 +79,16 @@ const AvatarUploader = () => {
         )}
       </div>
 
-      <div className="col-auto">
-        <h4 className="text-16 fw-500">Your avatar</h4>
+      <div className="col-12 items-center">
+        {/* <h4 className="text-16 fw-500">Your avatar</h4>
         <div className="text-14 mt-5">
           PNG or JPG no bigger than 800px wide and tall.
-        </div>
+        </div> */}
         <div className="d-inline-block mt-15">
           <label
             htmlFor="avatar-upload"
             role="button"
-            className="button h-50 px-24 -dark-1 bg-blue-1 text-white"
+            className="button h-40 px-24 -dark-1 bg-blue-1 text-white"
           >
             <i className="icon-upload-file text-20 mr-10" />
             Browse

@@ -3,7 +3,7 @@ import Image from 'next/image'
 const ImageCard = () => {
     return (
         <>
-            <div className="col-md x-gap-20 y-gap-30 mt-4 mb-4 border-light rounded-8">
+            <div className="col-12 border-light rounded-8 py-20 px-20 w-full ml-15 mt-10">
                 {/* <div className="row-md-auto"> */}
                 <div style={{
                     position: 'relative',
