@@ -14,7 +14,7 @@ import { PackageSummary } from "./package-summary";
 // };
 
 const TravelPackageBuilder = () => {
-  const [activeTab, setActiveTab] = useState(1);
+  const [activeTab, setActiveTab] = useState(2);
 
   const handleTabClick = (index) => {
     setActiveTab(index);
@@ -27,7 +27,7 @@ const TravelPackageBuilder = () => {
   return (
     <>
       <Header1 />
-      <div className="py-30"></div>
+      <div className="py-40"></div>
       <div className="dashboard">
         <div className="dashboard__content bg-light-2 pb-30">
           <div className="row y-gap-20 justify-between items-end pb-30 lg:pb-40 md:pb-32">

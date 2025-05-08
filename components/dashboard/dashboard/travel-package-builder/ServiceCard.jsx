@@ -1,38 +1,38 @@
 "use client";
 
-const data = [
-  {
-    name: "Flights",
-    image: "/img/destinations/4/1.png",
-    icon: "/img/dashboard/icons/hotel-icon.svg",
-    selected: true,
-  },
-  {
-    name: "Hotels",
-    image: "/img/destinations/4/2.png",
-    icon: "/img/dashboard/icons/hotel-icon.svg",
-    selected: false,
-  },
-  {
-    name: "Ground Transportation",
-    image: "/img/destinations/4/2.png",
-    icon: "/img/dashboard/icons/hotel-icon.svg",
-    selected: true,
-  },
-  {
-    name: "Tours",
-    image: "/img/destinations/4/2.png",
-    icon: "/img/dashboard/icons/hotel-icon.svg",
-    selected: true,
-  },
-  {
-    name: "Activities/Events",
-    image: "/img/destinations/4/2.png",
-    icon: "/img/dashboard/icons/hotel-icon.svg",
-    selected: true,
-  },
-];
 const ServiceCard = () => {
+  const data = [
+    {
+      name: "Flights",
+      image: "/img/destinations/4/1.png",
+      icon: "/img/dashboard/icons/hotel-icon.svg",
+      selected: true,
+    },
+    {
+      name: "Hotels",
+      image: "/img/destinations/4/2.png",
+      icon: "/img/dashboard/icons/hotel-icon.svg",
+      selected: false,
+    },
+    {
+      name: "Ground Transportation",
+      image: "/img/destinations/4/2.png",
+      icon: "/img/dashboard/icons/hotel-icon.svg",
+      selected: true,
+    },
+    {
+      name: "Tours",
+      image: "/img/destinations/4/2.png",
+      icon: "/img/dashboard/icons/hotel-icon.svg",
+      selected: true,
+    },
+    {
+      name: "Activities/Events",
+      image: "/img/destinations/4/2.png",
+      icon: "/img/dashboard/icons/hotel-icon.svg",
+      selected: true,
+    },
+  ];
   return (
     <div className="row y-gap-30">
       {data.map((item, index) => (
