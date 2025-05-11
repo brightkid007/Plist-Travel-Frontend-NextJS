@@ -45,3 +45,5 @@ export const SelectService = () => {
     </div>
   );
 };
+
+export default SelectService;

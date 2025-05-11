@@ -1,32 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
-import Header1 from "@/components/header/header-1";
-import Footer from "@/components/footer/footer-5";
-import { SelectService } from "./select-service";
-import { ServiceDetail } from "./service-detail";
-import { PackageSummary } from "./package-summary";
-
+import DashboardPage from "@/components/dashboard/dashboard/db-package"
 // export const metadata = {
 //   title: "Plist || Travel Platform",
 //   description: "Plist - Travel Package Builder",
 // };
 
 const TravelPackageBuilder = () => {
-  const [activeTab, setActiveTab] = useState(2);
-
-  const handleTabClick = (index) => {
-    setActiveTab(index);
-  };
-  const tabItems = [
-    { label: "Select Services", content: <SelectService /> },
-    { label: "Service Detail", content: <ServiceDetail /> },
-    { label: "Package Summary", content: <PackageSummary /> },
-  ];
   return (
     <>
-      <Header1 />
+      <DashboardPage />
+      {/* <Header1 />
       <div className="py-40"></div>
       <div className="dashboard">
         <div className="dashboard__content bg-light-2 pb-30">
@@ -64,7 +49,7 @@ const TravelPackageBuilder = () => {
       </div>
 
       <Footer />
-      {/* End Footer Section */}
+      End Footer Section */}
     </>
   );
 };

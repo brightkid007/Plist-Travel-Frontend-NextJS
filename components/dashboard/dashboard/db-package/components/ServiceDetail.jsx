@@ -1,21 +1,22 @@
 import Hotels from "@/components/hotels/Hotels";
 import { useState } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
+import TravelerInformationCard from "./TravelInformationCard";
 
 export const ServiceDetail = () => {
   const [activeCategory, setActiveCategory] = useState(0);
   const categoryList = [
     { label: "Flight", name: "Flight Details", content: <FlightDetails /> },
-    { label: "Hotel", name: "Hotel Details", content: <HotelDetails /> },
+    { label: "Property", name: "Property Details", content: <HotelDetails /> },
     {
-      label: "Transportation",
-      name: "Ground Transportation Details",
+      label: "Ride",
+      name: "Rides Details",
       content: <TransportationDetails />,
     },
     { label: "Tours", name: "Tours Details", content: <ToursDetails /> },
     {
-      label: "Activities",
-      name: "Activities & Events Details",
+      label: "Attraction/Events",
+      name: "Attractions & Events Details",
       content: <ActivitiesDetails />,
     },
   ];
@@ -211,7 +212,7 @@ const HotelDetails = () => {
   const [children, setChildren] = useState(0);
   return (
     <>
-      <h1 className="text-16 lh-14 fw-500">Hotel Details</h1>
+      <h1 className="text-16 lh-14 fw-500">Property Details</h1>
       <div className="col-12">
         <h1 className="text-15 lh-14 fw-500">Destination/Hotel Name</h1>
         <input
@@ -220,7 +221,7 @@ const HotelDetails = () => {
           placeholder="City, region or Hotel Name"
         />
       </div>
-      <div className="col-6">
+      <div className="col-lg-6 col-md-6 col-sm-12">
         <h1 className="text-15 lh-14 fw-500">Check-in Date</h1>
         <div className="border-light rounded-8 py-10 px-20 w-full mt-10 cursor-text text-gray-900 bg-white">
           <DatePicker
@@ -234,7 +235,7 @@ const HotelDetails = () => {
           />
         </div>
       </div>
-      <div className="col-6">
+      <div className="col-lg-6 col-md-6 col-sm-12">
         <h1 className="text-15 lh-14 fw-500">Check-out Date</h1>
         <div className="border-light rounded-8 py-10 px-20 w-full mt-10 cursor-text text-gray-900 bg-white">
           <DatePicker
@@ -248,7 +249,7 @@ const HotelDetails = () => {
           />
         </div>
       </div>
-      <div className="col-4">
+      <div className="col-lg-4 col-md-4 col-sm-12">
         <h1 className="text-15 lh-14 fw-500">Rooms</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
@@ -266,7 +267,7 @@ const HotelDetails = () => {
           </button>
         </div>
       </div>
-      <div className="col-4">
+      <div className="col-lg-4 col-md-4 col-sm-12">
         <h1 className="text-15 lh-14 fw-500">Adults</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
@@ -284,7 +285,7 @@ const HotelDetails = () => {
           </button>
         </div>
       </div>
-      <div className="col-4">
+      <div className="col-lg-4 col-md-4 col-sm-12">
         <h1 className="text-15 lh-14 fw-500">Children</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
@@ -310,50 +311,6 @@ const HotelDetails = () => {
   );
 };
 
-const TravelerInformationCard = ({ index }) => {
-  return (
-    <div className="col-12 border-light rounded-8 py-20 px-20 w-full ml-15 mt-10">
-      <div className="d-flex justify-between items-center mb-10">
-        <h1 className="text-15 lh-14 fw-500">Traveler {index + 1}</h1>
-        {index != 0 && <div className="text-13 lh-14 fw-500 w-25">Remove</div>}
-      </div>
-      <div className="row y-gap-10">
-        <div className="col-6">
-          <h1 className="text-15 lh-14 fw-500">First Name</h1>
-          <input
-            className="border-light rounded-8 py-5 px-20 w-full mt-10"
-            type="text"
-            placeholder="John"
-          />
-        </div>
-        <div className="col-6">
-          <h1 className="text-15 lh-14 fw-500">Last Name</h1>
-          <input
-            className="border-light rounded-8 py-5 px-20 w-full mt-10"
-            type="text"
-            placeholder="Doe"
-          />
-        </div>
-        <div className="col-6">
-          <h1 className="text-15 lh-14 fw-500">Email</h1>
-          <input
-            className="border-light rounded-8 py-5 px-20 w-full mt-10"
-            type="email"
-            placeholder="john.doe@example.com"
-          />
-        </div>
-        <div className="col-6">
-          <h1 className="text-15 lh-14 fw-500">Phone Number</h1>
-          <input
-            className="border-light rounded-8 py-5 px-20 w-full mt-10"
-            type="tel"
-            placeholder="+1 123 456 7890"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const TransportationDetails = () => {
   const options = [

@@ -1,57 +1,46 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import DashboardPage from "@/components/dashboard/dashboard/db-sales-link-gen"
+import LinkTable from "./LinkTable";
 
-const SalesLinkGenerator = () => {
-  // const [linkType, setLinkType] = useState("Hotel");
-  // const [commissionRate, setCommissionRate] = useState("Standard (10%)");
+const SalesLinkGen = () => {
 
-  // const links = [
-  //   {
-  //     name: "London Hotels Package",
-  //     type: "Hotel",
-  //     clicks: 145,
-  //     conversions: 12,
-  //     earnings: 360.0,
-  //     status: "Active",
-  //   },
-  //   {
-  //     name: "NYC Weekend Getaway",
-  //     type: "Package",
-  //     clicks: 87,
-  //     conversions: 5,
-  //     earnings: 175.5,
-  //     status: "Active",
-  //   },
-  //   {
-  //     name: "Paris Flights Promo",
-  //     type: "Flight",
-  //     clicks: 210,
-  //     conversions: 18,
-  //     earnings: 540.0,
-  //     status: "Expired",
-  //   },
-  //   {
-  //     name: "Barcelona Tour Special",
-  //     type: "Tour",
-  //     clicks: 122,
-  //     conversions: 8,
-  //     earnings: 280.0,
-  //     status: "Expired",
-  //   },
-  // ];
-
+    const links = [
+        {
+            name: "London Hotels Package",
+            type: "Hotel",
+            clicks: 145,
+            conversions: 12,
+            earnings: 360.0,
+            status: "Active",
+        },
+        {
+            name: "NYC Weekend Getaway",
+            type: "Package",
+            clicks: 87,
+            conversions: 5,
+            earnings: 175.5,
+            status: "Active",
+        },
+        {
+            name: "Paris Flights Promo",
+            type: "Flight",
+            clicks: 210,
+            conversions: 18,
+            earnings: 540.0,
+            status: "Expired",
+        },
+        {
+            name: "Barcelona Tour Special",
+            type: "Tour",
+            clicks: 122,
+            conversions: 8,
+            earnings: 280.0,
+            status: "Expired",
+        },
+    ];
   return (
-    <>
-      {/* <Header1 />
-      <div className="py-40"></div>
-      <div className="container mb-30">
-        <h1 className="text-30 lh-14 fw-600 mt-30">Sales Link Generator</h1>
-        <div className="text-15 text-light-1">
-          Create and manage custom referral links to earn commission on bookings
-        </div>
-        <div className="row px-10 mt-30">
+    <div className="overflow-scroll scroll-bar-1 pt-30">
+      <div className="row px-10 mt-30">
           <div className="col-md-3 col-sm-12">
             <div className="border-light rounded-8 bg-white shadow-3 px-15 py-15 row">
               <div className="text-20 lh-14 fw-600 px-0">Your Earnings</div>
@@ -206,80 +195,8 @@ const SalesLinkGenerator = () => {
             </div>
           </div>
         </div>
-      </div>
-      <Footer /> */}
-      <DashboardPage />
-    </>
-  );
-};
-
-const LinkTable = ({ links }) => {
-  return (
-    <div className="w-100 mt-10 overflow-scroll scroll-bar-1">
-      <table className="table-3 -border-bottom col-12">
-        <thead className="bg-light-2">
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Clicks</th>
-            <th>Earnings</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {links.map((link, index) => (
-            <tr>
-              <td>
-                <div className="text-14 lh-16 fw-500">{link.name}</div>
-                <div className="text-12 lh-16 fw-500 text-light-1">
-                  https://plistravels.com/r/london-hot…
-                </div>
-              </td>
-              <td>
-                <span className="border-light text-center px-10 rounded-100 text-12 fw-500 mr-20">
-                  {link.type}
-                </span>
-              </td>
-              <td>
-                <div className="text-12 lh-16 fw-500">{link.clicks}</div>
-                <div className="text-12 lh-16 fw-500 text-light-1">
-                  {link.conversions} conversions
-                </div>
-              </td>
-              <td className="lh-16">${link.earnings}</td>
-              <td>
-                {link.status == "Active" ? (
-                  <span className="rounded-100 px-10 text-center text-12 fw-500 bg-green-1 text-green-2">
-                    Active
-                  </span>
-                ) : (
-                  <span className="rounded-100 px-10 text-center text-12 fw-500 bg-light-2 text-dark-1">
-                    Expired
-                  </span>
-                )}
-              </td>
-              <td className="fw-500">
-                <div className="d-flex">
-                  <div className="px-5 py-5">
-                    <img src="/img/dashboard/icons/paste.svg" />
-                  </div>
-                  <div className="px-5 py-5">
-                    <img src="/img/dashboard/icons/link.svg" />
-                  </div>
-                  <div className="px-5 py-5">
-                    <img src="/img/dashboard/icons/delete.svg" />
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
-};
+}
 
-export default dynamic(() => Promise.resolve(SalesLinkGenerator), {
-  ssr: false,
-});
+export default SalesLinkGen;

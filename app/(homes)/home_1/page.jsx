@@ -216,7 +216,7 @@ const Home_1 = () => {
                   <img src="/img/general/plistLogo2.svg" alt="color" style={{ height: '20px' }} />
                   <div className="">
                     <p className="text-26 fw-semibold">Are you a Vendor?</p>
-                    <p className="text-14">Partner with Us: Showcase Your Accommodations to Travelers Worldwide!</p>
+                    <p className="text-14">Partner with Us: Showcase YourAccommodations to Travelers Worldwide!</p>
                   </div>
                   
 

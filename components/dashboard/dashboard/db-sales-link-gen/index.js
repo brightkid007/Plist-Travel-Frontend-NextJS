@@ -3,8 +3,7 @@ import Sidebar from "../common/Sidebar";
 import Header from "@/components/header/dashboard-header";
 
 import Footer from "../common/Footer";
-import BookingTable from "./components/BookingTable";
-import BookingForm from "@/components/dashboard/dashboard/db-booking/components/BookingForm";
+import SalesLinkGen from "./components/SalesLinkGen";
 
 const index = () => {
   return (
@@ -28,9 +27,9 @@ const index = () => {
           <div className="dashboard__content bg-light-2">
             <div className="row y-gap-20 justify-between items-end pb-60 lg:pb-40 md:pb-32">
               <div className="col-12">
-                <h1 className="text-30 lh-14 fw-600">Create New Booking</h1>
+                <h1 className="text-30 lh-14 fw-600">Sales Link Generator</h1>
                 <div className="text-15 text-light-1">
-                Add a new walk-in booking.
+                  Create and manage custom referral links to earn commission on bookings.
                 </div>
               </div>
               {/* End .col-12 */}
@@ -38,7 +37,7 @@ const index = () => {
             {/* End .row */}
 
             <div className="py-30 px-30 rounded-22 bg-white shadow-3">
-              <BookingForm />
+              <SalesLinkGen />
               {/* End tabs */}
             </div>
 
