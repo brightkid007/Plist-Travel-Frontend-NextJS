@@ -1,6 +1,6 @@
 import CallToActions from "@/components/common/CallToActions";
 import Header11 from "@/components/header/header-11";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import MainFilterSearchBox from "@/components/flight-list/flight-list-v1/MainFilterSearchBox";
 import TopHeaderFilter from "@/components/flight-list/flight-list-v1/TopHeaderFilter";
 import FlightProperties from "@/components/flight-list/flight-list-v1/FlightProperties";
@@ -90,7 +90,7 @@ const index = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

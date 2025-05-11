@@ -17,9 +17,9 @@ module.exports = [
     title: "Service",
     menuList: [
       { name: "Properties", routerPath: "/" },
+      { name: "Tours", routerPath: "/" },
       { name: "Flights", routerPath: "/" },
       { name: "Rides", routerPath: "/" },
-      { name: "Tours", routerPath: "/" },
       { name: "Attractions & Events", routerPath: "/" },
       { name: "Travel Packages", routerPath: "/" },
     ],

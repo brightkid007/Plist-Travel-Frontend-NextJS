@@ -26,13 +26,20 @@ const TopBreadCrumb = () => {
           </div>
           {/* End .col-auto */}
           <div className="col-auto">
-            <div className="row x-gap-15 y-gap-15 items-center">
-              <button className="col-auto h-30 px-24 -dark-1 bg-gray-800 text-black">
-                <img src="/img/icons/hart.svg" alt="save_button" /> Save
-              </button>
-              <button className="col-auto h-30 px-24 -dark-1 bg-gray-800 text-black">
-                <img src="/img/icons/share.svg" alt="share_button" /> Share
-              </button>
+            <div className="row x-gap-10 y-gap-10">
+              <div className="col-auto">
+                <button className="button px-15 py-10 -blue-1">
+                  <i className="icon-share mr-10" />
+                  Share
+                </button>
+              </div>
+              {/* End .col */}
+              <div className="col-auto">
+                <button className="button px-15 py-10 -blue-1 bg-light-2">
+                  <i className="icon-heart mr-10" />
+                  Save
+                </button>
+              </div>
             </div>
           </div>
           {/* End col-auto */}

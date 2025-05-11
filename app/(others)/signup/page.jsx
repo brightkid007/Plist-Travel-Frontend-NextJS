@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import CallToActions from "@/components/common/CallToActions";
 import DefaultHeader from "@/components/header/default-header";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import LoginWithSocial from "@/components/common/LoginWithSocial";
 import SignUpForm from "@/components/common/SignUpForm";
 
@@ -52,7 +52,7 @@ const SignUp = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import CallToActions from "@/components/common/CallToActions";
 import Faq from "@/components/faq/Faq";
 import DefaultHeader from "@/components/header/default-header";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import HelpSearchBlock from "@/components/block/HelpSearchBlock";
 import HelpBlock from "@/components/block/HelpBlock";
 
@@ -84,7 +84,7 @@ const HelpCenter = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

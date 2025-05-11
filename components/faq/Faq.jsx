@@ -45,7 +45,7 @@ const Faq = () => {
     <>
       {faqContent.map((item) => (
         <div className="col-12" key={item.id}>
-          <div className="accordion__item px-20 py-20 border-light rounded-4">
+          <div className="accordion__item px-20 py-20 border-light rounded-22">
             <div
               className="accordion__button d-flex items-center"
               data-bs-toggle="collapse"

@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import CallToActions from "@/components/common/CallToActions";
 import DefaultHeader from "@/components/header/default-header";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import NotFound from "@/components/common/NotFound";
 
 export const metadata = {
@@ -26,7 +26,7 @@ const index = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

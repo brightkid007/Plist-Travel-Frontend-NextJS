@@ -2,27 +2,27 @@ import dynamic from "next/dynamic";
 import "photoswipe/dist/photoswipe.css";
 import { hotelsData } from "@/data/hotels";
 import Header11 from "@/components/header/header-11";
-import Overview from "@/components/hotel-single/Overview";
-import PopularFacilities from "@/components/hotel-single/PopularFacilities";
-import PropertyHighlights from "@/components/hotel-single/PropertyHighlights";
-import RatingTag from "@/components/hotel-single/RatingTag";
-import StickyHeader from "@/components/hotel-single/StickyHeader";
-import TopBreadCrumb from "@/components/hotel-single/TopBreadCrumb";
-import SidebarRight from "@/components/hotel-single/SidebarRight";
-import AvailableRooms from "@/components/hotel-single/AvailableRooms";
-import ReviewProgress from "@/components/hotel-single/guest-reviews/ReviewProgress";
-import DetailsReview from "@/components/hotel-single/guest-reviews/DetailsReview";
-import ReplyForm from "@/components/hotel-single/ReplyForm";
-import ReplyFormReview from "@/components/hotel-single/ReplyFormReview";
-import Facilities from "@/components/hotel-single/Facilities";
+import Overview from "@/components/property-single/Overview";
+import PopularFacilities from "@/components/property-single/PopularFacilities";
+import PropertyHighlights from "@/components/property-single/PropertyHighlights";
+import RatingTag from "@/components/property-single/RatingTag";
+import StickyHeader from "@/components/property-single/StickyHeader";
+import TopBreadCrumb from "@/components/property-single/TopBreadCrumb";
+import SidebarRight from "@/components/property-single/SidebarRight";
+import AvailableRooms from "@/components/property-single/AvailableRooms";
+import ReviewProgress from "@/components/property-single/guest-reviews/ReviewProgress";
+import DetailsReview from "@/components/property-single/guest-reviews/DetailsReview";
+import ReplyForm from "@/components/property-single/ReplyForm";
+import ReplyFormReview from "@/components/property-single/ReplyFormReview";
+import Facilities from "@/components/property-single/Facilities";
 import Image from "next/image";
-import Surroundings from "@/components/hotel-single/Surroundings";
-import HelpfulFacts from "@/components/hotel-single/HelpfulFacts";
+import Surroundings from "@/components/property-single/Surroundings";
+import HelpfulFacts from "@/components/property-single/HelpfulFacts";
 import Faq from "@/components/faq/Faq";
 import Hotels2 from "@/components/hotels/Hotels2";
 import CallToActions from "@/components/common/CallToActions";
-import DefaultFooter from "@/components/footer/default";
-import GalleryOne from "@/components/hotel-single/GalleryOne";
+import Footer from "@/components/footer/footer-5";
+import GalleryOne from "@/components/property-single/GalleryOne";
 
 export const metadata = {
   title: "Hotel Single v1 || GoTrip - Travel & Tour React NextJS Template",
@@ -316,7 +316,7 @@ const HotelSingleV1Dynamic = ({ params }) => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

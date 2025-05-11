@@ -1,0 +1,15 @@
+.responsive-logo {
+    width: 70px;
+    height: 30px;
+  
+    @media (min-width: 768px) {
+      width: 100px;
+      height: 40px;
+    }
+  
+    @media (min-width: 1024px) {
+      width: 140px;
+      height: 55px;
+    }
+  }
+  

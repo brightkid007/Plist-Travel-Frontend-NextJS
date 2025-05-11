@@ -1,6 +1,6 @@
 import CallToActions from "@/components/common/CallToActions";
 import DefaultHeader from "@/components/header/default-header";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/default";
 import LocationTopBar from "@/components/common/LocationTopBar";
 import RelatedBlog from "@/components/blog/blog-details/RelatedBlog";
 import blogsData from "@/data/blogs";
@@ -116,7 +116,7 @@ const BlogSingleDynamic = ({ params }) => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

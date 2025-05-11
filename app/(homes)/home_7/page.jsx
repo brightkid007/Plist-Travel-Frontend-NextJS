@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import Header7 from "@/components/header/header-7";
 import Hero7 from "@/components/hero/hero-7";
 import BlockGuide from "@/components/block/BlockGuide";
@@ -185,7 +185,7 @@ const home_7 = () => {
       <Subscribe />
       {/* End Subscribe Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Footer Section */}
     </>
   );

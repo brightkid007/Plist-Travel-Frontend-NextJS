@@ -1,7 +1,7 @@
 import CallToActions from "@/components/common/CallToActions";
 import Header11 from "@/components/header/header-11";
 import Header1 from "@/components/header/header-1";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import Footer2 from "@/components/Footer2";
 import MainFilterSearchBox from "@/components/hotel-list/hotel-list-v5/MainFilterSearchBox";
 import Pagination from "@/components/hotel-list/common/Pagination";
@@ -95,7 +95,7 @@ const index = () => {
       </section>
       {/* End layout for listing sidebar and content */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

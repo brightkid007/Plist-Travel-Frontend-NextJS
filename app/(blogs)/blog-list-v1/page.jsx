@@ -2,7 +2,7 @@ import React from "react";
 import CallToActions from "@/components/common/CallToActions";
 import DefaultHeader from "@/components/header/default-header";
 import LocationTopBar from "@/components/common/LocationTopBar";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/default";
 import Blog1 from "@/components/blog/Blog1";
 
 export const metadata = {
@@ -41,7 +41,7 @@ const BlogListV1 = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

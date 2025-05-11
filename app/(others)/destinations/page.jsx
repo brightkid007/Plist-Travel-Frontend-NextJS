@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import CallToActions from "@/components/common/CallToActions";
 import DefaultHeader from "@/components/header/default-header";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import TopDestinations2 from "@/components/destinations/TopDestinations2";
 import Faq from "@/components/faq/Faq";
 import TestimonialLeftCol from "@/components/home/home-1/TestimonialLeftCol";
@@ -17,7 +17,7 @@ import Weather from "@/components/destinations/components/Weather";
 import GeneralInfo from "@/components/destinations/components/GeneralInfo";
 import Cars from "@/components/cars/Cars";
 import Tours from "@/components/tours/Tours";
-import Activity from "@/components/activity/Activity";
+import Activity from "@/components/attr-event/Activity";
 import Rentals from "@/components/rentals/Rentals";
 import Hotels from "@/components/hotels/Hotels2";
 
@@ -396,7 +396,7 @@ const Destinations = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

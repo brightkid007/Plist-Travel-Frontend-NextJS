@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
 import AddBanner from "@/components/add-banner/AddBanner";
 import PopularDestinations from "@/components/destinations/PopularDestinations";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import Header1 from "@/components/header/header-1";
-import Hero1 from "@/components/hero/hero-1";
+import Hero from "@/components/hero/hero-customer";
 import BlockGuide from "@/components/block/BlockGuide";
 import Blog from "@/components/blog/Blog3";
 import CallToActions from "@/components/home/home-2/CallToActions";
@@ -28,7 +28,7 @@ const CustomerDashboard = () => {
       <Header1 />
       {/* End Header 1 */}
 
-      <Hero1 />
+      <Hero />
       {/* End Hero 1 */}
 
       {/* <section className="layout-pt-lg layout-pb-md" data-aos="fade-up">
@@ -157,7 +157,7 @@ const CustomerDashboard = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <Footer2 />
+      <Footer />
       {/* End Footer Section */}
     </>
   );

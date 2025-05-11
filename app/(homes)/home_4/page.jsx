@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import Header4 from "@/components/header/header-4";
 import Hero4 from "@/components/hero/hero-4";
 import BlockGuide from "@/components/block/BlockGuide";
@@ -210,7 +210,7 @@ const home_4 = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Footer Section */}
     </>
   );

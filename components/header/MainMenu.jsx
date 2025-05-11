@@ -59,23 +59,31 @@ const MainMenu = ({ style = "" }) => {
         {/* End categories menu items */}
 
         <li className={pathname === "/" ? "current" : ""}>
-          <Link href="/destinations">Home</Link>
+          <Link href="/">Home</Link>
         </li>
 
         <li className={pathname === "/" ? "current" : ""}>
-          <Link href="/properties">Properties</Link>
+          <Link href="/property">Properties</Link>
         </li>
 
         <li className={pathname === "/" ? "current" : ""}>
-          <Link href="/flights">Flights</Link>
+          <Link href="/tour">Tours</Link>
         </li>
 
         <li className={pathname === "/" ? "current" : ""}>
-          <Link href="/attractions-events">Attractions & Events</Link>
+          <Link href="/flight">Flights</Link>
         </li>
 
         <li className={pathname === "/" ? "current" : ""}>
-          <Link href="/rides">Rides</Link>
+          <Link href="/ride">Rides</Link>
+        </li>
+
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/attr-event">Attractions & Events</Link>
+        </li>
+
+        <li className={pathname === "/" ? "current" : ""}>
+          <Link href="/travel-package">Travel Packages</Link>
         </li>
         {/* End Destinatinos single menu */}
 
@@ -154,10 +162,7 @@ const MainMenu = ({ style = "" }) => {
         <li className={pathname === "/contact" ? "current" : ""}>
           <Link href="/contact">Contact</Link>
         </li>
-
-        <li className={pathname === "/contact" ? "current" : ""}>
-          <Link href="/contact">Contact</Link>
-        </li>
+        
       </ul>
     </nav>
   );

@@ -1,10 +1,10 @@
 import Header11 from "@/components/header/header-11";
-import MainFilterSearchBox from "@/components/activity-list/activity-list-v3/MainFilterSearchBox";
-import TopHeaderFilter from "@/components/activity-list/activity-list-v3/TopHeaderFilter";
-import TourProperties from "@/components/activity-list/activity-list-v3/ActivityProperties";
-import DropdownSelelctBar from "@/components/activity-list/common/DropdownSelelctBar";
-import MapPropertyFinder from "@/components/activity-list/common/MapPropertyFinder";
-import Pagination from "@/components/activity-list/common/Pagination";
+import MainFilterSearchBox from "@/components/attr-event-list/activity-list-v3/MainFilterSearchBox";
+import TopHeaderFilter from "@/components/attr-event-list/activity-list-v3/TopHeaderFilter";
+import TourProperties from "@/components/attr-event-list/activity-list-v3/ActivityProperties";
+import DropdownSelelctBar from "@/components/attr-event-list/common/DropdownSelelctBar";
+import MapPropertyFinder from "@/components/attr-event-list/common/MapPropertyFinder";
+import Pagination from "@/components/attr-event-list/common/Pagination";
 
 export const metadata = {
   title: "Activity List v3 || GoTrip - Travel & Tour React NextJS Template",

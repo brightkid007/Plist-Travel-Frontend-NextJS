@@ -79,7 +79,7 @@ const AvatarUploader = () => {
         )}
       </div>
 
-      <div className="col-12 items-center">
+      <div className="col-12 d-flex justify-center items-center">
         {/* <h4 className="text-16 fw-500">Your avatar</h4>
         <div className="text-14 mt-5">
           PNG or JPG no bigger than 800px wide and tall.

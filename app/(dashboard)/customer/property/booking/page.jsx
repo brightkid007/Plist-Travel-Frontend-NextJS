@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 // import { useState } from "react";
 import Header1 from "@/components/header/header-1";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 
 import ImageCard from "@/components/dashboard/image-card/ImageCard";
 import TravelerInformationCard from "@/components/dashboard/dashboard/common/TravelInformationCard";
@@ -57,7 +57,7 @@ const PropertyBookingPage = () => {
         </div>
       </div>
 
-      <DefaultFooter />
+      <Footer />
       {/* End Footer Section */}
     </>
   );

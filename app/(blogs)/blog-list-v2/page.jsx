@@ -1,7 +1,7 @@
 import React from "react";
 import CallToActions from "@/components/common/CallToActions";
 import DefaultHeader from "@/components/header/default-header";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/default";
 import LocationTopBar from "@/components/common/LocationTopBar";
 import Blog2 from "@/components/blog/Blog2";
 import BlogSidebar from "@/components/blog/blog-sidebar";
@@ -65,7 +65,7 @@ const BlogListV2 = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
       {/* End Call To Actions Section */}
     </>
   );

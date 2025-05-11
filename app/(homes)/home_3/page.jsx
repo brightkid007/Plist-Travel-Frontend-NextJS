@@ -5,7 +5,7 @@ import TopDestinations from "@/components/destinations/TopDestinations";
 import Hotels from "@/components/hotels/Hotels2";
 import Link from "next/link";
 import Tours from "@/components/tours/Tours";
-import Activity from "@/components/activity/Activity";
+import Activity from "@/components/attr-event/Activity";
 import Rentals from "@/components/rentals/Rentals";
 import Cars from "@/components/cars/Cars";
 import Cruise from "@/components/cruise/Cruise";

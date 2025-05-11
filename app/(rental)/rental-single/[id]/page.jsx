@@ -11,7 +11,7 @@ import DetailsReview2 from "@/components/rental-single/guest-reviews/DetailsRevi
 import ReplyForm from "@/components/rental-single/ReplyForm";
 import ReplyFormReview2 from "@/components/rental-single/ReplyFormReview2";
 import CallToActions from "@/components/common/CallToActions";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import SlideGallery from "@/components/rental-single/SlideGallery";
 import MapPropertyFinder from "@/components/rental-single/MapPropertyFinder";
 import HelpfulFacts from "@/components/rental-single/HelpfulFacts";
@@ -218,7 +218,7 @@ const TourSingleV1Dynamic = ({ params }) => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

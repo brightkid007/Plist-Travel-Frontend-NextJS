@@ -1,16 +1,16 @@
 import dynamic from "next/dynamic";
 import PopularDestinations from "@/components/destinations/PopularDestinations";
-import Footer5 from "@/components/footer/footer-5";
+import Footer from "@/components/footer/footer-5";
 import Header6 from "@/components/header/header-6";
 import Hero6 from "@/components/hero/hero-6";
 import BlockGuide from "@/components/home/home-6/BlockGuide";
 import AddBanner from "@/components/home/home-6/AddBanner";
 import TourCategories from "@/components/home/home-6/TourCategories";
-import Activity from "@/components/activity/Activity";
+import Activity from "@/components/attr-event/Activity";
 import Blog from "@/components/home/home-6/Blog";
 import AppBanner from "@/components/home/home-6/AppBanner";
 import Testimonials from "@/components/home/home-6/Testimonials";
-import Activity2 from "@/components/activity/Activity2";
+import Activity2 from "@/components/attr-event/Activity2";
 
 export const metadata = {
   title: "Home-6 || GoTrip - Travel & Tour React NextJS Template",

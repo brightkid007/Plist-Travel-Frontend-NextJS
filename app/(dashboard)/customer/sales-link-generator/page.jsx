@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Header1 from "@/components/header/header-1";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import { useState } from "react";
 
 const SalesLinkGenerator = () => {
@@ -209,7 +209,7 @@ const SalesLinkGenerator = () => {
           </div>
         </div>
       </div>
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

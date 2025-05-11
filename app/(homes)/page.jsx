@@ -25,12 +25,13 @@ import Thirteen from "@/components/Thirteen";
 import Fourteen from "@/components/attractions-events/Fourteen";
 import Fifteen from "@/components/Fifteen";
 import Sixteen from "@/components/Sixteen";
-import Footer from "@/components/Footer";
+import Footer from "@/components/Footer2";
 // import peoples from "/public/Images/Group 81.png";
 import category2 from "/public/Images/category-2.svg";
 import bookmark from "/public/Images/bookmark.svg";
 import support24 from "/public/Images/24-support.svg";
 import './home.css';
+// import Footer from "@/components/footer/footer-5";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);

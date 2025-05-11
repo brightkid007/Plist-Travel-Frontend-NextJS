@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { hotelsData } from "../../../../data/hotels";
+import { hotelsData } from "@/components/data/hotels";
 import GuestIcon from "/public/img/icons/guest.svg";
 
 const Properties = () => {

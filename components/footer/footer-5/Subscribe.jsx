@@ -11,7 +11,7 @@ const Subscribe = () => {
         type="submit"
         className="absolute px-20 h-full text-15 fw-500 underline text-dark-1"
       >
-        Subscribe
+        Contact
       </button>
     </div>
   );

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import Header1 from "@/components/header/header-1";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import { SelectService } from "./select-service";
 import { ServiceDetail } from "./service-detail";
 import { PackageSummary } from "./package-summary";
@@ -63,7 +63,7 @@ const TravelPackageBuilder = () => {
         </div>
       </div>
 
-      <DefaultFooter />
+      <Footer />
       {/* End Footer Section */}
     </>
   );

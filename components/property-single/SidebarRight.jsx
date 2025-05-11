@@ -1,4 +1,4 @@
-import FilterBox from "../../components/hotel-single/filter-box";
+import FilterBox from "./filter-box";
 
 const SidebarRight = ({ hotel }) => {
   return (

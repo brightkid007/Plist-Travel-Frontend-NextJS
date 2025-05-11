@@ -1,10 +1,10 @@
 import CallToActions from "@/components/common/CallToActions";
 import Header11 from "@/components/header/header-11";
-import DefaultFooter from "@/components/footer/default";
-import TopHeaderFilter from "@/components/activity-list/activity-list-v2/TopHeaderFilter";
-import ActivityProperties from "@/components/activity-list/activity-list-v2/ActivityProperties";
-import Pagination from "@/components/activity-list/common/Pagination";
-import Sidebar from "@/components/activity-list/activity-list-v2/Sidebar";
+import Footer from "@/components/footer/footer-5";
+import TopHeaderFilter from "@/components/attr-event-list/activity-list-v2/TopHeaderFilter";
+import ActivityProperties from "@/components/attr-event-list/activity-list-v2/ActivityProperties";
+import Pagination from "@/components/attr-event-list/common/Pagination";
+import Sidebar from "@/components/attr-event-list/activity-list-v2/Sidebar";
 
 export const metadata = {
   title: "Activity List v2 || GoTrip - Travel & Tour React NextJS Template",
@@ -81,7 +81,7 @@ const index = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

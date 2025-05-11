@@ -1,6 +1,6 @@
 import CallToActions from "@/components/common/CallToActions";
 import Header11 from "@/components/header/header-11";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/footer-5";
 import TopHeaderFilter from "@/components/tour-list/tour-list-v2/TopHeaderFilter";
 import TourProperties from "@/components/tour-list/tour-list-v2/TourProperties";
 import Pagination from "@/components/tour-list/common/Pagination";
@@ -81,7 +81,7 @@ const index = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };

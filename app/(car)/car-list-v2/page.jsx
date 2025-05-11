@@ -1,6 +1,6 @@
 import CallToActions from "@/components/common/CallToActions";
 import Header11 from "@/components/header/header-11";
-import DefaultFooter from "@/components/footer/default";
+import Footer from "@/components/footer/default";
 import TopHeaderFilter from "@/components/car-list/car-list-v2/TopHeaderFilter";
 import Pagination from "@/components/car-list/common/Pagination";
 import Sidebar from "@/components/car-list/car-list-v2/Sidebar";
@@ -81,7 +81,7 @@ const index = () => {
       <CallToActions />
       {/* End Call To Actions Section */}
 
-      <DefaultFooter />
+      <Footer />
     </>
   );
 };
