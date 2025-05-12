@@ -5,7 +5,7 @@ const Address = () => {
       colClass: "col-lg-3",
       title: "Address",
       content: (
-        <>328 Queensberry Street, North Melbourne VIC 3051, Australia.</>
+        <>United States</>
       ),
     },
     {
@@ -14,7 +14,7 @@ const Address = () => {
       title: "Toll Free Customer Care",
       content: (
         <>
-          <a href="tel:+4733378901">+47 333 78 901</a>
+          <a href="tel:+4733378901">+1 234 235 2345</a>
         </>
       ),
     },
@@ -25,7 +25,7 @@ const Address = () => {
       content: (
         <>
           {" "}
-          <a href="mailto:i@gotrip.com">hi@gotrip.com</a>
+          <a href="mailto:i@gotrip.com">hi@plist.com</a>
         </>
       ),
     },

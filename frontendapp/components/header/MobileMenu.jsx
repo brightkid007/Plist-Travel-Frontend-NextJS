@@ -59,7 +59,7 @@ const MobileMenu = () => {
     <>
       <div className="pro-header d-flex align-items-center justify-between border-bottom-light">
         <Link href="/">
-          <img src="/img/general/logo-dark.svg" alt="brand" />
+          <img src="/img/general/plistLogo-blue.svg" alt="brand" />
         </Link>
         {/* End logo */}
 
@@ -78,7 +78,7 @@ const MobileMenu = () => {
         <Sidebar width="400" backgroundColor="#fff">
 
           <Menu>
-            <SubMenu label="Home" className={ homeItems.some((item=>item.routePath?.split('/')[1] == pathname.split('/')[1])) ? "menu-active-link":''}>
+            {/* <SubMenu label="Home" className={ homeItems.some((item=>item.routePath?.split('/')[1] == pathname.split('/')[1])) ? "menu-active-link":''}>
               {homeItems.map((item, i) => (
                 <MenuItem
                   key={i}
@@ -93,10 +93,10 @@ const MobileMenu = () => {
                   {item.name}
                 </MenuItem>
               ))}
-            </SubMenu>
+            </SubMenu> */}
             {/* End  All Home Menu */}
 
-            <SubMenu label="Categories" className={isActiveParent ? 'menu-active-link':'' }>
+            {/* <SubMenu label="Categories" className={isActiveParent ? 'menu-active-link':'' }>
               {categorieMobileItems.map((item) => (
                 <SubMenu label={item.title} key={item.id} className={isActiveNestedParent == item.id ? 'menu-active-link':'inactive-menu'}>
                   {item.menuItems.map((single) => (
@@ -118,11 +118,11 @@ const MobileMenu = () => {
                   ))}
                 </SubMenu>
               ))}
-            </SubMenu>
+            </SubMenu> */}
             {/* End  All Categories Menu */}
 
-            <MenuItem
-             onClick={()=>router.push("/destinations")}
+            {/* <MenuItem
+             onClick={()=>router.push("/")}
              className={
               pathname === "/destinations"
                 ? "menu-active-link"
@@ -131,10 +131,10 @@ const MobileMenu = () => {
               
             >
               Desitinations
-            </MenuItem>
+            </MenuItem> */}
             {/* End  Desitinations Menu */}
 
-            <SubMenu label="Blog" className={ blogItems.some((item=>item.routePath?.split('/')[1] == pathname.split('/')[1])) ? "menu-active-link":''}>
+            {/* <SubMenu label="Blog" className={ blogItems.some((item=>item.routePath?.split('/')[1] == pathname.split('/')[1])) ? "menu-active-link":''}>
               {blogItems.map((item, i) => (
                 <MenuItem
                   key={i}
@@ -148,10 +148,10 @@ const MobileMenu = () => {
                   {item.name}
                 </MenuItem>
               ))}
-            </SubMenu>
+            </SubMenu> */}
             {/* End  All Blog Menu */}
 
-            <SubMenu label="Pages" className={ pageItems.some((item=>item.routePath?.split('/')[1] == pathname.split('/')[1])) ? "menu-active-link":''}>
+            {/* <SubMenu label="Pages" className={ pageItems.some((item=>item.routePath?.split('/')[1] == pathname.split('/')[1])) ? "menu-active-link":''}>
               {pageItems.map((item, i) => (
                 <MenuItem
                   key={i}
@@ -165,10 +165,10 @@ const MobileMenu = () => {
                   {item.name}
                 </MenuItem>
               ))}
-            </SubMenu>
+            </SubMenu> */}
             {/* End  All Pages Menu */}
 
-            <SubMenu label="Dashboard" className={ pathname.split('/')[1] == 'dashboard'  || pathname.split('/')[1] == 'vendor-dashboard' ? "menu-active-link":''}>
+            {/* <SubMenu label="Dashboard" className={ pathname.split('/')[1] == 'dashboard'  || pathname.split('/')[1] == 'vendor-dashboard' ? "menu-active-link":''}>
               {dashboardItems.map((item, i) => (
                 <MenuItem
                   key={i}
@@ -182,7 +182,7 @@ const MobileMenu = () => {
                   {item.name}
                 </MenuItem>
               ))}
-            </SubMenu>
+            </SubMenu> */}
             {/* End  All Dashboard Menu */}
 
             <MenuItem
@@ -210,14 +210,14 @@ const MobileMenu = () => {
             <Social />
           </div>
         </div>
-        <div className="mt-20">
+        {/* <div className="mt-20">
           <Link
             className=" button -dark-1 px-30 fw-400 text-14 bg-blue-1 h-50 text-white"
             href="/login"
           >
             Become An Expert
           </Link>
-        </div>
+        </div> */}
       </div>
       {/* End pro-footer */}
     </>
