@@ -1,43 +1,22 @@
 "use client";
 
-const ServiceCard = () => {
-  const data = [
-    {
-      name: "Flights",
-      image: "/img/destinations/4/1.png",
-      icon: "/img/dashboard/icons/hotel-icon.svg",
-      selected: true,
-    },
-    {
-      name: "Hotels",
-      image: "/img/destinations/4/2.png",
-      icon: "/img/dashboard/icons/hotel-icon.svg",
-      selected: false,
-    },
-    {
-      name: "Ground Transportation",
-      image: "/img/destinations/4/2.png",
-      icon: "/img/dashboard/icons/hotel-icon.svg",
-      selected: true,
-    },
-    {
-      name: "Tours",
-      image: "/img/destinations/4/2.png",
-      icon: "/img/dashboard/icons/hotel-icon.svg",
-      selected: true,
-    },
-    {
-      name: "Activities/Events",
-      image: "/img/destinations/4/2.png",
-      icon: "/img/dashboard/icons/hotel-icon.svg",
-      selected: true,
-    },
-  ];
+import Image from "next/image";
+import { useState } from "react";
+
+const ServiceCard = ({ data, setData }) => {
   return (
     <div className="row y-gap-30">
       {data.map((item, index) => (
         <div key={index} className="col-xl-4 col-md-6">
-          <div className={"py-30 px-30 rounded-8 bg-white shadow-3 " + (item.selected ? "border-blue-1" : "border-light")}>
+          <div className={"py-30 px-30 rounded-8 bg-white shadow-3 " + (item.selected ? "border-blue-1" : "border-light")}
+            onClick={() => {
+              const newData = [...data];
+              newData[index] = {
+                ...newData[index],
+                selected: !newData[index].selected,
+              };
+              setData(newData);
+            }}>
             <div className="row y-gap-20 justify-between items-center">
               <div className="row-auto">
                 {item.selected ? <img src="/img/dashboard/icons/checked.svg" alt="icon" /> : <img src={item.icon} alt="icon" />}
@@ -45,9 +24,18 @@ const ServiceCard = () => {
                   {item.name}
                 </div>
               </div>
-              <div className="col-auto">
-                <img src={item.image} alt="image" />
-              </div>
+              <div className="col-12 blogCard -type-1">
+                <div className="blogCard__image">
+                  <div className="rounded-8 d-flex justify-center">
+                    <img
+                    style={{height: "300px", objectFit: "fill"}}
+                      className="cover w-100 img-fluid"
+                      src={item.image}
+                      alt="image"
+                    />
+                  </div>
+                </div>
+            </div>
             </div>
           </div>
         </div>
