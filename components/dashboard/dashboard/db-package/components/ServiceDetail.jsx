@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import TravelerInformationCard from "./TravelInformationCard";
 
-export const ServiceDetail = ({ selectedItems }) => {
+export const ServiceDetail = ({ selectedItems, activeTab, setActiveTab }) => {
   const [activeCategory, setActiveCategory] = useState(0);
 
   const COMPONENT_MAP = {
@@ -34,7 +34,7 @@ export const ServiceDetail = ({ selectedItems }) => {
     },
   };
 
-  const categoryList = selectedItems.map(item => COMPONENT_MAP[item.name]);
+  const categoryList = selectedItems.map((item) => COMPONENT_MAP[item.name]);
 
   return (
     <>
@@ -66,13 +66,25 @@ export const ServiceDetail = ({ selectedItems }) => {
           <div className="row y-gap-20 justify-between items-end">
             <button
               className="button rounded-8 py-10 px-30 text-12 -dark-1 border-light text-light-1 col-auto"
-              onClick={() => setActiveCategory(Math.max(0, activeCategory - 1))}
+              onClick={() => {
+                if (activeCategory == 0) {
+                  setActiveTab(activeTab - 1);
+                } else {
+                  setActiveCategory(Math.max(0, activeCategory - 1));
+                }
+              }}
             >
               <i className="icon icon-chevron-left mr-10" /> Back
             </button>
             <button
               className="button rounded-8 py-10 px-30 text-12 -dark-1 bg-dark-3 text-white col-auto"
-              onClick={() => setActiveCategory(Math.min(activeCategory + 1, categoryList.length - 1))}
+              onClick={() => {
+                if (activeCategory === categoryList.length - 1) {
+                  setActiveTab(activeTab + 1);
+                } else {
+                  setActiveCategory(activeCategory + 1);
+                }
+              }}
             >
               Continue
               <i className="icon icon-chevron-right ml-10" />
@@ -325,7 +337,6 @@ const HotelDetails = () => {
     </>
   );
 };
-
 
 const TransportationDetails = () => {
   const options = [

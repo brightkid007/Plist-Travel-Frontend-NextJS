@@ -4,12 +4,6 @@ export const SelectService = ({ data, setData, activeTab, setActiveTab }) => {
 
   const handleContinue = () => {
     setActiveTab(activeTab + 1);
-    // setData(prevData =>
-    //   prevData.map(item => ({
-    //     ...item,
-    //     selected: false,
-    //   }))
-    // );
   }
 
   return (

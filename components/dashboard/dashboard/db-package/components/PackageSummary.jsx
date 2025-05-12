@@ -6,11 +6,13 @@ import transportation from "/public/img/dashboard/services/transportation.svg";
 import tours from "/public/img/dashboard/services/tours.svg";
 import activities from "/public/img/dashboard/services/activities.svg";
 import Image from "next/image";
+import { useEffect } from "react";
 
-export const PackageSummary = () => {
-  const data = [
-    {
-      name: "Transportation",
+export const PackageSummary = ({ selectedItems }) => {
+  
+  const COMPONENT_MAP = {
+    Rides: {
+      name: "Ride",
       icon: transportation,
       content: (
         <>
@@ -145,7 +147,7 @@ export const PackageSummary = () => {
         </>
       ),
     },
-    {
+    Flights: {
       name: "Flight",
       icon: flight,
       content: (
@@ -253,7 +255,7 @@ export const PackageSummary = () => {
         </>
       ),
     },
-    {
+    Tours: {
       name: "Tours",
       icon: tours,
       content: (
@@ -361,8 +363,8 @@ export const PackageSummary = () => {
         </>
       ),
     },
-    {
-      name: "Activities",
+   "Attractions/Events": {
+      name: "Attractions/Events",
       icon: activities,
       content: (
         <>
@@ -476,8 +478,8 @@ export const PackageSummary = () => {
         </>
       ),
     },
-    {
-      name: "Hotel",
+    Properties: {
+      name: "Property",
       icon: hotel,
       content: (
         <>
@@ -626,23 +628,18 @@ export const PackageSummary = () => {
         </>
       ),
     },
-  ];
-  const categoryList = [
-    { label: "Flight" },
-    { label: "Hotel" },
-    { label: "Transportation" },
-    { label: "Tours" },
-    { label: "Activities" },
-  ];
+  };
+
+  const selectedService = selectedItems.map((item) => COMPONENT_MAP[item.name]);
   return (
     <div className="row y-gap-20 py-10 px-10 rounded-8 bg-white shadow-3">
       <h1 className="text-20 lh-14 fw-600">Package Summary</h1>
-      {categoryList.map((item, index) => (
+      {selectedItems.map((item, index) => (
         <div
           key={index}
-          class="col-auto py-5 px-15 rounded-16 text-10 lh-16 fw-500 uppercase ml-10 mb-10 bg-blue-2 text-dark-3"
+          className="col-auto py-5 px-15 rounded-16 text-10 lh-16 fw-500 uppercase ml-10 mb-10 bg-blue-2 text-dark-3"
         >
-          {item.label}
+          {item.name}
         </div>
       ))}
       <h1 className="text-18 lh-14 fw-500">Package Summary</h1>
@@ -689,7 +686,6 @@ export const PackageSummary = () => {
           </div>
           <div className="text-12 lh-16 fw-400 mt-10">Inclusions:</div>
           <div className="text-12 lh-16 fw-400">
-            {" "}
             • 5-Night Luxury Hotel Stay
           </div>
           <div className="text-12 lh-16 fw-400"> • Daily Breakfast</div>
@@ -711,7 +707,7 @@ export const PackageSummary = () => {
         </div>
       </div>
       <h1 className="text-18 lh-14 fw-500">Selected Services</h1>
-      {data.map((item, index) => (
+      {selectedService.map((item, index) => (
         <div key={index} className="col-md-6 col-sm-12">
           <div className="py-15 px-15 rounded-8 bg-white shadow-3 border-light">
             <div className="d-flex items-center">
@@ -726,7 +722,7 @@ export const PackageSummary = () => {
         <div className="py-15 px-15 rounded-8 border-light bg-white">
           <div className="d-flex items-center justify-between">
             <div className="text-12 lh-14 fw-500">Status</div>
-            <div class="col-auto py-5 px-15 rounded-100 text-10 lh-16 fw-500 ml-10 bg-yellow-1 text-dark-3">
+            <div className="col-auto py-5 px-15 rounded-100 text-10 lh-16 fw-500 ml-10 bg-yellow-1 text-dark-3">
               Pending
             </div>
           </div>

@@ -49,8 +49,8 @@ const TravelPackageFlow = () => {
     };
     const tabItems = [
         { label: "Select Services", content: <SelectService data={data} setData={setData} activeTab={activeTab} setActiveTab={setActiveTab} /> },
-        { label: "Service Detail", content: <ServiceDetail selectedItems={data.filter(item => item.selected)} /> },
-        { label: "Package Summary", content: <PackageSummary /> },
+        { label: "Service Detail", content: <ServiceDetail selectedItems={data.filter(item => item.selected)} activeTab={activeTab} setActiveTab={setActiveTab} /> },
+        { label: "Package Summary", content: <PackageSummary selectedItems={data.filter(item => item.selected)} /> },
     ];
     return (
         <div className="tabs -underline-2 js-tabs">
