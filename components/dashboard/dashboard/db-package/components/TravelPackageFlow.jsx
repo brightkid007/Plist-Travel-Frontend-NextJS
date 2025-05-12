@@ -11,12 +11,45 @@ const TravelPackageFlow = () => {
 
     const [activeTab, setActiveTab] = useState(0);
 
+    const [data, setData] = useState([
+        {
+          name: "Flights",
+          image: "/img/dashboard/services/flight_service.jpg",
+          icon: "/img/dashboard/icons/hotel-icon.svg",
+          selected: false,
+        },
+        {
+          name: "Properties",
+          image: "/img/dashboard/services/property_service.jpg",
+          icon: "/img/dashboard/icons/hotel-icon.svg",
+          selected: false,
+        },
+        {
+          name: "Rides",
+          image: "/img/dashboard/services/ride_service.jpg",
+          icon: "/img/dashboard/icons/hotel-icon.svg",
+          selected: false,
+        },
+        {
+          name: "Tours",
+          image: "/img/dashboard/services/tour_service.jpg",
+          icon: "/img/dashboard/icons/hotel-icon.svg",
+          selected: false,
+        },
+        {
+          name: "Attractions/Events",
+          image: "/img/dashboard/services/attr_events_service.jpg",
+          icon: "/img/dashboard/icons/hotel-icon.svg",
+          selected: false,
+        },
+      ]);
+
     const handleTabClick = (index) => {
         setActiveTab(index);
     };
     const tabItems = [
-        { label: "Select Services", content: <SelectService /> },
-        { label: "Service Detail", content: <ServiceDetail /> },
+        { label: "Select Services", content: <SelectService data={data} setData={setData} activeTab={activeTab} setActiveTab={setActiveTab} /> },
+        { label: "Service Detail", content: <ServiceDetail selectedItems={data.filter(item => item.selected)} /> },
         { label: "Package Summary", content: <PackageSummary /> },
     ];
     return (

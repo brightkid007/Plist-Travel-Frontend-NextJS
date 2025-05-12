@@ -1,25 +1,40 @@
 import Hotels from "@/components/hotels/Hotels";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import TravelerInformationCard from "./TravelInformationCard";
 
-export const ServiceDetail = () => {
+export const ServiceDetail = ({ selectedItems }) => {
   const [activeCategory, setActiveCategory] = useState(0);
-  const categoryList = [
-    { label: "Flight", name: "Flight Details", content: <FlightDetails /> },
-    { label: "Property", name: "Property Details", content: <HotelDetails /> },
-    {
+
+  const COMPONENT_MAP = {
+    Flights: {
+      label: "Flight",
+      name: "Flight Details",
+      content: <FlightDetails />,
+    },
+    Properties: {
+      label: "Property",
+      name: "Property Details",
+      content: <HotelDetails />,
+    },
+    Rides: {
       label: "Ride",
       name: "Rides Details",
       content: <TransportationDetails />,
     },
-    { label: "Tours", name: "Tours Details", content: <ToursDetails /> },
-    {
+    Tours: {
+      label: "Tours",
+      name: "Tours Details",
+      content: <ToursDetails />,
+    },
+    "Attractions/Events": {
       label: "Attraction/Events",
       name: "Attractions & Events Details",
       content: <ActivitiesDetails />,
     },
-  ];
+  };
+
+  const categoryList = selectedItems.map(item => COMPONENT_MAP[item.name]);
 
   return (
     <>
@@ -57,7 +72,7 @@ export const ServiceDetail = () => {
             </button>
             <button
               className="button rounded-8 py-10 px-30 text-12 -dark-1 bg-dark-3 text-white col-auto"
-              onClick={() => setActiveCategory(activeCategory + 1)}
+              onClick={() => setActiveCategory(Math.min(activeCategory + 1, categoryList.length - 1))}
             >
               Continue
               <i className="icon icon-chevron-right ml-10" />
@@ -123,7 +138,7 @@ const FlightDetails = () => {
         ))}
       </div>
       <div className="col-12 row y-gap-10 pl-30">
-        <div className="col-6">
+        <div className="col-lg-6 col-md-6 col-sm-12">
           <h1 className="text-15 lh-14 fw-500">Origin</h1>
           <input
             className="border-light rounded-8 py-5 px-20 w-full mt-10"
@@ -131,7 +146,7 @@ const FlightDetails = () => {
             placeholder="City or Airport"
           />
         </div>
-        <div className="col-6">
+        <div className="col-lg-6 col-md-6 col-sm-12">
           <h1 className="text-15 lh-14 fw-500">Destination</h1>
           <input
             className="border-light rounded-8 py-5 px-20 w-full mt-10"
@@ -139,7 +154,7 @@ const FlightDetails = () => {
             placeholder="City or Airport"
           />
         </div>
-        <div className="col-6">
+        <div className="col-lg-6 col-md-6 col-sm-12">
           <h1 className="text-15 lh-14 fw-500">Departure Date</h1>
           <div className="border-light rounded-8 py-10 px-20 w-full mt-10 cursor-text text-gray-900 bg-white">
             <DatePicker
@@ -153,7 +168,7 @@ const FlightDetails = () => {
             />
           </div>
         </div>
-        <div className="col-6">
+        <div className="col-lg-6 col-md-6 col-sm-12">
           <h1 className="text-15 lh-14 fw-500">Return Date</h1>
           <div className="border-light rounded-8 py-10 px-20 w-full mt-10 cursor-text text-gray-900 bg-white">
             <DatePicker
@@ -167,7 +182,7 @@ const FlightDetails = () => {
             />
           </div>
         </div>
-        <div className="col-6">
+        <div className="col-lg-6 col-md-6 col-sm-12">
           <h1 className="text-15 lh-14 fw-500">Passengers</h1>
           <div className="d-flex mt-10 items-center fw-600">
             <button
@@ -179,14 +194,14 @@ const FlightDetails = () => {
             {passengers}
             <button
               className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light ml-20 col-auto"
-              onClick={() => setPassengers(passengers + 1)}
+              onClick={() => setPassengers(passengers + 1, categoryList.length)}
             >
               <i className="icon icon-plus" />
             </button>
           </div>
         </div>
-        <div className="col-6">
-          <h1 className="text-15 lh-14 fw-500">Return Date</h1>
+        <div className="col-lg-6 col-md-6 col-sm-12">
+          <h1 className="text-15 lh-14 fw-500">Class</h1>
           <select className="form-select rounded-4 border-light px-20 justify-between text-16 fw-500 h-50 w-full sm:w-full text-14 mt-10">
             <option defaultValue>Economy</option>
             <option value="properties">Properties</option>

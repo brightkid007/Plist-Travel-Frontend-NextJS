@@ -1,5 +1,17 @@
 import ServiceCard from "@/components/dashboard/dashboard/travel-package-builder/ServiceCard";
-export const SelectService = () => {
+
+export const SelectService = ({ data, setData, activeTab, setActiveTab }) => {
+
+  const handleContinue = () => {
+    setActiveTab(activeTab + 1);
+    // setData(prevData =>
+    //   prevData.map(item => ({
+    //     ...item,
+    //     selected: false,
+    //   }))
+    // );
+  }
+
   return (
     <div className="row y-gap-20 py-10 px-10 rounded-8 bg-white shadow-3">
       <h1 className="text-20 lh-14 fw-600">Select Services</h1>
@@ -8,7 +20,7 @@ export const SelectService = () => {
         Choose one or more services to include in your booking. Selecting
         multiple services will create a package.
       </div>
-      <ServiceCard />
+      <ServiceCard data={data} setData={setData} />
       <div className="px-15">
         <div className="border-top-light mt-30 pt-30 row y-gap-20">
           <h1 className="text-20 lh-14 fw-500">Package Information</h1>
@@ -34,7 +46,10 @@ export const SelectService = () => {
               <button className="button rounded-8 py-10 px-30 text-12 -dark-1 border-light text-light-1 col-auto">
                 <i className="icon icon-chevron-left mr-10" /> Back
               </button>
-              <button className="button rounded-8 py-10 px-30 text-12 -dark-1 bg-dark-3 text-white col-auto">
+              <button 
+                className="button rounded-8 py-10 px-30 text-12 -dark-1 bg-dark-3 text-white col-auto"
+                onClick={handleContinue}
+              >
                 Continue
                 <i className="icon icon-chevron-right ml-10" />
               </button>
