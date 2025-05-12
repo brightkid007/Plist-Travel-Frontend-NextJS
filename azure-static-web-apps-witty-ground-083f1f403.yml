@@ -20,14 +20,7 @@ jobs:
   steps:
   - checkout: self
     submodules: true
-  - script: |
-      cd frontendapp
-      npm install --force
-    displayName: Install dependencies with --force
-  - script: |
-      cd frontendapp
-      npm run build
-    displayName: 'Build the app'
+
   - task: AzureStaticWebApp@0
     inputs:
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_GROUND_083F1F403)
@@ -37,4 +30,5 @@ jobs:
       api_location: "" # Api source code path - optional
       output_location: "" # Built app content directory - optional
 ###### End of Repository/Build Configurations ######
+      app_build_command: "npm install --force && npm run build"
 
