@@ -1,10 +1,9 @@
 const AppBlock = () => {
   return (
     <>
-      <h2 className="text-30 lh-15">Download the App</h2>
+      <h2 className="text-30 lh-15">Plist Travel Mobile App</h2>
       <p className="text-dark-1 pr-40 lg:pr-0 mt-15 sm:mt-5">
-        Book in advance or last-minute with GoTrip. Receive instant
-        confirmation. Access your booking info offline.
+        Download Our App From Google & App Store!
       </p>
 
       <div className="row items-center pt-30 sm:pt-10">

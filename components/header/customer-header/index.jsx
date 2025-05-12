@@ -69,23 +69,34 @@ const Header1 = () => {
                 </div>
                 {/* End language and currency selector */}
 
+{/* Start btn-group */}
 
-                
-                <div className="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
-                  {/* <Link
-                    href="/login"
-                    className="button px-30 fw-400 text-14 -white bg-white h-50 text-dark-1"
-                  >
-                    Become An Expert
-                  </Link> */}
-                  <Link
-                    href="/customer"
-                    className="button px-30 fw-400 text-14 border-white -outline-white h-50 text-white ml-20"
-                  >
-                    Sign In / Register
-                  </Link>
+                <div className="row items-center x-gap-5 y-gap-20 pl-20 lg:d-none">
+                  <div className="col-auto">
+                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
+                      <i className="icon-email-2 text-20"></i>
+                    </button>
+                  </div>
+                  {/* End col-auto */}
+
+                  <div className="col-auto">
+                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
+                      <i className="icon-notification text-20"></i>
+                    </button>
+                  </div>
+                  {/* End col-auto */}
                 </div>
-                {/* End btn-group */}
+                {/* End .row */}
+
+                <div className="pl-15">
+                  <Image
+                    width={50}
+                    height={50}
+                    src="/img/avatars/3.webp"
+                    alt="image"
+                    className="size-50 rounded-22 object-cover"
+                  />
+                </div>
 
                 {/* Start mobile menu icon */}
                 <div className="d-none xl:d-flex x-gap-20 items-center pl-30 text-white">
