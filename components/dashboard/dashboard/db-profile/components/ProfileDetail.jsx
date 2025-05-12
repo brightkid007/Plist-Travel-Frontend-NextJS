@@ -8,7 +8,7 @@ const ProfileDetail = () => {
         </div>
         <div className="col-12 mb-20">
           <div className="row mb-20 y-gap-10">
-            <div className="col-6">
+            <div className="col-lg-6 col-md-6 col-sm-12">
               <h1 className="text-15 lh-14 fw-500">Name</h1>
               <input
                 className="border-light rounded-8 py-5 px-20 w-full mt-10"
@@ -16,7 +16,7 @@ const ProfileDetail = () => {
                 placeholder="asf"
               />
             </div>
-            <div className="col-6">
+            <div className="col-lg-6 col-md-6 col-sm-12">
               <h1 className="text-15 lh-14 fw-500">Email</h1>
               <input
                 className="border-light rounded-8 py-5 px-20 w-full mt-10"
@@ -35,7 +35,7 @@ const ProfileDetail = () => {
           </div>
 
           <div className="row mb-20 y-gap-10">
-            <div className="col-6">
+            <div className="col-lg-6 col-md-6 col-sm-12">
               <h1 className="text-15 lh-14 fw-500">Phone Number</h1>
               <input
                 className="border-light rounded-8 py-5 px-20 w-full mt-10"
@@ -43,7 +43,7 @@ const ProfileDetail = () => {
                 placeholder="+1 (555) 123-4567"
               />
             </div>
-            <div className="col-6">
+            <div className="col-lg-6 col-md-6 col-sm-12">
               <h1 className="text-15 lh-14 fw-500">Address</h1>
               <input
                 className="border-light rounded-8 py-5 px-20 w-full mt-10"

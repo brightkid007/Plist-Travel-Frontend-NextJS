@@ -18,14 +18,14 @@ const LoyaltySettings = () => {
   return (
     <div className="row px-10">
       <div className="col-md-4 col-sm-12">
-        <div className="border-light rounded-8 bg-white shadow-3 px-20 py-20 d-flex flex-column justify-content-center align-items-center">
+        <div className="border-light rounded-8 bg-white shadow-3 px-20 py-20 d-flex flex-column align-items-center">
           <div className="text-20 lh-14 fw-600 mb-20">Your Loyalty Status</div>
           <div className="row justify-center items-center">
             <div className="col-auto">
               <div className="d-flex ratio ratio-1:1 w-200">
                 <Image
-                  width={200}
-                  height={200}
+                  width={150}
+                  height={150}
                   src="/img/misc/avatar-1.png"
                   alt="image"
                   className="img-ratio rounded-full"
@@ -39,22 +39,22 @@ const LoyaltySettings = () => {
             </div>
             <div className="col-12 text-18 fw-600 text-center">Asf</div>
             <div class="col-auto py-5 px-15 rounded-16 text-10 lh-16 fw-500 ml-10 bg-dark-3 text-white">
-              Pending
+              Silver Member
             </div>
           </div>
-          <div className="d-flex justify-between mt-20">
+          <div className="d-flex col-12 justify-between mt-20">
             <div className="text-12 lh-14 fw-500">Current Points</div>
             <div className="text-12 lh-14 fw-600">100</div>
           </div>
           <div className="w-100 bg-dark-3 rounded-16 py-5 mt-10 mb-10"></div>
-          <div className="d-flex justify-between items-center">
+          <div className="d-flex col-12 justify-between items-center">
             <div className="text-10 lh-14 text-light-1 fw-400">Bronze</div>
             <div className="text-10 lh-14 text-light-1 fw-400">Silver</div>
           </div>
           <div className="text-12 lh-14 mt-10 mb-10 fw-400">
             400 more points to reach Silver
           </div>
-          <div className="rounded-8 bg-blue-2 px-15 py-10">
+          <div className="rounded-8 col-12 bg-blue-2 px-15 py-10">
             <div className="text-12 lh-14 fw-600">Member Benefits</div>
             <div className="text-12 lh-14 fw-400 mt-5">
               <i className="icon icon-check mr-5 text-blue-1"></i>

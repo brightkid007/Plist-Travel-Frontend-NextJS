@@ -1,6 +1,6 @@
 import CallToActions from "@/components/common/CallToActions";
 import Header11 from "@/components/header/header-11";
-import Header1 from "@/components/header/header-1";
+import Header1 from "@/components/header/customer-header";
 import Footer from "@/components/footer/footer-5";
 import Footer2 from "@/components/Footer2";
 import MainFilterSearchBox from "@/components/hotel-list/hotel-list-v5/MainFilterSearchBox";
@@ -9,8 +9,8 @@ import HotelProperties from "@/components/hotel-list/hotel-list-v5/HotelProperti
 import DropdownSelelctBar from "@/components/hotel-list/common/DropdownSelelctBar";
 
 export const metadata = {
-  title: "Hotel List v5 || GoTrip - Travel & Tour React NextJS Template",
-  description: "GoTrip - Travel & Tour React NextJS Template",
+  title: "Find Service || Plist Travel",
+  description: "Find impressive service",
 };
 
 const index = () => {

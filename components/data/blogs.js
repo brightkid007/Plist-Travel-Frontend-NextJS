@@ -1,8 +1,8 @@
 module.exports = [
   {
     id: 1,
-    img: "/img/blog/1.png",
-    title: "10 European ski destinations you should visit this winter",
+    img: "/img/blog/home/blog1.png",
+    title: "Kenya vs Tanzania Safari: The Better African Safari Experience",
     date: "Jan 06, 2023",
     delayAnimation: "100",
     details: `For decades, travelers have been escaping to the Catskills — a mountainous region in upstate New York — whenever they’ve needed a reset.`,
@@ -11,8 +11,8 @@ module.exports = [
   },
   {
     id: 2,
-    img: "/img/blog/2.png",
-    title: "Booking travel during Corona: good advice in an uncertain time",
+    img: "/img/blog/home/blog2.png",
+    title: "Exploring the Serengeti: A Wildlife Adventure",
     date: "April 06, 2022",
     delayAnimation: "200",
     details: `For decades, travelers have been escaping to the Catskills — a mountainous region in upstate New York — whenever they’ve needed a reset.`,
@@ -21,8 +21,8 @@ module.exports = [
   },
   {
     id: 3,
-    img: "/img/blog/3.png",
-    title: "Where can I go? 5 amazing countries that open right now",
+    img: "/img/blog/home/blog3.png",
+    title: "Into the Wild: An Unforgettable Safari Journey",
     date: "Jan 06, 2023",
     delayAnimation: "300",
     details: `For decades, travelers have been escaping to the Catskills — a mountainous region in upstate New York — whenever they’ve needed a reset.`,

@@ -22,7 +22,7 @@ const PointHistory = () => {
     ];
     return (
       <>
-        <div className="text-20 lh-14 fw-600 mb-20">
+        <div className="text-20 lh-14 fw-600 mt-20">
           Points Transaction History
         </div>
         <div className="text-14 text-light-1 lh-14 fw-400 mb-20 px-0">

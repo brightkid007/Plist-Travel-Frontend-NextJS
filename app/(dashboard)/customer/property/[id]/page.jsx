@@ -27,8 +27,8 @@ import GalleryOne from "@/components/property-single/GalleryOne";
 import Properties from "@/components/dashboard/dashboard/db-wishlist/components/Properties";
 
 export const metadata = {
-  title: "Hotel Single v1 || GoTrip - Travel & Tour React NextJS Template",
-  description: "GoTrip - Travel & Tour React NextJS Template",
+  title: "Property Detail || Plist Travel",
+  description: "Check Property Detail",
 };
 
 const PropertySinglePage = ({ params }) => {
@@ -106,7 +106,7 @@ const PropertySinglePage = ({ params }) => {
       </section>
       {/* End Available Rooms */}
 
-      <section className="pt-40">
+      <section className="pt-40 mb-40">
         <div className="container">
           <div className="row">
             <div className="col-xl-8 col-lg-10">
@@ -130,32 +130,6 @@ const PropertySinglePage = ({ params }) => {
       </section>
       {/* End Reply Comment box section */}
 
-      <section className="layout-pt-md layout-pb-lg">
-        <div className="container">
-          <div className="row justify-center text-center">
-            <div className="col-auto">
-              <div className="sectionTitle -md">
-                <h2 className="sectionTitle__title">
-                  Popular properties similar to The Crown Hotel
-                </h2>
-                <p className=" sectionTitle__text mt-5 sm:mt-0">
-                  Interdum et malesuada fames ac ante ipsum
-                </p>
-              </div>
-              {/* End sectionTitle */}
-            </div>
-            {/* End .col */}
-          </div>
-          {/* End .row */}
-
-          <div className="pt-40 sm:pt-20 item_gap-x30">
-            <Hotels2 />
-          </div>
-          {/* End slide hotel */}
-        </div>
-        {/* End .container */}
-      </section>
-      {/* End similar hotel */}
 
       <Footer />
     </>

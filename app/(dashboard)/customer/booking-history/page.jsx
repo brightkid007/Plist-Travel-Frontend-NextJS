@@ -2,8 +2,8 @@ import dynamic from "next/dynamic";
 import DashboardPage from "@/components/dashboard/dashboard/db-booking-history"
 
 export const metadata = {
-  title: "Home-2 || GoTrip - Travel & Tour React NextJS Template",
-  description: "GoTrip - Travel & Tour React NextJS Template",
+  title: "Booking History Detail || Plist Travel",
+  description: "Booking History and Book Again!",
 };
 
 const TravelBookingHistoryPage = () => {

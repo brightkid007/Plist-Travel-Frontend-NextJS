@@ -1,11 +1,11 @@
-"use client";
 
 import dynamic from "next/dynamic";
 import DashboardPage from "@/components/dashboard/dashboard/db-package"
-// export const metadata = {
-//   title: "Plist || Travel Platform",
-//   description: "Plist - Travel Package Builder",
-// };
+
+export const metadata = {
+  title: "Travel Package || Plist Travel",
+  description: "Enjoy our Travel Package",
+};
 
 const TravelPackageBuilder = () => {
   return (

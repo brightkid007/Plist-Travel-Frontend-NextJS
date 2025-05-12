@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import AddBanner from "@/components/add-banner/AddBanner";
 import PopularDestinations from "@/components/destinations/PopularDestinations";
 import Footer from "@/components/footer/footer-5";
-import Header1 from "@/components/header/header-1";
+import Header from "@/components/header/customer-header";
 import Hero from "@/components/hero/hero-customer";
 import BlockGuide from "@/components/block/BlockGuide";
 import Blog from "@/components/blog/Blog3";
@@ -25,7 +25,7 @@ const CustomerDashboard = () => {
     <>
       {/* End Page Title */}
 
-      <Header1 />
+      <Header />
       {/* End Header 1 */}
 
       <Hero />
@@ -108,29 +108,6 @@ const CustomerDashboard = () => {
       </section>
       {/* Block Guide Section */}
 
-      <section className="layout-pt-lg layout-pb-lg bg-blue-2">
-        <div className="container">
-          <div className="row y-gap-40 justify-between">
-            <div className="col-xl-5 col-lg-6" data-aos="fade-up">
-              <TestimonialLeftCol />
-            </div>
-            {/* End col */}
-
-            <div className="col-lg-6">
-              <div
-                className="overflow-hidden js-testimonials-slider-3"
-                data-aos="fade-up"
-                data-aos-delay="50"
-              >
-                <Testimonial />
-              </div>
-            </div>
-          </div>
-          {/* End .row */}
-        </div>
-        {/* End container */}
-      </section>
-      {/* End testimonial Section */}
 
       <section className="layout-pt-md layout-pb-lg">
         <div className="container">
@@ -153,9 +130,6 @@ const CustomerDashboard = () => {
         </div>
       </section>
       {/* End Destination we love Section */}
-
-      <CallToActions />
-      {/* End Call To Actions Section */}
 
       <Footer />
       {/* End Footer Section */}

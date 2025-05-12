@@ -20,8 +20,8 @@ import SlideGallery from "@/components/attr-event-single/SlideGallery";
 import MapPropertyFinder from "@/components/attr-event-single/MapPropertyFinder";
 
 export const metadata = {
-  title: "Activity Single || GoTrip - Travel & Tour React NextJS Template",
-  description: "GoTrip - Travel & Tour React NextJS Template",
+  title: "Attractions/Events Detail || Plist Travel",
+  description: "Experience our Attractions/Events",
 };
 
 const TourSingleV1Dynamic = ({ params }) => {

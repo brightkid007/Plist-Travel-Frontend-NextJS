@@ -7,7 +7,7 @@ const ServiceCard = ({ data, setData }) => {
   return (
     <div className="row y-gap-30">
       {data.map((item, index) => (
-        <div key={index} className="col-xl-4 col-md-6">
+        <div key={index} className="col-xl-4 col-lg-6 col-md-6 col-sm-12">
           <div className={"py-30 px-30 rounded-8 bg-white shadow-3 " + (item.selected ? "border-blue-1" : "border-light")}
             onClick={() => {
               const newData = [...data];
@@ -28,8 +28,8 @@ const ServiceCard = ({ data, setData }) => {
                 <div className="blogCard__image">
                   <div className="rounded-8 d-flex justify-center">
                     <img
-                    style={{height: "300px", objectFit: "fill"}}
-                      className="cover w-100 img-fluid"
+                    style={{height: "200px", objectFit: "fill"}}
+                      className="cover img-fluid"
                       src={item.image}
                       alt="image"
                     />
