@@ -1,33 +1,21 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
-import AddBanner from "@/components/add-banner/AddBanner";
-import PopularDestinations from "@/components/destinations/PopularDestinations";
 import Footer from "@/components/footer/footer-5";
 import Header1 from "@/components/header/header-1";
 import Hero from "@/components/hero/hero-land";
-import BlockGuide from "@/components/block/BlockGuide";
 import Blog from "@/components/home/Blog";
-import CallToActions from "@/components/common/CallToActions";
-import Testimonial from "@/components/home/home-1/Testimonial";
-import TestimonialLeftCol from "@/components/home/home-1/TestimonialLeftCol";
 import Destinations from "@/components/home/Destinations"
-import SelectFilter from "@/components/hotels/filter-tabs/SelectFilter";
 import PopularRides from "@/components/home/PopularRides";
 import PopularFlights from "@/components/home/PopularFlights";
 import PopularTravelPackages from "@/components/home/PopularTravelPackages";
 import ParallaxBanner from "@/components/banner/ParallaxBanner";
 import Faq from "@/components/faq/Faq";
 import AttrEvents from "@/components/home/AttrEvents";
-import BecomeAgent from "@/components/home/BecomeAgent";
 import HolidayAmazing from "@/components/home/HolidayAmazing";
-import BecomeVendor from "@/components/home/BecomeVendor";
 import AppBanner from "@/components/home/AppBanner";
 
-export const metadata = {
-  title: "Home || Plist - Travel Service Platform",
-  description: "Plist - Travel Service Platform",
-};
+
 
 const Home = () => {
   return (
@@ -185,15 +173,15 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 col-md-6 col-sm-12 h-100">
+            <div className="col-lg-4 col-md-6 col-sm-12">
               <div style={{
                 backgroundColor: '#EEFAFF',
                 }}
-                className="h-100 rounded-22"
+                className="h-100 rounded-22 d-flex flex-column justify-center"
               >
                 <div className="row mx-3">
                   <div className="col-12"><img src="/img/icons/colors-square.svg" alt="color" /></div>
-                  <div className="">
+                  <div className="col-12">
                     <p className="text-26 fw-semibold">Ease of Use
                     </p>
                     <p className="text-14">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Urna, tortor tempus. Lorem ipsum dolor sit amet, consectetur  tortoradipiscing elit. Urna, tortor tempus. </p>
@@ -226,7 +214,7 @@ const Home = () => {
         {/* End .container */}
       </section>
 
-      <BecomeAgent />
+      {/* <BecomeAgent /> */}
 
       <section className="layout-pt-md layout-pb-md">
         <div className="container">
@@ -292,7 +280,7 @@ const Home = () => {
       </section>
       {/* End Faq Section */}
 
-      <BecomeVendor />
+      {/* <BecomeVendor /> */}
 
 
       <section className="layout-pt-md layout-pb-md">

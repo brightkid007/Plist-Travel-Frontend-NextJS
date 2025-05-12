@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import PopularDestinations from "@/components/destinations/PopularDestinations";
-import Footer from "@/components/footer/footer-5";
+import Footer5 from "@/components/footer/footer-5";
 import Header6 from "@/components/header/header-6";
 import Hero6 from "@/components/hero/hero-6";
 import BlockGuide from "@/components/home/home-6/BlockGuide";
