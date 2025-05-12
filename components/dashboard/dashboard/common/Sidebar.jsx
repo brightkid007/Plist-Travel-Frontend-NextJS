@@ -46,12 +46,12 @@ const pathname = usePathname()
       name: "Loyalty",
       routePath: "/customer/loyalty",
     },
-    {
-      id: 6,
-      icon: "/img/dashboard/sidebar/log-out.svg",
-      name: " Logout",
-      routePath: "/",
-    },
+    // {
+    //   id: 6,
+    //   icon: "/img/dashboard/sidebar/log-out.svg",
+    //   name: " Logout",
+    //   routePath: "/",
+    // },
   ];
   return (
     <div className="sidebar -dashboard">

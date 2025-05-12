@@ -263,7 +263,7 @@ const Rewards = () => {
 
   return (
     <>
-      <div className="text-20 lh-14 fw-600 px-0">Redeem Your Points</div>
+      <div className="text-20 lh-14 fw-600 px-0 mt-20">Redeem Your Points</div>
       <div className="text-14 text-light-1 lh-14 fw-400 mb-20 px-0">
         Use your points to get discounts, upgrades, and more
       </div>
@@ -282,15 +282,17 @@ const Rewards = () => {
           </div>
         ))}
       </div>
-      {discountItems.map((item, index) => (
-        <DiscountCard
-          key={index}
-          name={item.name}
-          description={item.description}
-          points={item.points}
-          image={item.image}
-        />
-      ))}
+      <div className="row x-gap-10 y-gap-10">
+        {discountItems.map((item, index) => (
+          <DiscountCard
+            key={index}
+            name={item.name}
+            description={item.description}
+            points={item.points}
+            image={item.image}
+          />
+        ))}
+      </div>
     </>
   );
 };

@@ -646,12 +646,73 @@ export const PackageSummary = () => {
         </div>
       ))}
       <h1 className="text-18 lh-14 fw-500">Package Summary</h1>
-      <div className="py-5 px-15">
-        <div className="py-15 px-15 rounded-8 border-light bg-white"></div>
+      <div className="px-15">
+        <div className="py-15 px-15 rounded-8 border-light bg-white">
+          <div className="text-18 lh-14 fw-600">Package Preview</div>
+          <div className="text-12 text-light-1 lh-14 fw-400 mb-10">
+            This is how your Package will appear to clients.
+          </div>
+          <div className="row">
+            <img
+              src="/img/general/convChannel2.png"
+              className="px-0 w-100"
+              style={{ height: "150px", objectFit: "fill" }}
+              alt=""
+            />
+          </div>
+          <div className="row justify-between items-center mt-15">
+            <div className="col-sm-12 col-md-auto">
+              <div className="text-18 lh-16 rounded-4 fw-600">
+                Exclusive Bali Getaway
+              </div>
+              <div className="text-12 text-light-1 lh-16 fw-400">
+                Package Tour
+              </div>
+            </div>
+
+            <div className="col-sm-12 col-md-auto d-flex flex-column items-end">
+              <div className="text-10 text-light-1 lh-16 fw-400 line-through">
+                $1,999
+              </div>
+              <div className="text-18 lh-16 rounded-4 text-green-2 fw-600">
+                $1,699
+              </div>
+              <div className="text-10 text-light-1 lh-16 fw-400">
+                per person
+              </div>
+            </div>
+          </div>
+          <div className="text-12 lh-16 fw-400">
+            Experience the ultimate luxury escape to Bali with this exclusive
+            package designed for discerning travelers. Enjoy pristine beaches,
+            cultural excursions, and world-class amenities.
+          </div>
+          <div className="text-12 lh-16 fw-400 mt-10">Inclusions:</div>
+          <div className="text-12 lh-16 fw-400">
+            {" "}
+            • 5-Night Luxury Hotel Stay
+          </div>
+          <div className="text-12 lh-16 fw-400"> • Daily Breakfast</div>
+          <div className="text-12 lh-16 fw-400"> • Airport Transfers</div>
+          <div className="text-12 text-light-1 lh-16 fw-400 mt-10">
+            Valid until: April 30, 2024
+          </div>
+          <div className="text-12 text-light-1 lh-16 fw-400 mt-10">
+            Terms & Conditions:
+          </div>
+          <div className="text-12 text-light-1 lh-16 fw-400 mb-10">
+            Subject to availability. Blackout dates may apply. Cancellation
+            policy: 50% refund if cancelled 30 days before arrival, no refund
+            thereafter.
+          </div>
+          <button className="button rounded-8 py-10 px-30 text-12 -dark-1 bg-dark-3 text-white col-12">
+            Book Now
+          </button>
+        </div>
       </div>
       <h1 className="text-18 lh-14 fw-500">Selected Services</h1>
       {data.map((item, index) => (
-        <div key={index} className="col-6">
+        <div key={index} className="col-md-6 col-sm-12">
           <div className="py-15 px-15 rounded-8 bg-white shadow-3 border-light">
             <div className="d-flex items-center">
               <Image src={item.icon} alt={item.name} width={30} height={30} />

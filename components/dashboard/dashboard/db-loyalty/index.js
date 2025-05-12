@@ -1,4 +1,3 @@
-
 import Sidebar from "../common/Sidebar";
 import Header from "@/components/header/dashboard-header";
 
@@ -32,13 +31,9 @@ const index = () => {
                   Lorem ipsum dolor sit amet, consectetur.
                 </div> */}
               </div>
-              {/* End .col-12 */}
-            </div>
-            {/* End .row */}
-
-            <div className="py-30 px-30 rounded-22 bg-white shadow-3">
-              <LoyaltySettings />
-              {/* End tabs */}
+              <div className="col-12 py-15 px-15 rounded-22 bg-white shadow-3">
+                <LoyaltySettings />
+              </div>
             </div>
 
             <Footer />

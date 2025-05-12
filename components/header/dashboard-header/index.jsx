@@ -40,9 +40,9 @@ const HeaderDashBoard = () => {
       >
         <div className="header__container px-30 sm:px-20">
           <div className="-left-side">
-            <Link href="/" className="header-logo">
+            <a href="/" className="header-logo">
               <img src="/img/general/plistLogo-blue.svg" alt="logo icon" />
-            </Link>
+            </a>
             {/* End logo */}
           </div>
           {/* End _left-side */}
@@ -100,7 +100,7 @@ const HeaderDashBoard = () => {
                     height={50}
                     src="/img/misc/avatar-1.png"
                     alt="image"
-                    className="size-50 rounded-22 object-cover"
+                    className="size-50 rounded-full object-cover"
                   />
                 </div>
 

@@ -1,6 +1,6 @@
 const DiscountCard = ({ name, description, points, image }) => {
     return (
-      <div className="col-md-6 col-sm-12 row mr-10 mb-10">
+      <div className="col-md-6 col-sm-12 row mr-15 mb-10">
         <div className="col-4 px-0">
           <img
             src={image}

@@ -31,7 +31,7 @@ const Location = () => {
           <label className="lh-1 text-16 text-light-1">Map Zoom</label>
         </div>
       </div>
-      <div className="col-lg12">
+      <div className="col-lg-12">
         <div className="d-flex ratio ratio-4:1 mt-10">
           <div className="d-flex px-20 py-20 bg-light-2 h-full w-1/1 absolute rounded-4">
             <div className>

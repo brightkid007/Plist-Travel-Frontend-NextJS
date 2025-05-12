@@ -4,12 +4,12 @@ import Aos from "aos";
 import { useEffect } from "react";
 import SrollTop from "../components/common/ScrollTop";
 import { usePathname } from "next/navigation";
-// import "swiper/css";
-// import "swiper/css/pagination";
-// import "swiper/css/navigation";
-// import "swiper/css/scrollbar";
-// import "swiper/css/effect-cards";
-// import "aos/dist/aos.css";
+import("swiper/css");
+import("swiper/css/pagination");
+import("swiper/css/navigation");
+import("swiper/css/scrollbar");
+import("swiper/css/effect-cards");
+import("aos/dist/aos.css");
 // import "../styles/index.scss";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
@@ -19,26 +19,19 @@ if (typeof window !== "undefined") {
 }
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
   useEffect(() => {
     Aos.init({
       duration: 1200,
       once: true,
     });
+    // import("../styles/index.scss");
   }, []);
-  const pathname = usePathname();
   useEffect(() => {
     if (pathname !== "/") {
-      import("swiper/css");
-      import("swiper/css/pagination");
-      import("swiper/css/navigation");
-      import("swiper/css/scrollbar");
-      import("swiper/css/effect-cards");
-      import("aos/dist/aos.css");
       import("../styles/index.scss");
-    } else {
-      import("./home.css");
     }
-  }, [pathname])
+  }, [pathname]);
   return (
     <html lang="en">
       <head>
