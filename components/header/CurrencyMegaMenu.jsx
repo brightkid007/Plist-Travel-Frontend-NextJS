@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 
-const CurrenctyMegaMenu = ({ textClass }) => {
+const CurrencyMegaMenu = ({ textClass }) => {
   const [click, setClick] = useState(false);
   const handleCurrency = () => setClick((prevState) => !prevState);
 
@@ -95,4 +95,4 @@ const CurrenctyMegaMenu = ({ textClass }) => {
   );
 };
 
-export default CurrenctyMegaMenu;
+export default CurrencyMegaMenu;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import MainMenu from "../MainMenu";
-import CurrenctyMegaMenu from "../CurrenctyMegaMenu";
+import CurrencyMegaMenu from "../CurrencyMegaMenu";
 import LanguageMegaMenu from "../LanguageMegaMenu";
 import MobileMenu from "../MobileMenu";
 
@@ -34,11 +34,11 @@ const Header1 = () => {
           <div className="row justify-between items-center">
             <div className="col-auto">
               <div className="d-flex items-center">
-                <a href="/" className="header-logo mr-20">
+                <Link href="/" className="header-logo mr-20">
                   <img src="/img/general/plist logo 1.png" alt="logo icon" />
                   {/* <img src="/img/general/logo-light.svg" alt="logo icon" />
                   <img src="/img/general/logo-dark.svg" alt="logo icon" /> */}
-                </a>
+                </Link>
                 {/* End logo */}
 
                 <div className="header-menu">
@@ -55,7 +55,7 @@ const Header1 = () => {
             <div className="col-auto">
               <div className="d-flex items-center">
                 <div className="row x-gap-20 items-center xxl:d-none">
-                  <CurrenctyMegaMenu textClass="text-white" />
+                  <CurrencyMegaMenu textClass="text-white" />
                   {/* End Megamenu for Currencty */}
 
                   {/* Start vertical devider*/}
