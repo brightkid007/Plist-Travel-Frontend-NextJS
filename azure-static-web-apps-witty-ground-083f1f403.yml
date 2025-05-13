@@ -21,11 +21,6 @@ jobs:
   - checkout: self
     submodules: true
 
-  - script: npm install --force
-    displayName: 'npm install'
-  - script: npm run build
-    displayName: 'npm run build'
-
   - task: AzureStaticWebApp@0
     inputs:
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_GROUND_083F1F403)
@@ -34,7 +29,7 @@ jobs:
       app_location: "/" # App source code path
       api_location: "" # Api source code path - optional
       output_location: ".next/" # Built app content directory - optional
-      skip_app_build: true
-      skip_api_build: true
+      app_build_command: "npm install --force"
+      app_build_command: "npm run build"
+      app_build_command: "rm -rf ./node_modules/@next/swc-* && rm -rf ./.next/cache"
 ###### End of Repository/Build Configurations ######
-  
