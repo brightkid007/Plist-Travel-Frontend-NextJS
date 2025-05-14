@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import CurrenctyMegaMenu from "../CurrenctyMegaMenu";
+import CurrenctyMegaMenu from "../CurrencyMegaMenu";
 import LanguageMegaMenu from "../LanguageMegaMenu";
 import LocationSearch from "./LocationSearch";
 import MobileMenu from "../MobileMenu";
