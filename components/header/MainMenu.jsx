@@ -58,7 +58,7 @@ const MainMenu = ({ style = "" }) => {
         </li> */}
         {/* End categories menu items */}
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/home" ? "current" : ""}>
           <Link href="/">Home</Link>
         </li>
 
@@ -78,7 +78,7 @@ const MainMenu = ({ style = "" }) => {
           <Link href="/">Rides</Link>
         </li>
 
-        <li className={pathname === "/attractions-events" ? "current" : ""}>
+        <li className={pathname === "/attrs-events" ? "current" : ""}>
           <Link href="/">Attractions & Events</Link>
         </li>
 

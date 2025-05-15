@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import "photoswipe/dist/photoswipe.css";
 import { hotelsData } from "@/data/hotels";
-import Header1 from "@/components/header/header-1";
+import Header from "@/components/header/customer-header";
 import Overview from "@/components/property-single/Overview";
 import PropertyHighlights from "@/components/property-single/PropertyHighlights";
 import RatingTag from "@/components/property-single/RatingTag";
@@ -29,7 +29,7 @@ const PropertySinglePage = ({ params }) => {
       <div className="header-margin"></div>
       {/* header top margin */}
 
-      <Header1 />
+      <Header />
       {/* End Header 1 */}
 
       <TopBreadCrumb />

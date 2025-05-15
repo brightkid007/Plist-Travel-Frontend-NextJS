@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import "photoswipe/dist/photoswipe.css";
 import carsData from "@/data/cars";
-import Header1 from "@/components/header/header-1";
+import Header from "@/components/header/customer-header";
 import Overview from "@/components/car-single/Overview";
 import PropertyHighlights from "@/components/car-single/PropertyHighlights";
 import TopBreadCrumb from "@/components/car-single/TopBreadCrumb";
@@ -21,7 +21,7 @@ export const metadata = {
   description: "Check Ride Detail",
 };
 
-const TourSingleV1Dynamic = ({ params }) => {
+const RideSinglePage = ({ params }) => {
   const id = params.id;
   const car = carsData.find((item) => item.id == id) || carsData[0];
 
@@ -32,7 +32,7 @@ const TourSingleV1Dynamic = ({ params }) => {
       <div className="header-margin"></div>
       {/* header top margin */}
 
-      <Header1 />
+      <Header />
       {/* End Header 1 */}
 
       <TopBreadCrumb />
@@ -234,6 +234,6 @@ const TourSingleV1Dynamic = ({ params }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(TourSingleV1Dynamic), {
+export default dynamic(() => Promise.resolve(RideSinglePage), {
   ssr: false,
 });

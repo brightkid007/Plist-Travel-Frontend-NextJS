@@ -7,11 +7,11 @@ import { Gallery, Item } from "react-photoswipe-gallery";
 
 const SlideGallery = () => {
   const sliderImg = [
-    "/img/activities/10.png",
-    "/img/activities/11.png",
-    "/img/activities/12.png",
-    "/img/activities/13.png",
-    "/img/activities/11.png",
+    "/img/activities/1.png",
+    "/img/activities/2.png",
+    "/img/activities/3.png",
+    "/img/activities/1.png",
+    "/img/activities/2.png",
   ];
 
   return (

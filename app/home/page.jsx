@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "@/components/footer/footer-5";
-import Header1 from "@/components/header/header-1";
+import Header from "@/components/header/header-1";
 import Hero from "@/components/hero/hero-land";
 import Blog from "@/components/home/Blog";
 import Destinations from "@/components/home/Destinations"
@@ -22,7 +22,7 @@ const Home = () => {
     <>
       {/* End Page Title */}
 
-      <Header1 />
+      <Header />
       {/* End Header 1 */}
 
       <Hero />

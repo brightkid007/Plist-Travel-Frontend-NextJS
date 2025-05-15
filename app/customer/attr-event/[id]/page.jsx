@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import "photoswipe/dist/photoswipe.css";
 import activityData from "@/data/activity";
-import Header1 from "@/components/header/header-1";
+import Header from "@/components/header/customer-header";
 import Overview from "@/components/attr-event-single/Overview";
 import TourSnapShot from "@/components/attr-event-single/TourSnapShot";
 import TopBreadCrumb from "@/components/attr-event-single/TopBreadCrumb";
@@ -24,7 +24,7 @@ export const metadata = {
   description: "Experience our Attractions/Events",
 };
 
-const TourSingleV1Dynamic = ({ params }) => {
+const AttrEventSinglePage = ({ params }) => {
   const id = params.id;
   const activity =
     activityData.find((item) => item.id == id) || activityData[0];
@@ -36,7 +36,7 @@ const TourSingleV1Dynamic = ({ params }) => {
       <div className="header-margin"></div>
       {/* header top margin */}
 
-      <Header1 />
+      <Header />
       {/* End Header 1 */}
 
       <TopBreadCrumb />
@@ -147,27 +147,6 @@ const TourSingleV1Dynamic = ({ params }) => {
       </section>
       {/* End Itinerary */}
 
-      <section className="mt-40">
-        <div className="container ">
-          <div className="pt-40 border-top-light">
-            <div className="row y-gap-20">
-              <div className="col-lg-4">
-                <h2 className="text-22 fw-500">
-                  FAQs about
-                  <br /> The Crown Hotel
-                </h2>
-              </div>
-              {/* End .row */}
-
-            </div>
-            {/* End .row */}
-          </div>
-          {/* End .pt-40 */}
-        </div>
-        {/* End .container */}
-      </section>
-      {/* End Faq about sections */}
-
       <section className="mt-40 border-top-light pt-40">
         <div className="container">
           <div className="row y-gap-40 justify-between">
@@ -221,6 +200,6 @@ const TourSingleV1Dynamic = ({ params }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(TourSingleV1Dynamic), {
+export default dynamic(() => Promise.resolve(AttrEventSinglePage), {
   ssr: false,
 });

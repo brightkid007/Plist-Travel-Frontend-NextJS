@@ -9,8 +9,8 @@ import SelectFilter from "@/components/hotels/filter-tabs/SelectFilter";
 
 
 export const metadata = {
-  title: "Plist || Travel Platform",
-  description: "Plist - Customer Dashboard",
+  title: "Tour Detail || Plist Travel",
+  description: "Check Tour Detail",
 };
 
 const CustomerDashboard = () => {
