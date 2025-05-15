@@ -13,12 +13,12 @@ const GalleryCruiseSlider = () => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
   const galleryImage = [
-    "/img/cruises/6.png",
-    "/img/cruises/1.png",
-    "/img/cruises/2.png",
-    "/img/cruises/3.png",
-    "/img/cruises/4.png",
-    "/img/cruises/5.png",
+    "/img/flights/2.png",
+    "/img/flights/2.png",
+    "/img/flights/2.png",
+    "/img/flights/2.png",
+    "/img/flights/2.png",
+    "/img/flights/2.png",
   ];
 
   return (

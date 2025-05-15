@@ -50,7 +50,7 @@ const HotelProperties = () => {
           data-aos-delay={item.delayAnimation}
         >
           <Link
-            href={`/customer/property/${item.id}`}
+            href={item?.link}
             className="hotelsCard -type-1 hover-inside-slider"
           >
             <div className="hotelsCard__image">
@@ -85,24 +85,27 @@ const HotelProperties = () => {
                 <div className="cardImage__leftBadge">
                   <div
                     className={`py-5 px-15 rounded-right-4 text-12 lh-16 fw-500 uppercase ${
-                      isTextMatched(item?.tag, "breakfast included")
+                      isTextMatched(item?.tag, "property")
                         ? "bg-dark-1 text-white"
                         : ""
                     } ${
-                      isTextMatched(item?.tag, "best seller")
+                      isTextMatched(item?.tag, "tour")
                         ? "bg-blue-1 text-white"
                         : ""
                     } 
                     } ${
-                      isTextMatched(item?.tag, "-25% today")
+                      isTextMatched(item?.tag, "flight")
                         ? "bg-brown-1 text-white"
                         : ""
-                    } 
-                     ${
-                       isTextMatched(item?.tag, "top rated")
+                    } ${
+                       isTextMatched(item?.tag, "ride")
                          ? "bg-yellow-1 text-dark-1"
                          : ""
-                     }`}
+                    } ${
+                      isTextMatched(item?.tag, "attr")
+                        ? "bg-white-10 text-dark-1"
+                        : ""
+                    }`}
                   >
                     {item?.tag}
                   </div>

@@ -4,6 +4,11 @@ import SignUpForm from "@/components/common/SignUpForm";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "react-responsive";
 
+// export const metadata = {
+//   title: "Sign Up || Plist Travel",
+//   description: "New to Plist? Sing Up Here",
+// };
+
 const SignUp = () => {
   const isMobile = useMediaQuery({ query: "(max-width: 1023px)" });
   return (

@@ -48,12 +48,12 @@ const LocationSearch2 = () => {
           data-bs-auto-close="true"
           data-bs-offset="0,22"
         >
-          <h4 className="text-15 fw-500 ls-2 lh-16">All Cruise Line</h4>
+          <h4 className="text-15 fw-500 ls-2 lh-16">All Flight Line</h4>
           <div className="text-15 text-light-1 ls-2 lh-16">
             <input
               autoComplete="off"
               type="search"
-              placeholder="Carnival Cruise Line."
+              placeholder="Carnival Flight Line."
               className="js-search js-dd-focus"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}

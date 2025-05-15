@@ -39,7 +39,7 @@ const index = () => {
             <div className="col-12">
               <div className="text-center">
                 <h1 className="text-30 fw-600 text-white">
-                  Find Your Dream Luxury Hotel
+                  Find Your Dream Luxury Service
                 </h1>
               </div>
               {/* End text-center */}

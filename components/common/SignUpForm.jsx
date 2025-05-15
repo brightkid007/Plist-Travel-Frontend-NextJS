@@ -334,12 +334,12 @@ const VenderSignUpForm = ({ setFormType }) => {
         />
       </div>
       <div className="col-12 d-flex flex-column items-center">
-        <button
+        <Link
           className="button py-20 -dark-1 bg-dark-4 text-white w-100 mt-15"
-          onClick={() => {}}
+          href={"/login"}
         >
           Create Account
-        </button>
+        </Link>
         <div className="mt-10">
           Already have an account?
           <Link href="/login" className="ml-5 text-blue-1">
@@ -433,12 +433,12 @@ const AgentSignUpForm = ({ setFormType }) => {
         />
       </div>
       <div className="col-12 d-flex flex-column items-center">
-        <button
+        <Link
           className="button py-20 -dark-1 bg-dark-4 text-white w-100 mt-15"
-          onClick={() => {}}
+          href={"/login"}
         >
           Create Account
-        </button>
+        </Link>
         <div className="mt-10">
           Already have an account?
           <Link href="/login" className="ml-5 text-blue-1">
@@ -514,12 +514,12 @@ const CustomerSignUpForm = ({ setFormType }) => {
         />
       </div>
       <div className="col-12 d-flex flex-column items-center">
-        <button
+        <Link
           className="button py-20 -dark-1 bg-dark-4 text-white w-100 mt-15"
-          onClick={() => {}}
+          href={"/login"}
         >
           Create Account
-        </button>
+        </Link>
         <div className="mt-10">
           Already have an account?
           <Link href="/login" className="ml-5 text-blue-1">

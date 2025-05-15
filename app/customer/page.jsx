@@ -9,11 +9,11 @@ import SelectFilter from "@/components/hotels/filter-tabs/SelectFilter";
 
 
 export const metadata = {
-  title: "Tour Detail || Plist Travel",
-  description: "Check Tour Detail",
+  title: "Customer Booking || Plist Travel",
+  description: "Entry of Customer Booking",
 };
 
-const CustomerDashboard = () => {
+const CustomerBookingEntry = () => {
   return (
     <>
       {/* End Page Title */}
@@ -130,4 +130,4 @@ const CustomerDashboard = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(CustomerDashboard), { ssr: false });
+export default dynamic(() => Promise.resolve(CustomerBookingEntry), { ssr: false });
