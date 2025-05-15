@@ -3,7 +3,6 @@ import Sidebar from "../common/Sidebar";
 import Header from "@/components/header/dashboard-header";
 
 import Footer from "../common/Footer";
-import BookingTable from "./components/BookingTable";
 import BookingForm from "@/components/dashboard/dashboard/db-booking/components/BookingForm";
 
 const index = () => {

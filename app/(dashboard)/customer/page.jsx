@@ -1,18 +1,11 @@
 import dynamic from "next/dynamic";
-import AddBanner from "@/components/add-banner/AddBanner";
-import PopularDestinations from "@/components/destinations/PopularDestinations";
 import Footer from "@/components/footer/footer-5";
 import Header from "@/components/header/customer-header";
 import Hero from "@/components/hero/hero-customer";
 import BlockGuide from "@/components/block/BlockGuide";
-import Blog from "@/components/blog/Blog3";
-import CallToActions from "@/components/home/home-2/CallToActions";
 import Destinations from "@/components/home/home-1/Destinations";
-import Testimonial from "@/components/home/home-1/Testimonial";
-import TestimonialLeftCol from "@/components/home/home-1/TestimonialLeftCol";
 import Hotels from "@/components/hotels/Hotels";
 import SelectFilter from "@/components/hotels/filter-tabs/SelectFilter";
-import Footer2 from "@/components/Footer2"
 
 
 export const metadata = {
