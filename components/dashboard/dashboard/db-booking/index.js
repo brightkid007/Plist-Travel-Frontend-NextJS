@@ -5,7 +5,7 @@ import Header from "@/components/header/dashboard-header";
 import Footer from "../common/Footer";
 import BookingForm from "@/components/dashboard/dashboard/db-booking/components/BookingForm";
 
-const index = () => {
+const index = ({ serviceType }) => {
   return (
     <>
       {/*  */}
@@ -37,7 +37,7 @@ const index = () => {
             {/* End .row */}
 
             <div className="py-30 px-30 rounded-22 bg-white shadow-3 row x-gap-20 y-gap-20 items-center">
-              <BookingForm />
+              <BookingForm serviceType={serviceType} />
               {/* End tabs */}
             </div>
 

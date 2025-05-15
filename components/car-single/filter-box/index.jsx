@@ -1,6 +1,7 @@
 import DateSearch from "./DateSearch";
 import GuestSearch from "./GuestSearch";
 import LocationSearch from "./LocationSearch";
+import Link from "next/link";
 
 const index = () => {
   return (
@@ -46,14 +47,15 @@ const index = () => {
       {/* End .col-12 */}
 
       <div className="col-12">
-        <button
+        <Link
           className="button -dark-1 py-15 px-35 h-60 col-12 rounded-4 bg-yellow-1 text-dark-1"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
+          href={"/customer/ride/1/booking"}
+          // data-bs-dismiss="offcanvas"
+          // aria-label="Close"
         >
           <i className="icon-search text-20 mr-10" />
           Book Now
-        </button>
+        </Link>
 
         {/* End search button_item */}
       </div>

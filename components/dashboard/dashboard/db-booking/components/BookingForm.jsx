@@ -3,12 +3,25 @@
 import { useState } from "react";
 import ImageCard from "@/components/dashboard/image-card/ImageCard";
 import TravelerInformationCard from "@/components/dashboard/dashboard/db-booking/components/TravelInformationCard";
-import BookingTimeCard from "@/components/dashboard/dashboard/db-booking/components/BookingTimeCard";
 import BookingPaymentCard from "@/components/dashboard/dashboard/db-booking/components/BookingPaymentCard";
 import BookingCouponApplyCard from "@/components/dashboard/dashboard/db-booking/components/BookingCouponApplyCard";
 import BookingStatusCard from "@/components/dashboard/dashboard/db-booking/components/BookingStatusCard";
+import FlightInfoCard from "./FlightInfoCard";
+import PropertyInfoCard from "./PropertyInfoCard";
+import RideInfoCard from "./RideInfoCard";
+import TourInfoCard from "./TourInfoCard";
+import AttrEventInfoCard from "./AttrEventInfoCard";
 
-const BookingForm = () => {
+const BookingForm = ({ serviceType }) => {
+
+  const COMPONENT_MAP = {
+    Property: <PropertyInfoCard />,
+    Tour: <TourInfoCard />,
+    Ride: <RideInfoCard />,
+    Flight: <FlightInfoCard />,
+    AttrEvent: <AttrEventInfoCard />
+  };
+
   const [travelerCount, setTravelerCount] = useState(1);
   const [isGroupBooking, setIsGroupBooking] = useState(false);
 
@@ -59,7 +72,8 @@ const BookingForm = () => {
         </>
       )}
       {/* </div> */}
-      <BookingTimeCard />
+      {COMPONENT_MAP[serviceType]}
+
       <BookingPaymentCard />
       <BookingCouponApplyCard />
       <BookingStatusCard roomPrice={80} extraPrice={5} discount={2} />

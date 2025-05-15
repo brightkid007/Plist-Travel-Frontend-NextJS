@@ -1,5 +1,5 @@
 import Wrapper from "@/components/layout/Wrapper";
-import MainHome from "../app/(homes)/home_1/page";
+import MainHome from "../app/home/page";
 
 export const metadata = {
   title: "Home || Plist - Travel Service Platform",

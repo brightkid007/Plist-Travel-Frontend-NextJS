@@ -58,31 +58,31 @@ const MainMenu = ({ style = "" }) => {
         </li> */}
         {/* End categories menu items */}
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/home" ? "current" : ""}>
           <Link href="/">Home</Link>
         </li>
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/properties" ? "current" : ""}>
           <Link href="/">Properties</Link>
         </li>
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/tours" ? "current" : ""}>
           <Link href="/">Tours</Link>
         </li>
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/flights" ? "current" : ""}>
           <Link href="/">Flights</Link>
         </li>
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/rides" ? "current" : ""}>
           <Link href="/">Rides</Link>
         </li>
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/attrs-events" ? "current" : ""}>
           <Link href="/">Attractions & Events</Link>
         </li>
 
-        <li className={pathname === "/" ? "current" : ""}>
+        <li className={pathname === "/travel-packages" ? "current" : ""}>
           <Link href="/">Travel Packages</Link>
         </li>
         {/* End Destinatinos single menu */}
