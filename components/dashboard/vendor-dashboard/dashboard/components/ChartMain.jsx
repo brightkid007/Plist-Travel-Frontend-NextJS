@@ -50,17 +50,33 @@ export const options = {
   },
 };
 
-const labels = ["January", "February", "March", "April", "May", "June"];
+const labels = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export const data = {
   labels,
   datasets: [
     {
       label: "Dataset",
-      data: labels.map(() => faker.number.int({ min: 100, max: 400 })),
       borderColor: "#1967d2",
       backgroundColor: "#1967d2",
-      data: [196, 132, 215, 362, 210, 252],
+      tension: 0.2,
+      data: [
+        8000, 7400, 10000, 14000, 17000, 20000, 22000, 25000, 28000, 25000,
+        23000, 30000,
+      ],
       fill: false,
     },
   ],

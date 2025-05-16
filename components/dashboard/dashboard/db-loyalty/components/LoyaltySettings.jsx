@@ -96,7 +96,7 @@ const LoyaltySettings = () => {
             <div className="ml-10">
               <div className="text-14 lh-14 fw-500">Referrals</div>
               <div className="text-12 lh-14 fw-400 text-light-1">
-                Earn 250 points for each friend you refer{" "}
+                Earn 250 points for each friend you refer
               </div>
             </div>
           </div>

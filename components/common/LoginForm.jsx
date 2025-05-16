@@ -43,7 +43,7 @@ const LoginForm = () => {
         <div className="col-12 d-flex flex-column items-center">
           <Link
             type="submit"
-            href="/customer/booking-history"
+            href="/customer"
             className="button py-20 -dark-1 bg-dark-4 text-white w-100"
           >
             Login

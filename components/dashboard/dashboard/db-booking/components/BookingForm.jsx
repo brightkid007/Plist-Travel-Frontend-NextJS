@@ -67,7 +67,7 @@ const BookingForm = ({ serviceType }) => {
           </div>
 
           {Array.from({ length: travelerCount }).map((_, index) => (
-            <TravelerInformationCard key={index} index={index} />
+            <TravelerInformationCard key={index} index={index} travelerCount={travelerCount} setTravelerCount={setTravelerCount} />
           ))}
         </>
       )}

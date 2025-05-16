@@ -234,7 +234,7 @@ const HotelDetails = () => {
   const [checkOutDate, setCheckOutDate] = useState(
     new DateObject().add(10, "days")
   );
-  const [rooms, setPassengers] = useState(1);
+  const [rooms, setRooms] = useState(1);
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   return (
@@ -281,7 +281,7 @@ const HotelDetails = () => {
         <div className="d-flex mt-10 items-center fw-600">
           <button
             className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setRooms(Math.max(0, rooms - 1))}
+            onClick={() => setRooms(Math.max(1, rooms - 1))}
           >
             <i className="icon icon-minus" />
           </button>
@@ -299,7 +299,7 @@ const HotelDetails = () => {
         <div className="d-flex mt-10 items-center fw-600">
           <button
             className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setAdults(Math.max(0, adults - 1))}
+            onClick={() => setAdults(Math.max(1, adults - 1))}
           >
             <i className="icon icon-minus" />
           </button>
@@ -332,7 +332,7 @@ const HotelDetails = () => {
       </div>
       <h1 className="text-15 lh-14 fw-500">Traveler Information</h1>
       {Array.from({ length: adults }).map((_, index) => (
-        <TravelerInformationCard key={index} index={index} />
+        <TravelerInformationCard key={index} index={index} adults={adults} setAdults={setAdults} />
       ))}
     </>
   );

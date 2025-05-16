@@ -56,37 +56,28 @@ const Header1 = () => {
               <div className="d-flex items-center">
                 <div className="row x-gap-20 items-center xxl:d-none">
                   <CurrenctyMegaMenu textClass="text-white" />
-                  {/* End Megamenu for Currencty */}
 
-                  {/* Start vertical devider*/}
                   <div className="col-auto">
                     <div className="w-1 h-20 bg-white-20" />
                   </div>
-                  {/* End vertical devider*/}
 
                   <LanguageMegaMenu textClass="text-white" />
-                  {/* End Megamenu for Language */}
                 </div>
-                {/* End language and currency selector */}
 
-{/* Start btn-group */}
 
                 <div className="row items-center x-gap-5 y-gap-20 pl-20 lg:d-none">
                   <div className="col-auto">
-                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
+                    <button className="button -blue-1-05 text-white size-50 rounded-22 flex-center">
                       <i className="icon-email-2 text-20"></i>
                     </button>
                   </div>
-                  {/* End col-auto */}
 
                   <div className="col-auto">
-                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
+                    <button className="button -blue-1-05 size-50 text-white rounded-22 flex-center">
                       <i className="icon-notification text-20"></i>
                     </button>
                   </div>
-                  {/* End col-auto */}
                 </div>
-                {/* End .row */}
 
                 <div className="pl-15">
                   <Image

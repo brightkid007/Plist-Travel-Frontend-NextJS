@@ -6,8 +6,8 @@ import DatePicker, { DateObject } from "react-multi-date-picker";
 
 const DateSearch = () => {
   const [dates, setDates] = useState([
-    new DateObject().setDay(15),
-    new DateObject().setDay(14).add(1, "month"),
+    new DateObject(),
+    new DateObject().add(20, "day"),
   ]);
 
   return (
@@ -22,6 +22,7 @@ const DateSearch = () => {
         range
         rangeHover
         format="MMMM DD"
+        minDate={new DateObject()}
       />
     </div>
   );

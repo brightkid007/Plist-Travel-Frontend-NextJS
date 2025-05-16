@@ -11,8 +11,8 @@ const DateSearch = () => {
   //   1597994736000, //unix time in milliseconds (August 21 2020)
   // ]);
   const [dates, setDates] = useState([
-    new DateObject().setDay(5),
-    new DateObject().setDay(14).add(1, "month"),
+    new DateObject(),
+    new DateObject().add(20, "day"),
   ]);
 
   return (
@@ -27,6 +27,7 @@ const DateSearch = () => {
         range
         rangeHover
         format="MMMM DD"
+        minDate={new DateObject()}
       />
     </div>
   );
