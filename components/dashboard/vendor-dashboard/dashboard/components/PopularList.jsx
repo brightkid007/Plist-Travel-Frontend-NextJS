@@ -1,4 +1,4 @@
-const PopularList = () => {
+const PopularList = ({ detail = false }) => {
   const data = [
     {
       image: "/img/testimonials/1/4.png",
@@ -42,44 +42,51 @@ const PopularList = () => {
     },
   ];
   return (
-    <div className="overflow-scroll scroll-bar-1 pt-30">
+    <div className="overflow-scroll scroll-bar-1 pt-0">
       <table className="table-2 col-12">
         <thead>
           <tr className="text-light-1 fw-600">
-            <th>Image</th>
+            {!detail && <th>Image</th>}
             <th>Name</th>
             <th>Type</th>
             <th>Bookings</th>
             <th>Revenue</th>
-            <th>Status</th>
-            <th>Actions</th>
+            {!detail && <th>Status</th>}
+            {!detail && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
           {data.map((row, index) => (
             <tr key={index}>
-              <td className="align-middle">
-                <img
-                className="rounded-8"
-                  src={row.image}
-                  alt={row.name}
-                  style={{ height: "50px", width: "60px", objectFit: "fill" }}
-                />
-              </td>
-              <td className="align-middle">{row.name}</td>
-              <td className="align-middle">{row.type}</td>
-              <td className="align-middle">{row.bookings}</td>
-              <td className="align-middle">{row.revenue}</td>
-              <td className="align-middle">
-                <div
-                  className={`rounded-100 py-4 text-center col-12 text-14 fw-500 bg-${row.status.color} text-${row.status.text}`}
-                >
-                  {row.status.label}
-                </div>
-              </td>
-              <td className="align-middle">
-                <i className="icon icon-more-horiz"></i>
-              </td>
+              {!detail && (
+                <td className="align-middle">
+                  <img
+                    className="rounded-8"
+                    src={row.image}
+                    alt={row.name}
+                    style={{ height: "50px", width: "60px", objectFit: "fill" }}
+                  />
+                </td>
+              )}
+              <td className="align-middle fw-600">{row.name}</td>
+              <td className="align-middle fw-500">{row.type}</td>
+              <td className="align-middle fw-500">{row.bookings}</td>
+              <td className="align-middle fw-500">{row.revenue}</td>
+              {!detail && (
+                <td className="align-middle fw-500">
+                  <div
+                    className={`rounded-100 py-4 text-center col-12 text-14 fw-500 bg-${row.status.color} text-${row.status.text}`}
+                  >
+                    {row.status.label}
+                  </div>
+                </td>
+              )}
+              {!detail && (
+                <td className="align-middle">
+                  <span class="material-symbols-outlined">more_horiz</span>
+                  <span class="material-symbols-outlined">north_east</span>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

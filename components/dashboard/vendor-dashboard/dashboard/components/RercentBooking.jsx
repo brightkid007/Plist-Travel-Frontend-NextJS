@@ -1,81 +1,67 @@
 const RercentBooking = () => {
   const data = [
     {
-      item: "New York",
-      description: "Discover America",
-      total: "$130",
-      paid: "$0",
-      status: { color: "yellow-4", text: "yellow-3", label: "Pending" },
-      createdAt: "04/04/2022 08:16",
+      name: "John Smith",
+      email: "john@example.com",
+      status: "Confirmed",
+      price: "$345.00",
+      createdAt: "2 mins ago",
     },
     {
-      item: "New York",
-      description: "Discover America",
-      total: "$130",
-      paid: "$0",
-      status: { color: "blue-1-05", text: "blue-1", label: "Confirmed" },
-      createdAt: "04/04/2022 08:16",
+      name: "Sarah Johnson",
+      email: "sarah@example.com",
+      status: "Pending",
+      price: "$120.00",
+      createdAt: "40 mins ago",
     },
     {
-      item: "New York",
-      description: "Discover America",
-      total: "$130",
-      paid: "$0",
-      status: { color: "red-3", text: "red-2", label: "Rejected" },
-      createdAt: "04/04/2022 08:16",
+      name: "Michael Brown",
+      email: "michael@example.com",
+      status: "Confirmed",
+      price: "$560.00",
+      createdAt: "3 hours ago",
     },
     {
-      item: "New York",
-      description: "Discover America",
-      total: "$130",
-      paid: "$0",
-      status: { color: "blue-1-05", text: "blue-1", label: "Confirmed" },
-      createdAt: "04/04/2022 08:16",
-    },
-    {
-      item: "New York",
-      description: "Discover America",
-      total: "$130",
-      paid: "$0",
-      status: { color: "blue-1-05", text: "blue-1", label: "Confirmed" },
-      createdAt: "04/04/2022 08:16",
+      name: "Emily Davis",
+      email: "emily@example.com",
+      status: "Confirmed",
+      price: "$85.00",
+      createdAt: "5 hours ago",
     },
   ];
+
   return (
     <div className="overflow-scroll scroll-bar-1 pt-30">
-      <table className="table-2 col-12">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Item</th>
-            <th>Total</th>
-            <th>Paid</th>
-            <th>Status</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>
-                {row.item}
-                <br /> {row.description}
-              </td>
-              <td className="fw-500">{row.total}</td>
-              <td>{row.paid}</td>
-              <td>
-                <div
-                  className={`rounded-100 py-4 text-center col-12 text-14 fw-500 bg-${row.status.color} text-${row.status.text}`}
-                >
-                  {row.status.label}
-                </div>
-              </td>
-              <td>{row.createdAt}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {data.map((row, index) => (
+        <div key={index} className="d-flex items-center justify-between mb-20">
+          <div className="d-flex items-center">
+            <span className="material-symbols-outlined text-light-1 px-5">
+              person
+            </span>
+            <div className="ml-10 d-flex flex-column items-start">
+              <div className="text-16 fw-500 lh-14">{row.name}</div>
+              <div className="text-light-1 lh-14">{row.email}</div>
+            </div>
+          </div>
+          <div className="d-flex items-center">
+            <div>
+              <div
+                className={`rounded-100 px-20 text-center col-12 text-14 fw-500 ${
+                  row.status == "Pending"
+                    ? "bg-white border-light text-dark"
+                    : "bg-dark-4 text-white"
+                }`}
+              >
+                {row.status}
+              </div>
+            </div>
+            <div className="ml-20 d-flex flex-column items-end">
+              <div className="text-16 fw-500 lh-14">{row.price}</div>
+              <div className="text-light-1 lh-14">{row.createdAt}</div>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
