@@ -1,9 +1,8 @@
 "use client";
 
 import DashboardCard from "./components/DashboardCard";
-import Sidebar from "../common/Sidebar";
-import Header from "../../../../components/header/dashboard-header";
-import ChartSelect from "./components/ChartSelect";
+import Header from "@/components/header/dashboard-header";
+import Sidebar from "@/components/dashboard/vendor-dashboard/common/Sidebar";
 import ChartMain from "./components/ChartMain";
 import Link from "next/link";
 import RercentBooking from "./components/RercentBooking";
