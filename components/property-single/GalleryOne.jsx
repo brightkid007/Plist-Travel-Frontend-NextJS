@@ -1,14 +1,11 @@
-
-'use client'
+"use client";
 
 import ModalVideo from "react-modal-video";
 import { Gallery, Item } from "react-photoswipe-gallery";
 import Link from "next/link";
-import React, { useState } from 'react'
-
+import React, { useState } from "react";
 
 export default function GalleryOne({ hotel }) {
-
   const [isOpen, setOpen] = useState(false);
 
   return (
@@ -71,19 +68,15 @@ export default function GalleryOne({ hotel }) {
                 </div>
                 <div className="col-auto">
                   <Link
-                    href="/booking-page"
+                    href="/customer/property/1/#overview"
                     className="button h-50 px-24 -dark-1 bg-blue-1 text-white"
                   >
                     Select Room <div className="icon-arrow-top-right ml-15" />
                   </Link>
                 </div>
               </div>
-
-
             </div>
-            {/* End .col */}
           </div>
-          {/* End .row */}
 
           <Gallery>
             <div className="galleryGrid -type-1 pt-30">
@@ -207,5 +200,5 @@ export default function GalleryOne({ hotel }) {
         {/* End .container */}
       </section>
     </>
-  )
+  );
 }
