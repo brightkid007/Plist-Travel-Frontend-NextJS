@@ -71,10 +71,10 @@ export default function GalleryOne({ hotel }) {
                 </div>
                 <div className="col-auto">
                   <Link
-                    href="/customer/property/1/booking"
-                    className="button h-40 px-24 -dark-1 bg-blue-1 text-white"
+                    href="/booking-page"
+                    className="button h-50 px-24 -dark-1 bg-blue-1 text-white"
                   >
-                    Book Now <div className="icon-arrow-top-right ml-15" />
+                    Select Room <div className="icon-arrow-top-right ml-15" />
                   </Link>
                 </div>
               </div>

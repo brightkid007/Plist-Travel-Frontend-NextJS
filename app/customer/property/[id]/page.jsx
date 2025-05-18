@@ -11,7 +11,11 @@ import ReplyForm from "@/components/property-single/ReplyForm";
 import ReplyFormReview from "@/components/property-single/ReplyFormReview";
 import Footer from "@/components/footer/footer-5";
 import GalleryOne from "@/components/property-single/GalleryOne";
-import Properties from "@/components/dashboard/dashboard/db-wishlist/components/Properties";
+import AvailableRooms from "@/components/property-single/AvailableRooms";
+import ReviewProgress from "@/components/property-single/guest-reviews/ReviewProgress";
+import DetailsReview from "@/components/property-single/guest-reviews/DetailsReview";
+import PopularFacilities from "@/components/property-single/PopularFacilities";
+import Facilities from "@/components/property-single/Facilities";
 
 export const metadata = {
   title: "Property Detail || Plist Travel",
@@ -59,6 +63,16 @@ const PropertySinglePage = ({ params }) => {
                 {/* End .col-12  Overview */}
 
                 <div className="col-12">
+                  <h3 className="text-22 fw-500 pt-40 border-top-light">
+                    Most Popular Facilities
+                  </h3>
+                  <div className="row y-gap-10 pt-20">
+                    <PopularFacilities />
+                  </div>
+                </div>
+                {/* End .col-12 Most Popular Facilities */}
+
+                <div className="col-12">
                   <RatingTag />
                 </div>
                 {/* End .col-12 This property is in high demand! */}
@@ -86,12 +100,43 @@ const PropertySinglePage = ({ params }) => {
             </div>
           </div>
           {/* End .row */}
-          {/* <AvailableRooms hotel={hotel} /> */}
-          <Properties />
+          <AvailableRooms hotel={hotel} />
         </div>
         {/* End .container */}
       </section>
       {/* End Available Rooms */}
+
+      <section className="pt-40" id="reviews">
+        <div className="container">
+          <div className="row">
+            <div className="col-12">
+              <h3 className="text-22 fw-500">Guest reviews</h3>
+            </div>
+          </div>
+          {/* End .row */}
+
+          <ReviewProgress />
+          {/* End review with progress */}
+
+          <div className="pt-40">
+            <DetailsReview />
+            {/* End review with details */}
+          </div>
+
+          <div className="row pt-30">
+            <div className="col-auto">
+              <a href="#" className="button -md -outline-blue-1 text-blue-1">
+                Show all 116 reviews{" "}
+                <div className="icon-arrow-top-right ml-15"></div>
+              </a>
+            </div>
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+        {/* End container */}
+      </section>
+      {/* End Review section */}
 
       <section className="pt-40 mb-40">
         <div className="container">
@@ -117,7 +162,23 @@ const PropertySinglePage = ({ params }) => {
       </section>
       {/* End Reply Comment box section */}
 
-
+      <section className="mt-40 mb-40" id="facilities">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-12">
+              <h3 className="text-22 fw-500">Facilities of this Hotel</h3>
+              <div className="row x-gap-40 y-gap-40 pt-20">
+                <Facilities />
+              </div>
+              {/* End .row */}
+            </div>
+            {/* End .col-12 */}
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+      </section>
+      {/* End facilites section */}
       <Footer />
     </>
   );
