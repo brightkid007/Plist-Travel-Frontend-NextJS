@@ -33,6 +33,7 @@ const HotelProperties = () => {
                             src={slide}
                             alt="image"
                             className="w-100"
+                            unoptimized
                           />
                         </SwiperSlide>
                       ))}

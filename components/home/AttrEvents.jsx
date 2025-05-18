@@ -38,6 +38,7 @@ const AttrEvents = () => {
                 className="img-ratio js-lazy loaded"
                 src={item.img}
                 alt="image"
+                unoptimized
               />
             </div>
             <div className="ctaCard__content py-70 px-70 lg:py-30 lg:px-30">

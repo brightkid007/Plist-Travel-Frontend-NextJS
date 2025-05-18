@@ -5,7 +5,7 @@ import logo from "/public/img/general/plist logo 1.png";
 const LoginForm = () => {
   return (
     <div className="d-flex flex-column items-center">
-      <Image src={logo} width={150} height={40} alt="" />
+      <Image src={logo} width={150} height={40} alt="" unoptimized />
       <h1 className="fw-600 mt-20">Welcome Back</h1>
       <div className="text-light-1 fw-400 mb-30">Sign in to your account</div>
       <form className="row y-gap-20 rounded-22 border-light-1 bg-white shadow-1 px-30 py-30">

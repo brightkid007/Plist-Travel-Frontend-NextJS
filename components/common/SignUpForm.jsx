@@ -186,7 +186,7 @@ const SignUpForm = () => {
 
   return (
     <div className="d-flex flex-column items-center">
-      <Image src={logo} width={150} height={40} alt="" className="mb-10" />
+      <Image src={logo} width={150} height={40} alt="" className="mb-10" unoptimized />
       {formType == 0 && (
         <>
           <h1 className="fw-600">Hey There</h1>

@@ -58,6 +58,7 @@ const AddBanner = () => {
                 className="js-lazy img-ratio"
                 src={item.img}
                 alt="image"
+                unoptimized
               />
             </div>
             <div className="ctaCard__content py-50 px-50 xl:py-30 xl:px-30">

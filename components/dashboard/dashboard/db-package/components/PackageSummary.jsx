@@ -711,7 +711,7 @@ export const PackageSummary = ({ selectedItems }) => {
         <div key={index} className="col-md-6 col-sm-12">
           <div className="py-15 px-15 rounded-8 bg-white shadow-3 border-light">
             <div className="d-flex items-center">
-              <Image src={item.icon} alt={item.name} width={30} height={30} />
+              <Image src={item.icon} alt={item.name} width={30} height={30} unoptimized />
               <div className="text-15 lh-14 fw-500 ml-10">{item.name}</div>
             </div>
             {item.content}

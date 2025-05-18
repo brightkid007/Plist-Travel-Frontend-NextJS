@@ -52,6 +52,7 @@ const LanguageMegaMenu = ({ textClass }) => {
             src="/img/general/lang.png"
             alt="image"
             className="rounded-full mr-10"
+            unoptimized
           />
           <span className="js-language-mainTitle">
             {" "}

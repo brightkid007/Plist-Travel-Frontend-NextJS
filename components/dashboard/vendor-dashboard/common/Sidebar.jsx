@@ -65,6 +65,7 @@ const Sidebar = () => {
                 src={item.icon}
                 alt="image"
                 className="mr-15"
+                unoptimized
               />
               {item.title}
             </Link>

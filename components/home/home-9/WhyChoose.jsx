@@ -47,6 +47,7 @@ const WhyChoose = () => {
             src={item.icon}
             alt="image"
             className="size-60"
+            unoptimized
           />
           <h5 className="text-18 fw-500 mt-10">{item.title}</h5>
           <p className="mt-10">{item.text}</p>

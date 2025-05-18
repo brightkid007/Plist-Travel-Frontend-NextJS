@@ -28,6 +28,7 @@ const ReviewGallery = () => {
                   alt="image"
                   role="button"
                   className="rounded-4"
+                  unoptimized
                 />
               )}
             </Item>

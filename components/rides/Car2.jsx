@@ -41,10 +41,11 @@ function Car2() {
                 src={image}
                 alt={`Card ${index + 1}`}
                 className="w-full h-[214px] object-cover"
+                unoptimized
               />
               <div className="p-3 bg-[#D9D9D966]">
                 <div className="flex items-center space-x-2">
-                  <Image src={location} alt="location" />
+                  <Image src={location} alt="location" unoptimized />
                   <p className="text-[#2D3B4E] font-Bricolage font-normal text-[14px]">
                     Istanbul, Turkey
                   </p>

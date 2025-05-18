@@ -164,7 +164,7 @@ function Car6() {
         </div>
 
         <div className="lg:-mt-28 mt-10">
-          <Image src={women} alt="" className="object-cover" />
+          <Image src={women} alt="" className="object-cover" unoptimized />
         </div>
       </div>
     </div>

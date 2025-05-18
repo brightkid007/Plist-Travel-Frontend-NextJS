@@ -36,6 +36,7 @@ const CarPropertes = () => {
                                 src={slide}
                                 priority
                                 alt="image"
+                                unoptimized
                               />
                             </SwiperSlide>
                           ))}

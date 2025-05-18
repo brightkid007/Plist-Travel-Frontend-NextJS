@@ -23,28 +23,28 @@ function Car1() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 lg:px-20 lg:w-[80%] mx-auto">
         <div>
-          <Image src={car1} alt="" className="w-full" />
+          <Image src={car1} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car2} alt="" className="w-full" />
+          <Image src={car2} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car3} alt="" className="w-full" />
+          <Image src={car3} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car4} alt="" className="w-full" />
+          <Image src={car4} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car5} alt="" className="w-full" />
+          <Image src={car5} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car6} alt="" className="w-full" />
+          <Image src={car6} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car7} alt="" className="w-full" />
+          <Image src={car7} alt="" className="w-full" unoptimized />
         </div>
         <div>
-          <Image src={car8} alt="" className="w-full" />
+          <Image src={car8} alt="" className="w-full" unoptimized />
         </div>
       </div>
     </div>

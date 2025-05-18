@@ -55,6 +55,7 @@ const GalleryCruiseSlider = () => {
                         ref={ref}
                         onClick={open}
                         alt="large slide"
+                        unoptimized
                       />
                     )}
                   </Item>
@@ -96,6 +97,7 @@ const GalleryCruiseSlider = () => {
                 src={item}
                 alt="small size slide"
                 className="h-full"
+                unoptimized
               />
             </SwiperSlide>
           ))}

@@ -47,6 +47,8 @@ export default function TourGallery({tour}) {
                         alt="image"
                         style={{ height: "501px" }}
                         className="rounded-4 col-12 cover object-cover"
+
+                        unoptimized
                       />
                     </SwiperSlide>
                   ))}

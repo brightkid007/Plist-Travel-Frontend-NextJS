@@ -54,6 +54,7 @@ const PopularDestinations = () => {
                   src={item.img}
                   alt="image"
                   className="js-lazy"
+                  unoptimized
                 />
               </div>
               <div className="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">

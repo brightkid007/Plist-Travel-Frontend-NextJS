@@ -41,6 +41,7 @@ const WhyChoose = () => {
                 src={item.icon}
                 alt="image"
                 className="js-lazy"
+                unoptimized
               />
             </div>
             <div className="text-center mt-30">

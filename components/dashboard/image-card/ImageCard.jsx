@@ -17,6 +17,7 @@ const ImageCard = () => {
                         style={{ objectFit: 'cover' }}
                         src="/img/hotels/5.png"
                         alt="image"
+                        unoptimized
                     />
                 </div>
                 {/* </div> */}

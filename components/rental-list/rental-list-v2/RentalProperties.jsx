@@ -70,6 +70,7 @@ const RentalProperties = () => {
                           className="rounded-4 col-12 js-lazy"
                           src={slide}
                           alt="image"
+                          unoptimized
                         />
                       </div>
                     </div>

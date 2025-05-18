@@ -27,6 +27,7 @@ const AvailableRooms = ({ hotel }) => {
                       src="/img/backgrounds/1.png"
                       alt="image"
                       className="img-ratio rounded-4"
+                      unoptimized
                     />
                   </div>
                   {/* End image */}
@@ -281,6 +282,7 @@ const AvailableRooms = ({ hotel }) => {
                       src="/img/backgrounds/1.png"
                       alt="image"
                       className="img-ratio rounded-4"
+                      unoptimized
                     />
                   </div>
                   {/* End image */}

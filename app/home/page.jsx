@@ -251,6 +251,7 @@ const Home = () => {
                     src="/img/activities/home/attr1.jpg"
                     alt="image"
                     className="js-lazy"
+                    unoptimized
                   />
                 </div>
                 <div className="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">

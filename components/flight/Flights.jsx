@@ -24,6 +24,7 @@ const Flights = () => {
                         className="size-40"
                         src={flight?.avatar}
                         alt="image"
+                        unoptimized
                       />
                     </div>
                     <div className="col">

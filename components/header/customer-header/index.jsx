@@ -86,6 +86,7 @@ const Header1 = () => {
                     src="/img/avatars/3.webp"
                     alt="image"
                     className="size-50 rounded-22 object-cover"
+                    unoptimized
                   />
                 </div>
 

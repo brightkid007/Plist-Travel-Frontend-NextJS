@@ -28,6 +28,7 @@ const Block1 = () => {
           src="/img/pages/about/2.png"
           alt="image"
           className="rounded-4 w-100"
+          unoptimized
         />
       </div>
       {/* End .col */}

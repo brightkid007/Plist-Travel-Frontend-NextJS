@@ -12,6 +12,7 @@ const BookingDetails = () => {
             src="/img/backgrounds/1.png"
             alt="image"
             className="size-140 rounded-4 object-cover"
+            unoptimized
           />
         </div>
         {/* End .col */}

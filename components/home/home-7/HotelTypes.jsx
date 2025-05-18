@@ -90,6 +90,7 @@ const HotelTypes = () => {
                   alt="image"
                   width={236}
                   height={185}
+                  unoptimized
                 />
               </div>
               <div className="citiesCard__content mt-10">
