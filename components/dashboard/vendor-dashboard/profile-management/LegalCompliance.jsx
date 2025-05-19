@@ -50,7 +50,11 @@ const LegalCompliance = () => {
                   placeholder="Enter Description"
                 />
               </div>
-              <FileUploadForm count={licenses} setCount={setLicenses} />
+              <FileUploadForm
+                placeholder={"Upload License"}
+                count={licenses}
+                setCount={setLicenses}
+              />
             </div>
           </div>
         ))}
@@ -58,7 +62,9 @@ const LegalCompliance = () => {
 
       <div className="col-12">
         <div className="row justify-between items-center">
-          <div className="text-18 fw-500 mt-10 col-auto">Insurance Certificates</div>
+          <div className="text-18 fw-500 mt-10 col-auto">
+            Insurance Certificates
+          </div>
           <div className="d-flex col-sm-auto">
             <button
               className="button border-light rounded-4 text-13 fw-500 px-10 py-5"
@@ -93,10 +99,28 @@ const LegalCompliance = () => {
                   placeholder="Enter Description"
                 />
               </div>
-              <FileUploadForm count={certificates} setCount={setCertificates} />
+              <FileUploadForm
+                placeholder={"Upload Certificate"}
+                count={certificates}
+                setCount={setCertificates}
+              />
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="col-md-6 col-sm-12">
+        <h1 className="text-13 lh-14 fw-500">Tax Identification Number</h1>
+        <input
+          className="border-light rounded-8 py-5 px-15 w-full mt-5"
+          type="text"
+          placeholder="Enter Tax Identification Number"
+        />
+      </div>
+
+      <div className="col-md-6 col-sm-12">
+        <h1 className="text-13 lh-14 fw-500">Compliance Certifications</h1>
+        <FileUploadForm placeholder={"Compliance certification details"} />
       </div>
 
       <div className="d-flex justify-end mt-20 border-top-light pt-15">

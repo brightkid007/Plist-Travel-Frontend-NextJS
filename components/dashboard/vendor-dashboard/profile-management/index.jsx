@@ -13,7 +13,7 @@ import Integration from "./Integration";
 
 const index = () => {
 //   const [activeTab, setActiveTab] = useState("basic-info");
-  const [activeTab, setActiveTab] = useState("legal-compliance");
+  const [activeTab, setActiveTab] = useState("financial");
   const tabs = [
     { label: "Basic Info", value: "basic-info", content: <BasicInfo key={"basic-info"} /> },
     {
