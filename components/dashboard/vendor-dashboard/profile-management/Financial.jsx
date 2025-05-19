@@ -65,7 +65,7 @@ const Financial = () => {
         <div className="row border-light rounded-8 px-15 py-15">
           <div className="text-18 fw-600 lh-1 px-0">Payment Terms</div>
           <div className="col-12 d-flex items-center border-light rounded-8 py-15 px-15 mt-20">
-            <span class="material-symbols-outlined text-14">info</span>
+            <span className="material-symbols-outlined text-14">info</span>
             <div className="text-14 lh-1 ml-10">
               Payment terms are set by the Super Admin.
             </div>
@@ -89,7 +89,7 @@ const Financial = () => {
         <div className="row border-light rounded-8 px-15 py-15">
           <div className="text-18 fw-600 lh-1 px-0">Pricing Structure</div>
           <div className="col-12 d-flex items-center border-light rounded-8 py-15 px-15 mt-20">
-            <span class="material-symbols-outlined text-14">info</span>
+            <span className="material-symbols-outlined text-14">info</span>
             <div className="text-14 lh-1 ml-10">
               Pricing structure is set by the Super Admin.
             </div>

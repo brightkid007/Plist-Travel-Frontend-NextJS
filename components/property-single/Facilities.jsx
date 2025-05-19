@@ -116,7 +116,7 @@ const Facilities = () => {
   return (
     <>
       {facilitiesContent.map((item) => (
-        <div className="col-xl-4" key={item.id}>
+        <div className="col-lg-4" key={item.id}>
           <div className="row y-gap-30">
             {item?.items?.map((facility) => (
               <div className="col-12" key={facility.id}>

@@ -48,7 +48,7 @@ export const ServiceDetail = ({ selectedItems, activeTab, setActiveTab }) => {
           {categoryList.map((item, index) => (
             <div
               key={index}
-              class={
+              className={
                 "col-auto py-5 px-15 rounded-16 text-10 lh-16 fw-500 uppercase ml-10 mb-20 " +
                 (activeCategory >= index
                   ? "bg-dark-3 text-white"

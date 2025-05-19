@@ -34,7 +34,7 @@ const RoomInfoModal = ({ isOpen, onClose, roomData }) => {
             <h3 className="h4 mb-0">{roomData?.title || "Room Information"}</h3>
             <button 
               onClick={onClose}
-              className="btn btn-link text-dark p-0"
+              className="btn text-dark p-0"
             >
               <i className="icon-close fs-4" />
             </button>
