@@ -23,16 +23,19 @@ const PropertyHighlights2 = () => {
   ];
 
   return (
-    <div className="row y-gap-20 pt-30">
-      {highlightsContent.map((item) => (
-        <div className="col-lg-3 col-6" key={item.id}>
-          <div className="text-center">
-            <i className={`${item.icon} text-24 text-blue-1`} />
-            <div className="text-15 lh-1 mt-10">{item.text}</div>
+    <>
+      <h3 className="text-22 fw-500">Property highlights</h3>
+      <div className="row y-gap-20 pt-30">
+        {highlightsContent.map((item) => (
+          <div className="col-lg-3 col-6" key={item.id}>
+            <div className="text-center">
+              <i className={`${item.icon} text-24 text-blue-1`} />
+              <div className="text-15 lh-1 mt-10">{item.text}</div>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 };
 

@@ -1,8 +1,15 @@
+'use client'
+
 import Image from "next/image";
 
-const AvailableRooms = ({ hotel }) => {
+const AvailableRooms = ({ name, hotel, onShowRoomInfo }) => {
   return (
     <>
+      <div className="row pb-20">
+        <div className="col-auto">
+          <h3 className="text-22 fw-500">Available Rooms in {name}</h3>
+        </div>
+      </div>
       <div className="border-light rounded-4 px-30 py-30 sm:px-20 sm:py-20">
         <div className="row y-gap-20">
           <div className="col-12">
@@ -50,12 +57,12 @@ const AvailableRooms = ({ hotel }) => {
                     </div>
                   </div>
                   {/* End room features */}
-                  <a
-                    href="#"
-                    className="d-block text-15 fw-500 underline text-blue-1 mt-15"
+                  <button
+                    onClick={() => onShowRoomInfo("Standard Twin Room")}
+                    className="d-block text-15 fw-500 underline text-blue-1 mt-15 border-0 bg-transparent"
                   >
                     Show Room Information
-                  </a>
+                  </button>
                 </div>
                 {/* End roomgrid inner */}
 
@@ -305,12 +312,12 @@ const AvailableRooms = ({ hotel }) => {
                     </div>
                   </div>
                   {/* End room features */}
-                  <a
-                    href="#"
-                    className="d-block text-15 fw-500 underline text-blue-1 mt-15"
+                  <button
+                    onClick={() => onShowRoomInfo("Deluxe King Room")}
+                    className="d-block text-15 fw-500 underline text-blue-1 mt-15 border-0 bg-transparent"
                   >
                     Show Room Information
-                  </a>
+                  </button>
                 </div>
                 {/* End roomgrid inner */}
 

@@ -1,6 +1,9 @@
+'use client'
+
 import dynamic from "next/dynamic";
 import "photoswipe/dist/photoswipe.css";
 import { hotelsData } from "@/data/hotels";
+import { useState } from "react";
 import Header from "@/components/header/customer-header";
 import Overview from "@/components/property-single/Overview";
 import PropertyHighlights from "@/components/property-single/PropertyHighlights";
@@ -16,15 +19,26 @@ import ReviewProgress from "@/components/property-single/guest-reviews/ReviewPro
 import DetailsReview from "@/components/property-single/guest-reviews/DetailsReview";
 import PopularFacilities from "@/components/property-single/PopularFacilities";
 import Facilities from "@/components/property-single/Facilities";
+import RoomInfoModal from "@/components/property-single/RoomInfoModal";
+import Faq from "@/components/faq/Faq";
 
-export const metadata = {
-  title: "Property Detail || Plist Travel",
-  description: "Check Property Detail",
-};
+// export const metadata = {
+//   title: "Property Detail || Plist Travel",
+//   description: "Check Property Detail",
+// };
 
 const PropertySinglePage = ({ params }) => {
   const id = params.id;
   const hotel = hotelsData.find((item) => item.id == id) || hotelsData[0];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  const handleShowRoomInfo = (roomTitle) => {
+    setSelectedRoom({ title: roomTitle });
+    setIsModalOpen(true);
+    console.log("OKAY");
+    console.log(isModalOpen);
+  };
 
   return (
     <>
@@ -52,7 +66,6 @@ const PropertySinglePage = ({ params }) => {
             <div className="col-xl-8">
               <div className="row y-gap-40">
                 <div className="col-12">
-                  <h3 className="text-22 fw-500">Property highlights</h3>
                   <PropertyHighlights />
                 </div>
                 {/* End .col-12 Property highlights */}
@@ -63,17 +76,14 @@ const PropertySinglePage = ({ params }) => {
                 {/* End .col-12  Overview */}
 
                 <div className="col-12">
-                  <h3 className="text-22 fw-500 pt-40 border-top-light">
-                    Most Popular Facilities
-                  </h3>
                   <div className="row y-gap-10 pt-20">
-                    <PopularFacilities />
+                    <PopularFacilities name="Lagos Marriott Hotel Ikeja" />
                   </div>
                 </div>
                 {/* End .col-12 Most Popular Facilities */}
 
                 <div className="col-12">
-                  <RatingTag />
+                  <RatingTag name="Lagos Marriott Hotel Ikeja" />
                 </div>
                 {/* End .col-12 This property is in high demand! */}
               </div>
@@ -94,13 +104,9 @@ const PropertySinglePage = ({ params }) => {
 
       <section id="rooms" className="pt-30">
         <div className="container">
-          <div className="row pb-20">
-            <div className="col-auto">
-              <h3 className="text-22 fw-500">Available Rooms</h3>
-            </div>
-          </div>
+          
           {/* End .row */}
-          <AvailableRooms hotel={hotel} />
+          <AvailableRooms name="Lagos Marriott Hotel Ikeja" hotel={hotel} onShowRoomInfo={handleShowRoomInfo}  />
         </div>
         {/* End .container */}
       </section>
@@ -108,14 +114,10 @@ const PropertySinglePage = ({ params }) => {
 
       <section className="pt-40" id="reviews">
         <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <h3 className="text-22 fw-500">Guest reviews</h3>
-            </div>
-          </div>
+          
           {/* End .row */}
 
-          <ReviewProgress />
+          <ReviewProgress name="Lagos Marriott Hotel Ikeja" />
           {/* End review with progress */}
 
           <div className="pt-40">
@@ -144,7 +146,7 @@ const PropertySinglePage = ({ params }) => {
             <div className="col-xl-8 col-lg-10">
               <div className="row">
                 <div className="col-auto">
-                  <h3 className="text-22 fw-500">Leave a Reply</h3>
+                  <h3 className="text-22 fw-500">Leave a Reply for Lagos Marriott Hotel Ikeja</h3>
                   <p className="text-15 text-dark-1 mt-5">
                     Your email address will not be published.
                   </p>
@@ -166,7 +168,7 @@ const PropertySinglePage = ({ params }) => {
         <div className="container">
           <div className="row x-gap-40 y-gap-40">
             <div className="col-12">
-              <h3 className="text-22 fw-500">Facilities of this Hotel</h3>
+              <h3 className="text-22 fw-500">Facilities of Lagos Marriott Hotel Ikeja</h3>
               <div className="row x-gap-40 y-gap-40 pt-20">
                 <Facilities />
               </div>
@@ -179,7 +181,40 @@ const PropertySinglePage = ({ params }) => {
         {/* End .container */}
       </section>
       {/* End facilites section */}
+
+      <section className="mt-40 mb-40" id="facilities">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-lg-4">
+              <h2 className="text-22 text-center fw-500">
+                FAQs about
+                <br /> Lagos Marriott Hotel Ikeja
+              </h2>
+            </div>
+              {/* End .row */}
+
+            <div className="col-lg-8">
+              <div className="accordion -simple row y-gap-20 js-accordion">
+                <Faq />
+              </div>
+            </div>
+              {/* End .col */}
+            {/* End .col-12 */}
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+      </section>
+      {/* End facilites section */}
+
       <Footer />
+
+      {/* Room Info Modal */}
+      <RoomInfoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        roomData={selectedRoom}
+      />
     </>
   );
 };

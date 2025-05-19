@@ -1,4 +1,4 @@
-const ReviewProgress = () => {
+const ReviewProgress = ({ name }) => {
   const reviewProgressContent = [
     { id: 1, reviewReason: "Location", ratings: "9.4", progressPercent: "90%" },
     { id: 2, reviewReason: "Staff", ratings: "8.4", progressPercent: "84%" },
@@ -31,6 +31,11 @@ const ReviewProgress = () => {
 
   return (
     <>
+      <div className="row">
+        <div className="col-12">
+          <h3 className="text-22 fw-500">Guest reviews for {name}</h3>
+         </div>
+      </div>
       <div className="row y-gap-30 items-center pt-20">
         <div className="col-lg-3">
           <div className="flex-center rounded-4 min-h-250 bg-blue-1-05">

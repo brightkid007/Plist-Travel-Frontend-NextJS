@@ -1,6 +1,9 @@
-const PopularFacilities = () => {
+const PopularFacilities = ({ name }) => {
   return (
     <>
+      <h3 className="text-22 fw-500 pt-40 border-top-light">
+        Most Popular Facilities in {name}
+      </h3>
       <div className="col-md-5">
         <div className="d-flex x-gap-15 y-gap-15 items-center">
           <i className="icon-no-smoke"></i>
