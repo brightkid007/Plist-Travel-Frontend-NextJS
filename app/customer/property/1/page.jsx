@@ -26,6 +26,7 @@ import PlacesNearBy from "@/components/property-single/PlacesNearBy";
 import SimilarProperties from "@/components//property-single/SimilarProperties";
 import HouseRules from "@/components/property-single/HouseRules";
 import CitiesLandmarks from "@/components/property-single/CitiesLandmarks";
+import Link from "next/link";
 
 // export const metadata = {
 //   title: "Property Detail || Plist Travel",
@@ -144,18 +145,14 @@ const PropertySinglePage = ({ params }) => {
 
           <div className="row pt-30">
             <div className="col-auto">
-              <a href="#" className="button -md -outline-blue-1 text-blue-1">
+              <Link href="#" className="button -md -outline-blue-1 text-blue-1">
                 Show all 116 reviews{" "}
                 <div className="icon-arrow-top-right ml-15"></div>
-              </a>
+              </Link>
             </div>
           </div>
-          {/* End .row */}
         </div>
-        {/* End .container */}
-        {/* End container */}
       </section>
-      {/* End Review section */}
 
       <section className="pt-40 mb-40">
         <div className="container">
@@ -171,26 +168,21 @@ const PropertySinglePage = ({ params }) => {
                   </p>
                 </div>
               </div>
-              {/* End .row */}
-
               <ReplyFormReview />
-              {/* End ReplyFormReview */}
-
               <ReplyForm />
             </div>
           </div>
         </div>
       </section>
-      {/* End Reply Comment box section */}
 
       <section className="mt-40 mb-40 pt-20" id="fun-facts">
         <div className="container">
           <div className="row x-gap-40 y-gap-20">
             <div className="col-12 d-flex justify-between items-center">
               <h3 className="text-22 fw-600">Fun Facts about {hotel.title}</h3>
-              <button className="button -md -dark-1 bg-blue-1 text-white">
+              <Link href="#rooms" className="button -md -dark-1 bg-blue-1 text-white">
                 See availability
-              </button>
+              </Link>
             </div>
             <div className="col-12">
               <FunFacts />
@@ -212,9 +204,9 @@ const PropertySinglePage = ({ params }) => {
                   Good location - show on map
                 </button>
               </div>
-              <button className="button -md -dark-1 bg-blue-1 text-white">
+              <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
                 See availability
-              </button>
+              </Link>
             </div>
             <div className="col-12">
               <PlacesNearBy />
@@ -229,9 +221,9 @@ const PropertySinglePage = ({ params }) => {
             <div className="col-12">
               <div className="col-12 d-flex justify-between items-center">
                 <h3 className="text-22 fw-600">Facilities of {hotel.title}</h3>
-                <button className="button -md -dark-1 bg-blue-1 text-white">
+                <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
                   See availability
-                </button>
+                </Link>
               </div>
               <div className="col-12">
                 <div className="row x-gap-40 y-gap-40 pt-20">
@@ -271,9 +263,9 @@ const PropertySinglePage = ({ params }) => {
                   next step!
                 </div>
               </div>
-              <button className="button -md -dark-1 bg-blue-1 text-white">
+              <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
                 See availability
-              </button>
+              </Link>
             </div>
             <div className="col-12">
               <HouseRules />
@@ -294,9 +286,9 @@ const PropertySinglePage = ({ params }) => {
                   Need-to-know information for guests at this property
                 </div>
               </div>
-              <button className="button -md -dark-1 bg-blue-1 text-white">
+              <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
                 See availability
-              </button>
+              </Link>
             </div>
             <div className="col-12">
               <div className="border-light rounded-8 px-20 py-20">
