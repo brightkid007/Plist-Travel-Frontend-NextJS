@@ -112,15 +112,15 @@ const SalesLinkGen = () => {
             </select>
           </div>
           <div className="col-12 d-flex">
-            <div class="form-checkbox">
+            <div className="form-checkbox">
               <input type="checkbox" name="name" />
-              <div class="form-checkbox__mark">
-                <div class="form-checkbox__icon icon-check"></div>
+              <div className="form-checkbox__mark">
+                <div className="form-checkbox__icon icon-check"></div>
               </div>
             </div>
             <div className="row">
-              <div class="text-15 lh-14 ml-10 fw-500">Enable extra price</div>
-              <div class="text-14 lh-14 ml-10 fw-400 text-light-1">
+              <div className="text-15 lh-14 ml-10 fw-500">Enable extra price</div>
+              <div className="text-14 lh-14 ml-10 fw-400 text-light-1">
                 Track clicks and conversions for this link
               </div>
             </div>

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import dynamic from "next/dynamic";
 import "photoswipe/dist/photoswipe.css";
@@ -21,6 +21,12 @@ import PopularFacilities from "@/components/property-single/PopularFacilities";
 import Facilities from "@/components/property-single/Facilities";
 import RoomInfoModal from "@/components/property-single/RoomInfoModal";
 import Faq from "@/components/faq/Faq";
+import FunFacts from "@/components/property-single/FunFacts";
+import PlacesNearBy from "@/components/property-single/PlacesNearBy";
+import SimilarProperties from "@/components//property-single/SimilarProperties";
+import HouseRules from "@/components/property-single/HouseRules";
+import CitiesLandmarks from "@/components/property-single/CitiesLandmarks";
+import Link from "next/link";
 
 // export const metadata = {
 //   title: "Property Detail || Plist Travel",
@@ -36,10 +42,20 @@ const PropertySinglePage = ({ params }) => {
   const handleShowRoomInfo = (roomTitle) => {
     setSelectedRoom({ title: roomTitle });
     setIsModalOpen(true);
-    console.log("OKAY");
-    console.log(isModalOpen);
   };
 
+  function formatStayDates(checkInDate = new Date(), nights = 3) {
+    const options = { day: "2-digit", month: "short" };
+
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkIn);
+    checkOut.setDate(checkOut.getDate() + nights);
+
+    const checkInFormatted = checkIn.toLocaleDateString("en-GB", options);
+    const checkOutFormatted = checkOut.toLocaleDateString("en-GB", options);
+
+    return `${checkInFormatted} - ${checkOutFormatted}`;
+  }
   return (
     <>
       {/* End Page Title */}
@@ -77,13 +93,13 @@ const PropertySinglePage = ({ params }) => {
 
                 <div className="col-12">
                   <div className="row y-gap-10 pt-20">
-                    <PopularFacilities name="Lagos Marriott Hotel Ikeja" />
+                    <PopularFacilities name={hotel.title} />
                   </div>
                 </div>
                 {/* End .col-12 Most Popular Facilities */}
 
                 <div className="col-12">
-                  <RatingTag name="Lagos Marriott Hotel Ikeja" />
+                  <RatingTag name={hotel.title} />
                 </div>
                 {/* End .col-12 This property is in high demand! */}
               </div>
@@ -104,9 +120,12 @@ const PropertySinglePage = ({ params }) => {
 
       <section id="rooms" className="pt-30">
         <div className="container">
-          
           {/* End .row */}
-          <AvailableRooms name="Lagos Marriott Hotel Ikeja" hotel={hotel} onShowRoomInfo={handleShowRoomInfo}  />
+          <AvailableRooms
+            name={hotel.title}
+            hotel={hotel}
+            onShowRoomInfo={handleShowRoomInfo}
+          />
         </div>
         {/* End .container */}
       </section>
@@ -114,10 +133,9 @@ const PropertySinglePage = ({ params }) => {
 
       <section className="pt-40" id="reviews">
         <div className="container">
-          
           {/* End .row */}
 
-          <ReviewProgress name="Lagos Marriott Hotel Ikeja" />
+          <ReviewProgress name={hotel.title} />
           {/* End review with progress */}
 
           <div className="pt-40">
@@ -127,18 +145,14 @@ const PropertySinglePage = ({ params }) => {
 
           <div className="row pt-30">
             <div className="col-auto">
-              <a href="#" className="button -md -outline-blue-1 text-blue-1">
+              <Link href="#" className="button -md -outline-blue-1 text-blue-1">
                 Show all 116 reviews{" "}
                 <div className="icon-arrow-top-right ml-15"></div>
-              </a>
+              </Link>
             </div>
           </div>
-          {/* End .row */}
         </div>
-        {/* End .container */}
-        {/* End container */}
       </section>
-      {/* End Review section */}
 
       <section className="pt-40 mb-40">
         <div className="container">
@@ -146,41 +160,154 @@ const PropertySinglePage = ({ params }) => {
             <div className="col-xl-8 col-lg-10">
               <div className="row">
                 <div className="col-auto">
-                  <h3 className="text-22 fw-500">Leave a Reply for Lagos Marriott Hotel Ikeja</h3>
+                  <h3 className="text-22 fw-600">
+                    Leave a Reply for {hotel.title}
+                  </h3>
                   <p className="text-15 text-dark-1 mt-5">
                     Your email address will not be published.
                   </p>
                 </div>
               </div>
-              {/* End .row */}
-
               <ReplyFormReview />
-              {/* End ReplyFormReview */}
-
               <ReplyForm />
             </div>
           </div>
         </div>
       </section>
-      {/* End Reply Comment box section */}
+
+      <section className="mt-40 mb-40 pt-20" id="fun-facts">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-20">
+            <div className="col-12 d-flex justify-between items-center">
+              <h3 className="text-22 fw-600">Fun Facts about {hotel.title}</h3>
+              <Link href="#rooms" className="button -md -dark-1 bg-blue-1 text-white">
+                See availability
+              </Link>
+            </div>
+            <div className="col-12">
+              <FunFacts />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-40 mb-40 pt-20" id="fun-facts">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-20">
+            <div className="col-12 d-flex justify-between items-center">
+              <div>
+                <h3 className="text-22 fw-600">Places Nearby {hotel.title}</h3>
+                <button
+                  data-x-click="mapFilter"
+                  className="text-blue-1 text-15 underline"
+                >
+                  Good location - show on map
+                </button>
+              </div>
+              <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
+                See availability
+              </Link>
+            </div>
+            <div className="col-12">
+              <PlacesNearBy />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-40 mb-40" id="facilities">
         <div className="container">
           <div className="row x-gap-40 y-gap-40">
             <div className="col-12">
-              <h3 className="text-22 fw-500">Facilities of Lagos Marriott Hotel Ikeja</h3>
-              <div className="row x-gap-40 y-gap-40 pt-20">
-                <Facilities />
+              <div className="col-12 d-flex justify-between items-center">
+                <h3 className="text-22 fw-600">Facilities of {hotel.title}</h3>
+                <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
+                  See availability
+                </Link>
               </div>
-              {/* End .row */}
+              <div className="col-12">
+                <div className="row x-gap-40 y-gap-40 pt-20">
+                  <Facilities />
+                </div>
+              </div>
             </div>
-            {/* End .col-12 */}
           </div>
-          {/* End .row */}
         </div>
-        {/* End .container */}
       </section>
-      {/* End facilites section */}
+
+      <section className="mt-40 mb-40" id="similar-properties">
+        <div className="container">
+          <div className="row y-gap-10 justify-between items-center">
+            <div className="col-auto">
+              <h3 className="text-22 fw-600">
+                Similar properties available for your dates ({formatStayDates()}
+                )
+              </h3>
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden pt-40 sm:pt-20 js-section-slider item_gap-x30">
+            <SimilarProperties />
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-40 mb-40 pt-20" id="house-rules">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-20">
+            <div className="col-12 d-flex justify-between items-center">
+              <div>
+                <h3 className="text-22 fw-600">House rules</h3>
+                <div className="text-light-1">
+                  Studio 6-Denton, TX - UNT takes special requests - add in the
+                  next step!
+                </div>
+              </div>
+              <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
+                See availability
+              </Link>
+            </div>
+            <div className="col-12">
+              <HouseRules />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-40 mb-40 pt-20" id="fine-print">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-20">
+            <div className="col-12 d-flex justify-between items-center">
+              <div>
+                <h3 className="text-22 fw-600">
+                  Other Important Notes on {hotel.title}
+                </h3>
+                <div className="text-light-1">
+                  Need-to-know information for guests at this property
+                </div>
+              </div>
+              <Link href={"#rooms"} className="button -md -dark-1 bg-blue-1 text-white">
+                See availability
+              </Link>
+            </div>
+            <div className="col-12">
+              <div className="border-light rounded-8 px-20 py-20">
+                <p className="text-14 lh-16 text-dark-1 mb-10">
+                  You must show a valid photo ID and credit card upon check-in.
+                  Please note that all special requests cannot be guaranteed and
+                  are subject to availability upon check-in. Additional charges
+                  may apply.
+                </p>
+                <p className="text-14 lh-16 text-dark-1 mb-10">
+                  Guests are required to show a photo identification and credit
+                  card upon check-in. Please note that all Special Requests are
+                  subject to availability and additional charges may apply.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-40 mb-40" id="facilities">
         <div className="container">
@@ -188,28 +315,31 @@ const PropertySinglePage = ({ params }) => {
             <div className="col-lg-4">
               <h2 className="text-22 text-center fw-500">
                 FAQs about
-                <br /> Lagos Marriott Hotel Ikeja
+                <br /> {hotel.title}
               </h2>
             </div>
-              {/* End .row */}
 
             <div className="col-lg-8">
               <div className="accordion -simple row y-gap-20 js-accordion">
                 <Faq />
               </div>
             </div>
-              {/* End .col */}
-            {/* End .col-12 */}
           </div>
-          {/* End .row */}
         </div>
-        {/* End .container */}
       </section>
-      {/* End facilites section */}
+
+      <section className="mt-40 mb-40" id="cities-landmarks">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-12">
+              <CitiesLandmarks hotel={hotel} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
 
-      {/* Room Info Modal */}
       <RoomInfoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

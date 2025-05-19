@@ -8,7 +8,7 @@ const BookingStatusCard = ({ roomPrice = 0, extraPrice = 0, discount = 0 }) => {
       <div className="row">
         <div className="d-flex items-center justify-between">
           <div className="text-15 lh-14 fw-500">Status</div>
-          <div class="col-auto py-5 px-15 rounded-100 text-12 lh-16 fw-500 ml-10 bg-yellow-1 text-dark-3">
+          <div className="col-auto py-5 px-15 rounded-100 text-12 lh-16 fw-500 ml-10 bg-yellow-1 text-dark-3">
             Pending
           </div>
         </div>

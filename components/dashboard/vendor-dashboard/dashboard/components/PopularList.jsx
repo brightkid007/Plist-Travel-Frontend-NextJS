@@ -83,8 +83,8 @@ const PopularList = ({ detail = false }) => {
               )}
               {!detail && (
                 <td className="align-middle">
-                  <span class="material-symbols-outlined">more_horiz</span>
-                  <span class="material-symbols-outlined">north_east</span>
+                  <span className="material-symbols-outlined">more_horiz</span>
+                  <span className="material-symbols-outlined">north_east</span>
                 </td>
               )}
             </tr>
