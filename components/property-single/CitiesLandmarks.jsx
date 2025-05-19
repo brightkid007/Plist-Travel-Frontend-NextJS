@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const CitiesLandmarks = ({ hotel }) => {
   const landmarks = [
     "AT&T Stadium",
@@ -52,7 +54,7 @@ const CitiesLandmarks = ({ hotel }) => {
               landmarks in Denton
             </div>
           </div>
-          <div className="accordion__icon size-40 flex-center bg-light-2 rounded-full mr-20">
+          <div className="accordion__icon size-40 flex-center rounded-full">
             <span class="material-symbols-outlined">keyboard_arrow_down</span>
             <span class="material-symbols-outlined">keyboard_arrow_up</span>
           </div>
@@ -69,24 +71,30 @@ const CitiesLandmarks = ({ hotel }) => {
               <div className="col-lg-2 col-md-6 col-sm-12">
                 <div className="text-16 fw-600 mb-10">Cities</div>
                 {cities.map((name, index) => (
-                  <div className="text-blue-1" key={index}>
-                    {name}
+                  <div key={index}>
+                    <Link href={"/customer/search"} className="text-blue-1">
+                      {name}
+                    </Link>
                   </div>
                 ))}
               </div>
               <div className="col-lg-4 col-md-6 col-sm-12">
                 <div className="text-16 fw-600 mb-10">Airports</div>
                 {airports.map((name, index) => (
-                  <div className="text-blue-1" key={index}>
-                    {name}
+                  <div key={index}>
+                    <Link href={"/customer/search"} className="text-blue-1">
+                      {name}
+                    </Link>
                   </div>
                 ))}
               </div>
               <div className="col-lg-6 col-md-12">
                 <div className="text-16 fw-600 mb-10">Landmarks</div>
                 {landmarks.map((name, index) => (
-                  <div className="text-blue-1" key={index}>
-                    {name}
+                  <div key={index}>
+                    <Link href={"/customer/search"} className="text-blue-1">
+                      {name}
+                    </Link>
                   </div>
                 ))}
               </div>
