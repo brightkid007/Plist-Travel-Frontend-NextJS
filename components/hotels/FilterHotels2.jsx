@@ -77,6 +77,7 @@ const FilterHotels2 = ({filterOption}) => {
                           className="rounded-4 col-12 js-lazy"
                           src={slide}
                           alt="image"
+                          unoptimized
                         />
                       </div>
                     </div>

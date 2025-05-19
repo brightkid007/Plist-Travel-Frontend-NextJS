@@ -25,7 +25,7 @@ const index = () => {
                   placeholder="Enter Email"
                   className="rounded-16"
                 />
-                <Image src={sendIcon} alt="sendIcon" />
+                <Image src={sendIcon} alt="sendIcon" unoptimized />
               </div>
               
               <ContactInfo />

@@ -26,6 +26,7 @@ const SlideGallery = ({ rental }) => {
                   alt="image"
                   role="button"
                   className="rounded-4"
+                  unoptimized
                 />
               )}
             </Item>
@@ -49,6 +50,7 @@ const SlideGallery = ({ rental }) => {
                   alt="image"
                   className="rounded-4"
                   role="button"
+                  unoptimized
                 />
               )}
             </Item>
@@ -72,6 +74,7 @@ const SlideGallery = ({ rental }) => {
                   alt="image"
                   className="rounded-4"
                   role="button"
+                  unoptimized
                 />
               )}
             </Item>
@@ -95,6 +98,7 @@ const SlideGallery = ({ rental }) => {
                   alt="image"
                   className="rounded-4"
                   role="button"
+                  unoptimized
                 />
               )}
             </Item>
@@ -108,6 +112,7 @@ const SlideGallery = ({ rental }) => {
               src="/img/rentals/single/5.png"
               alt="image"
               className="rounded-4"
+              unoptimized
             />
             <div className="absolute h-full col-12 z-2 px-20 py-20 d-flex justify-end items-end bottom-0 end-0">
               <Item

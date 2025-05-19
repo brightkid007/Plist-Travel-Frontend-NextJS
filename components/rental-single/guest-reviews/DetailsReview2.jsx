@@ -12,6 +12,7 @@ const DetailsReview2 = () => {
               height={60}
               src="/img/avatars/2.png"
               alt="image"
+              unoptimized
             />
           </div>
           <div className="col-auto">
@@ -51,6 +52,7 @@ const DetailsReview2 = () => {
               height={60}
               src="/img/avatars/2.png"
               alt="image"
+              unoptimized
             />
           </div>
           <div className="col-auto">
@@ -89,6 +91,7 @@ const DetailsReview2 = () => {
               height={60}
               src="/img/avatars/2.png"
               alt="image"
+              unoptimized
             />
           </div>
           <div className="col-auto">
@@ -125,6 +128,7 @@ const DetailsReview2 = () => {
               height={60}
               src="/img/avatars/2.png"
               alt="image"
+              unoptimized
             />
           </div>
           <div className="col-auto">

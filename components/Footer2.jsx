@@ -18,6 +18,7 @@ function Footer2() {
               src={whiteLogo}
               alt=""
               className="lg:w-[140px] md:w-[100px] lg:h-[55px] md:h-[40px] w-[70px] h-[30px]"
+              unoptimized
             />
           </div>
           <div className="lg:w-[90%] text-start">
@@ -32,7 +33,7 @@ function Footer2() {
               placeholder="Enter Email"
               className="mr-6 text-[#2D3B4E] placeholder:text-[#2D3B4E] focus:outline-none font-Bricolage"
             />
-            <Image src={sendIcon} alt="sendIcon" className="-mr-4" />
+            <Image src={sendIcon} alt="sendIcon" className="-mr-4" unoptimized />
           </div>
 
           <div className="-ms-8 mt-3 cursor-pointer">
@@ -145,7 +146,7 @@ function Footer2() {
               <h3>Download Our App</h3>
             </div>
             <div className="mt-5">
-              <Image src={stores} alt="" />
+              <Image src={stores} alt="" unoptimized />
             </div>
           </div>
         </div>
@@ -154,7 +155,7 @@ function Footer2() {
             <h3>Download Our App</h3>
           </div>
           <div className="mt-5">
-            <Image src={stores} alt="" />
+            <Image src={stores} alt="" unoptimized />
           </div>
         </div>
 
@@ -263,7 +264,7 @@ function Footer2() {
             </h3>
           </div>
           <div className="lg:-ms-2 ms-5 mt-5">
-            <Image src={stores} alt="" />
+            <Image src={stores} alt="" unoptimized />
           </div>
         </div>
       </div>

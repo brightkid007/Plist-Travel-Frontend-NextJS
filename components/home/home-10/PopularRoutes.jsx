@@ -114,6 +114,7 @@ const PopularRoutes = () => {
                       className="rounded-4 col-12"
                       src={item.img}
                       alt="image"
+                      unoptimized
                     />
                   </div>
                 </div>

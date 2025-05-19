@@ -45,7 +45,7 @@ const HelpBlock = () => {
         <div className="col-lg-4 col-md-6" key={item.id}>
           <div className="bg-blue-1-05 rounded-4 px-50 py-40">
             <div className="size-70 bg-white rounded-full flex-center">
-              <Image width={30} height={30} src={item.icon} alt="icon" />
+              <Image width={30} height={30} src={item.icon} alt="icon" unoptimized />
             </div>
             <div className="mt-24">
               <div className="text-18 fw-500">{item.title}</div>

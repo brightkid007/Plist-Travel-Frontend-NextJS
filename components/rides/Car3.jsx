@@ -11,7 +11,7 @@ function Car3() {
     >
       <div className="px-2 flex gap-5 items-center lg:flex-row flex-col-reverse">
         <div className="lg:w-[750px] lg:h-[500px] lg:mt-28 mt-0">
-          <Image src={boob} alt="" className="w-full h-full" />
+          <Image src={boob} alt="" className="w-full h-full" unoptimized />
         </div>
         <div className="text-center mt-6 lg:mt-20">
           <h1 className="lg:text-[42px] text-[28px] font-bold font-Bricolage">

@@ -35,7 +35,7 @@ const HowWorks = () => {
           <div className="col-xl-2 col-lg-3 col-md-6">
             <div className="d-flex flex-column items-center text-center">
               <div className="relative size-120 flex-center rounded-full bg-green-1">
-                <Image width={50} height={50} src={item.icon} alt="image" />
+                <Image width={50} height={50} src={item.icon} alt="image" unoptimized />
                 <div className="side-badge">
                   <div className="size-40 flex-center rounded-full bg-yellow-1">
                     <span className="text-15 fw-500">{item.no}</span>
@@ -56,6 +56,7 @@ const HowWorks = () => {
                     height={21}
                     src={item.lineIcon}
                     alt="icon"
+                    unoptimized
                   />
                 </div>
               </div>

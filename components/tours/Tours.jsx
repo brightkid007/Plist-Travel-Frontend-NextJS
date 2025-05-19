@@ -99,6 +99,7 @@ const Tours = () => {
                             className="col-12 js-lazy"
                             src={slide}
                             alt="image"
+                            unoptimized
                           />
                         </div>
                       </div>

@@ -72,6 +72,7 @@ const pathname = usePathname()
                 src={item.icon}
                 alt="image"
                 className="mr-15"
+                unoptimized
               />
               {item.name}
             </Link>

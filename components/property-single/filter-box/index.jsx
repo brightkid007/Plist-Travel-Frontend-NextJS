@@ -1,5 +1,6 @@
 import GuestSearch from "./GuestSearch";
 import DateSearch from "./DateSearch";
+import Link from "next/link";
 
 const index = () => {
   return (
@@ -23,9 +24,10 @@ const index = () => {
 
       <div className="col-12">
         <div className="button-item h-full">
-          <button className="button -dark-1 px-35 h-60 col-12 bg-blue-1 text-white">
+          <Link className="button -dark-1 px-35 h-60 col-12 bg-blue-1 text-white"
+          href="/customer/property/1/#rooms">
             Check availability
-          </button>
+          </Link>
         </div>
         {/* End search button_item */}
       </div>

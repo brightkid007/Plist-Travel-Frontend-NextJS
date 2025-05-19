@@ -87,6 +87,7 @@ const Team1 = () => {
               src={item.img}
               alt="image"
               className="rounded-4 col-12"
+              unoptimized
             />
             <div className="mt-10">
               <div className="text-18 lh-15 fw-500">{item.name}</div>

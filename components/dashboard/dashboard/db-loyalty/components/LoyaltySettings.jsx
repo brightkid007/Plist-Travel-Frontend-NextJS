@@ -29,6 +29,7 @@ const LoyaltySettings = () => {
                   src="/img/misc/avatar-1.png"
                   alt="image"
                   className="img-ratio rounded-full"
+                  unoptimized
                 />
                 {/* <div className="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
                                                       <div className="size-40 bg-white rounded-full flex-center cursor-pointer">

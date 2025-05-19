@@ -68,6 +68,7 @@ const ItineraryContent = () => {
                       src={item.img}
                       alt="image"
                       className="rounded-4 mt-15"
+                      unoptimized
                     />
                     <div className="text-14 lh-17 mt-15">{item.content}</div>
                   </div>

@@ -45,6 +45,7 @@ const Block2 = () => {
           height={350}
           src="/img/backgrounds/10.png"
           alt="image"
+          unoptimized
         />
         <div className="absolute col-12 h-full flex-center z-1">
           <div
@@ -78,6 +79,7 @@ const Block2 = () => {
                       className="size-50"
                       src={item.icon}
                       alt="image"
+                      unoptimized
                     />
                     <div className="ml-15">
                       <h4 className="text-18 fw-500">{item.title}</h4>

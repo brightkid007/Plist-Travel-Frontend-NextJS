@@ -17,12 +17,12 @@ function Car5() {
 
       <div className="flex md:gap-10 gap-5 lg:justify-center ms-0 mt-10 lg:flex-row flex-col lg:px-0 px-3 w-full">
         <div className="lg:w-[50%] lg:mx-auto">
-          <Image src={go} alt="" className="h-full w-full" />
+          <Image src={go} alt="" className="h-full w-full" unoptimized />
         </div>
         <div className="flex flex-col gap-6 w-full lg:w-[50%]">
           <div className="bg-[#DAECF0] h-[244px] xl:w-[100%] px-9 py-7 w-full rounded-xl">
             <div className="flex flex-col w-full">
-              <Image src={colorSquare} alt="colorSquare" />
+              <Image src={colorSquare} alt="colorSquare" unoptimized />
               <h1 className="text-[24px] font-medium text-[#11161F] font-Bricolage mt-2">
                 Ease of use
               </h1>
@@ -35,7 +35,7 @@ function Car5() {
           </div>
           <div className="bg-[#DAECF0] xl:w-[100%] h-[244px] w-[100%] px-9 py-7 rounded-xl">
             <div className="flex flex-col">
-              <Image src={colorSquare} alt="colorSquare" />
+              <Image src={colorSquare} alt="colorSquare" unoptimized />
               <h1 className="text-[24px] font-medium text-[#11161F] font-Bricolage mt-2">
                 Devices synchronization
               </h1>

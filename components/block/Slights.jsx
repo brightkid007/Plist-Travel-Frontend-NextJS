@@ -55,6 +55,7 @@ const Slights = () => {
                     src={item.img}
                     alt="image"
                     className="img-ratio"
+                    unoptimized
                   />
                 </div>
               </div>

@@ -91,6 +91,7 @@ const CategoriesMegaMenu = ({setIsActiveParent}) => {
                     src={megaCol?.megaBanner}
                     alt="image"
                     className="rounded-4 js-lazy"
+                    unoptimized
                   />
 
                   <div className="absolute w-full h-full px-30 py-24">

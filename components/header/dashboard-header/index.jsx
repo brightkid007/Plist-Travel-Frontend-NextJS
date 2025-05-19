@@ -101,6 +101,7 @@ const HeaderDashBoard = () => {
                     src="/img/misc/avatar-1.png"
                     alt="image"
                     className="size-50 rounded-full object-cover"
+                    unoptimized
                   />
                 </div>
 

@@ -50,6 +50,7 @@ const TopDestinations2 = () => {
                   className="img-ratio rounded-4 js-lazy"
                   src={item.img}
                   alt="image"
+                  unoptimized
                 />
               </div>
               <div className="citiesCard__content mt-10">

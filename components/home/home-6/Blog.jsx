@@ -23,6 +23,7 @@ const Blog = () => {
                 className="size-250 rounded-4"
                 src={item.img}
                 alt="image"
+                unoptimized
               />
             </div>
             <div className="col">

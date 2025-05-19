@@ -20,6 +20,7 @@ function DownloadApp() {
           src={mobile}
           alt="Mobile"
           className="lg:-mt-40 mt-2 w-4/5 max-w-xs lg:max-w-full h-auto lg:h-[60vh]"
+          unoptimized
         />
       </div>
 
@@ -31,8 +32,8 @@ function DownloadApp() {
           Download Our App From Google & App Store!
         </p>
         <div className="md:mt-7 mt-3 flex justify-center lg:justify-start gap-4">
-          <Image src={app} alt="App Store" className="w-32 lg:w-48" />
-          <Image src={google} alt="Google Play" className="w-32 lg:w-48" />
+          <Image src={app} alt="App Store" className="w-32 lg:w-48" unoptimized />
+          <Image src={google} alt="Google Play" className="w-32 lg:w-48" unoptimized />
         </div>
       </div>
     </div>

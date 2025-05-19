@@ -70,6 +70,7 @@ const HotelProperties = () => {
                           className="rounded-22 col-12 js-lazy"
                           src={slide}
                           alt="image"
+                          unoptimized
                         />
                       </div>
                     </div>

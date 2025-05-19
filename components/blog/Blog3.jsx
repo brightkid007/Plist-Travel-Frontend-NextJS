@@ -24,6 +24,7 @@ const Blog3 = () => {
                   className="img-ratio js-lazy"
                   src={item.img}
                   alt="image"
+                  unoptimized
                 />
               </div>
             </div>

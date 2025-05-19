@@ -63,6 +63,7 @@ const Hotels3 = () => {
                               className="rounded-4 col-12 js-lazy"
                               src={slide}
                               alt="image"
+                              unoptimized
                             />
                           </SwiperSlide>
                         ))}

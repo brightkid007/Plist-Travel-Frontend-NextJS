@@ -28,6 +28,7 @@ const Testimonial = () => {
                   src={item.avatar}
                   alt="image"
                   className="js-lazy rounded-circle"
+                  unoptimized
                 />
               </div>
               <div className="col-auto">

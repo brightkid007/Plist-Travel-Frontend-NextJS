@@ -17,6 +17,7 @@ const Properties = () => {
                     className="rounded-22 col-12 js-lazy"
                     src={item.img}
                     alt="image"
+                    unoptimized
                   />
                 </div>
                 <div className="cardImage__wishlist">

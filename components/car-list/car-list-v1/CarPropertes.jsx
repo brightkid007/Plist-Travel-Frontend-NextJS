@@ -37,6 +37,7 @@ const CarPropertes = () => {
                                   src={slide}
                                   priority
                                   alt="image"
+                                  unoptimized
                                 />
                               </div>
                               <div className="cardImage__wishlist">

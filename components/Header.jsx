@@ -90,6 +90,7 @@ function Header() {
               src={whiteLogo}
               alt="Logo"
               className="lg:w-[200px] md:w-[160px] lg:h-[77px] md:h-[60px] w-[120px] h-[45px]"
+              unoptimized
             />
 
             <div className="hidden lg:flex">
@@ -234,7 +235,7 @@ function Header() {
 
         <div className=" flex justify-center  flex-col lg:gap-7 gap-0 lg:mt-10 mt-8 items-center">
           <div>
-            <Image src={peoples} alt="" className="w-[327px] h-[64px]" />
+            <Image src={peoples} alt="" className="w-[327px] h-[64px]" unoptimized />
           </div>
 
           <div className="lg:w-[20%] w-[80%] text-center">

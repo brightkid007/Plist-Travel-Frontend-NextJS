@@ -61,6 +61,7 @@ const Blog1 = () => {
                       className="cover w-100 img-fluid"
                       src={item.img}
                       alt="image"
+                      unoptimized
                     />
                   </div>
                 </div>

@@ -30,6 +30,7 @@ const WhyChooseUs = () => {
           height={350}
           src="/img/backgrounds/5.png"
           alt="image"
+          unoptimized
         />
       </div>
       {/* End right video popup icon with image */}
@@ -51,6 +52,7 @@ const WhyChooseUs = () => {
                       className="size-50"
                       src={item.icon}
                       alt="image"
+                      unoptimized
                     />
                     <div className="ml-15">
                       <h4 className="text-18 fw-500">{item.title}</h4>
