@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const CitiesLandmarks = ({ hotel }) => {
+const CitiesLandmarks = ({ service }) => {
   const landmarks = [
     "AT&T Stadium",
     "American Airlines Center",
@@ -47,7 +47,7 @@ const CitiesLandmarks = ({ hotel }) => {
         >
           <div>
             <h2 className="text-22 text-start fw-500">
-              Cities and Landmarks near {hotel.title}
+              Cities and Landmarks near {service?.title}
             </h2>
             <div className="text-12 text-light-1">
               Click here to see more hotels and accommodation near popular

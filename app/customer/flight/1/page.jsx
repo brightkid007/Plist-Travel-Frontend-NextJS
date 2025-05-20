@@ -14,6 +14,9 @@ import CallToActions from "@/components/common/CallToActions";
 import Footer from "@/components/footer/footer-5";
 import MapPropertyFinder from "@/components/cruise-single/MapPropertyFinder";
 import GalleryCruiseSlider from "@/components/cruise-single/GalleryCruiseSlider";
+import CitiesLandmarks from "@/components/property-single/CitiesLandmarks";
+
+import PopularFlights from "@/components/home/PopularFlights";
 
 export const metadata = {
   title: "Flight Detail || Plist Travel",
@@ -41,7 +44,7 @@ const FlightSinglePage = ({ params }) => {
         <div className="container">
           <div className="row justify-between items-end">
             <div className="col-auto">
-              <h1 className="text-26 fw-600">{cruise?.title}</h1>
+              <h1 className="text-26 fw-600">7 Night Flight to the Western Mediterranean</h1>
               <div className="d-flex x-gap-5 items-center pt-5">
                 <i className="icon-location-2 text-16 text-light-1" />
                 <div className="text-15 text-light-1">{cruise?.location}</div>
@@ -96,7 +99,7 @@ const FlightSinglePage = ({ params }) => {
             {/* End .col-xl-8 */}
 
             <div className="col-xl-4">
-              <SidebarRight cruise={cruise} />
+              <SidebarRight service={cruise} />
             </div>
             {/* End .col-xl-4 */}
           </div>
@@ -163,7 +166,39 @@ const FlightSinglePage = ({ params }) => {
         </div>
       </section>
       {/* End Reply Comment box section */}
+      <section className="layout-pt-md layout-pb-lg">
+        <div className="container">
+          <div className="row y-gap-20 justify-center text-center">
+            <div className="col-auto">
+              <div className="sectionTitle -md">
+                <h2 className="sectionTitle__title">Similar 7 Night Flight to the Western Mediterranean available</h2>
+                {/* <p className=" sectionTitle__text mt-5 sm:mt-0">
+                  Interdum et malesuada fames ac ante ipsum
+                </p> */}
+              </div>
+            </div>
+            {/* End .col */}
 
+          </div>
+          {/* End .row */}
+
+          <div className="row y-gap-30 pt-40 sm:pt-20">
+            <PopularFlights />
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+      </section>
+
+      <section className="mt-40 mb-40" id="cities-landmarks">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-12">
+              <CitiesLandmarks service={cruise} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </>

@@ -9,16 +9,17 @@ import ReplyForm from "@/components/tour-single/ReplyForm";
 import ReplyFormReview2 from "@/components/tour-single/ReplyFormReview2";
 import CallToActions from "@/components/common/CallToActions";
 import Footer from "@/components/footer/footer-5";
-import Tours from "@/components/tours/Tours";
 import Faq from "@/components/faq/Faq";
 import Link from "next/link";
 import Itinerary from "@/components/tour-single/itinerary";
 import ImportantInfo from "@/components/tour-single/ImportantInfo";
 import TourGallery from "@/components/tour-single/TourGallery";
+import CitiesLandmarks from "@/components/property-single/CitiesLandmarks";
+import Tours from "@/components/tours/Tours";
 
 export const metadata = {
-  title: "Tour Single || GoTrip - Travel & Tour React NextJS Template",
-  description: "GoTrip - Travel & Tour React NextJS Template",
+  title: "Tour Detail || Plist Travel",
+  description: "Check Tour Detail",
 };
 
 const TourSinglePage = ({ params }) => {
@@ -208,6 +209,48 @@ const TourSinglePage = ({ params }) => {
       </section>
       {/* End Reply Comment box section */}
 
+      <section className="layout-pt-lg layout-pb-lg mt-50 border-top-light">
+        <div className="container">
+          <div className="row y-gap-20 justify-center text-center">
+            <div className="col-auto">
+              <div className="sectionTitle -md">
+                <h2 className="sectionTitle__title">Similar {tour?.title} available</h2>
+                {/* <p className=" sectionTitle__text mt-5 sm:mt-0">
+                  Interdum et malesuada fames ac ante ipsum
+                </p> */}
+              </div>
+            </div>
+            {/* End .col */}
+
+            <div className="col-auto">
+              <Link
+                href="#"
+                className="button -md -blue-1 bg-blue-1-05 text-blue-1"
+              >
+                More <div className="icon-arrow-top-right ml-15" />
+              </Link>
+            </div>
+            {/* End .col */}
+          </div>
+          {/* End .row */}
+
+          <div className="row y-gap-30 pt-40 sm:pt-20 item_gap-x30">
+            <Tours />
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+      </section>      
+
+      <section className="mt-40 mb-40" id="cities-landmarks">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-12">
+              <CitiesLandmarks service={tour} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </>

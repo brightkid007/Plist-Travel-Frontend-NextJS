@@ -18,6 +18,7 @@ import Link from "next/link";
 import ImportantInfo from "@/components/attr-event-single/ImportantInfo";
 import SlideGallery from "@/components/attr-event-single/SlideGallery";
 import MapPropertyFinder from "@/components/attr-event-single/MapPropertyFinder";
+import CitiesLandmarks from "@/components/property-single/CitiesLandmarks";
 
 export const metadata = {
   title: "Attractions/Events Detail || Plist Travel",
@@ -194,6 +195,49 @@ const AttrEventSinglePage = ({ params }) => {
         {/* End .container */}
       </section>
       {/* End Reply Comment box section */}
+
+      <section className="layout-pt-lg layout-pb-lg mt-50 border-top-light">
+        <div className="container">
+          <div className="row y-gap-20 justify-center text-center">
+            <div className="col-auto">
+              <div className="sectionTitle -md">
+                <h2 className="sectionTitle__title">Similar {activity?.title} available</h2>
+                {/* <p className=" sectionTitle__text mt-5 sm:mt-0">
+                  Interdum et malesuada fames ac ante ipsum
+                </p> */}
+              </div>
+            </div>
+            {/* End .col */}
+
+            <div className="col-auto">
+              <Link
+                href="#"
+                className="button -md -blue-1 bg-blue-1-05 text-blue-1"
+              >
+                More <div className="icon-arrow-top-right ml-15" />
+              </Link>
+            </div>
+            {/* End .col */}
+          </div>
+          {/* End .row */}
+
+          <div className="row y-gap-30 pt-40 sm:pt-20 item_gap-x30">
+            <Tours />
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+      </section>     
+      
+      <section className="mt-40 mb-40" id="cities-landmarks">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-12">
+              <CitiesLandmarks service={activity} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </>

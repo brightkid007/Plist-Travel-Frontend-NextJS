@@ -15,6 +15,8 @@ import SlideGallery from "@/components/car-single/SlideGallery";
 import FilterBox from "@/components/car-single/filter-box";
 import Faq from "@/components/faq/Faq";
 import MapPropertyFinder from "@/components/car-single/MapPropertyFinder";
+import CitiesLandmarks from "@/components/property-single/CitiesLandmarks";
+import PopularRides from "@/components/home/PopularRides";
 
 export const metadata = {
   title: "Ride Detail || Plist Travel",
@@ -228,6 +230,40 @@ const RideSinglePage = ({ params }) => {
         {/* End .container */}
       </section>
       {/* End Reply Comment box section */}
+
+      <section className="layout-pt-md layout-pb-md">
+        <div className="container">
+          <div className="row y-gap-20 justify-center text-center">
+            <div className="col-auto">
+              <div className="sectionTitle -md">
+                <h2 className="sectionTitle__title">Similar {car?.title} available</h2>
+                {/* <p className=" sectionTitle__text mt-5 sm:mt-0">
+                  Interdum et malesuada fames ac ante ipsum
+                </p> */}
+              </div>
+            </div>
+            {/* End .col */}
+          </div>
+          {/* End .row */}
+
+          <div className="row y-gap-30 pt-40 sm:pt-20 item_gap-x30">
+            <PopularRides />
+          </div>
+          {/* End .row */}
+        </div>
+        {/* End .container */}
+      </section>
+      {/* Popular Car Hire Sections */}
+
+      <section className="mt-40 mb-40" id="cities-landmarks">
+        <div className="container">
+          <div className="row x-gap-40 y-gap-40">
+            <div className="col-12">
+              <CitiesLandmarks service={car} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </>

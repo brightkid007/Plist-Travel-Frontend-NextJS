@@ -108,7 +108,7 @@ const PropertySinglePage = ({ params }) => {
             {/* End .col-xl-8 */}
 
             <div className="col-xl-4">
-              <SidebarRight hotel={hotel} />
+              <SidebarRight service={hotel} />
             </div>
             {/* End .col-xl-4 */}
           </div>
