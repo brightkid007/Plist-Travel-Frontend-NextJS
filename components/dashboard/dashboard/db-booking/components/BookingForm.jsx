@@ -13,21 +13,16 @@ import TourInfoCard from "./TourInfoCard";
 import AttrEventInfoCard from "./AttrEventInfoCard";
 
 const BookingForm = ({ serviceType }) => {
-
   const COMPONENT_MAP = {
     Property: <PropertyInfoCard />,
     Tour: <TourInfoCard />,
     Ride: <RideInfoCard />,
     Flight: <FlightInfoCard />,
-    AttrEvent: <AttrEventInfoCard />
+    AttrEvent: <AttrEventInfoCard />,
   };
 
   const [travelerCount, setTravelerCount] = useState(1);
   const [isGroupBooking, setIsGroupBooking] = useState(false);
-
-  const handleAddTraveler = () => {
-    setTravelerCount((prev) => Math.max(1, prev + 1));
-  };
 
   const handleToggleGroupBooking = () => {
     setIsGroupBooking((prev) => !prev);
@@ -59,7 +54,7 @@ const BookingForm = ({ serviceType }) => {
             <h1 className="text-15 lh-14 fw-500">Traveler Information</h1>
             <button
               className="button rounded-8 py-10 px-30 text-12 -dark-1 bg-dark-3 text-white"
-              onClick={handleAddTraveler}
+              onClick={() => setTravelerCount(travelerCount + 1)}
             >
               + Add a Traveler
               <i className="icon icon-chevron-right ml-10" />
@@ -67,7 +62,12 @@ const BookingForm = ({ serviceType }) => {
           </div>
 
           {Array.from({ length: travelerCount }).map((_, index) => (
-            <TravelerInformationCard key={index} index={index} travelerCount={travelerCount} setTravelerCount={setTravelerCount} />
+            <TravelerInformationCard
+              key={index}
+              index={index}
+              travelerCount={travelerCount}
+              setTravelerCount={setTravelerCount}
+            />
           ))}
         </>
       )}

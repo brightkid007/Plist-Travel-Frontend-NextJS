@@ -1,5 +1,6 @@
 "use client";
 
+import svgIcon from "@/components/data/svgIcon";
 import LinkTable from "./LinkTable";
 
 const SalesLinkGen = () => {
@@ -146,47 +147,7 @@ const SalesLinkGen = () => {
           </div>
           <div className="border-top-light py-20">
             <button className="text-14 w-100 fw-500 py-5 rounded-8 border-light">
-              <svg
-                width="17"
-                height="16"
-                viewBox="0 0 17 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g clip-path="url(#clip0_307_66390)">
-                  <path
-                    d="M14.832 10V12.6667C14.832 13.0203 14.6916 13.3594 14.4415 13.6095C14.1915 13.8595 13.8523 14 13.4987 14H4.16536C3.81174 14 3.4726 13.8595 3.22256 13.6095C2.97251 13.3594 2.83203 13.0203 2.83203 12.6667V10"
-                    stroke="#020817"
-                    stroke-width="1.33333"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M5.5 6.66797L8.83333 10.0013L12.1667 6.66797"
-                    stroke="#020817"
-                    stroke-width="1.33333"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M8.83203 10V2"
-                    stroke="#020817"
-                    stroke-width="1.33333"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_307_66390">
-                    <rect
-                      width="16"
-                      height="16"
-                      fill="white"
-                      transform="translate(0.832031)"
-                    />
-                  </clipPath>
-                </defs>
-              </svg>
+              {svgIcon.export}
               <span className="ml-10">Export Link Report</span>
             </button>
           </div>

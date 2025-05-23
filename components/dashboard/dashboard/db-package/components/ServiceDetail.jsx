@@ -198,8 +198,9 @@ const FlightDetails = () => {
           <h1 className="text-15 lh-14 fw-500">Passengers</h1>
           <div className="d-flex mt-10 items-center fw-600">
             <button
+              disabled={passengers == 0}
               className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light mr-20 col-auto"
-              onClick={() => setPassengers(Math.max(0, passengers - 1))}
+              onClick={() => setPassengers(passengers - 1)}
             >
               <i className="icon icon-minus" />
             </button>
@@ -280,8 +281,9 @@ const HotelDetails = () => {
         <h1 className="text-15 lh-14 fw-500">Rooms</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
+            disabled={rooms == 1}
             className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setRooms(Math.max(1, rooms - 1))}
+            onClick={() => setRooms(rooms - 1)}
           >
             <i className="icon icon-minus" />
           </button>
@@ -298,8 +300,9 @@ const HotelDetails = () => {
         <h1 className="text-15 lh-14 fw-500">Adults</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
+            disabled={adults == 1}
             className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setAdults(Math.max(1, adults - 1))}
+            onClick={() => setAdults(adults - 1)}
           >
             <i className="icon icon-minus" />
           </button>
@@ -316,8 +319,9 @@ const HotelDetails = () => {
         <h1 className="text-15 lh-14 fw-500">Children</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
+            disabled={children == 0}
             className="button rounded-8 py-20 px-20 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setChildren(Math.max(0, children - 1))}
+            onClick={() => setChildren(children - 1)}
           >
             <i className="icon icon-minus" />
           </button>
@@ -332,7 +336,12 @@ const HotelDetails = () => {
       </div>
       <h1 className="text-15 lh-14 fw-500">Traveler Information</h1>
       {Array.from({ length: adults }).map((_, index) => (
-        <TravelerInformationCard key={index} index={index} adults={adults} setAdults={setAdults} />
+        <TravelerInformationCard
+          key={index}
+          index={index}
+          adults={adults}
+          setAdults={setAdults}
+        />
       ))}
     </>
   );
@@ -400,8 +409,9 @@ const TransportationDetails = () => {
           <h1 className="text-15 lh-14 fw-500">Passengers</h1>
           <div className="d-flex mt-10 items-center fw-600">
             <button
+              disabled={passengers == 0}
               className="button rounded-8 py-15 px-15 text-12 -dark-1 border-light mr-20 col-auto"
-              onClick={() => setPassengers(Math.max(0, passengers - 1))}
+              onClick={() => setPassengers(passengers - 1)}
             >
               <i className="icon icon-minus" />
             </button>
@@ -459,8 +469,9 @@ const ToursDetails = () => {
         <h1 className="text-15 lh-14 fw-500">Paricipants</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
+            disabled={paricipants == 0}
             className="button rounded-8 py-15 px-15 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setParicipants(Math.max(0, paricipants - 1))}
+            onClick={() => setParicipants(paricipants - 1)}
           >
             <i className="icon icon-minus" />
           </button>
@@ -517,8 +528,9 @@ const ActivitiesDetails = () => {
         <h1 className="text-15 lh-14 fw-500">Paricipants</h1>
         <div className="d-flex mt-10 items-center fw-600">
           <button
+            disabled={paricipants == 0}
             className="button rounded-8 py-15 px-15 text-12 -dark-1 border-light mr-20 col-auto"
-            onClick={() => setParicipants(Math.max(0, paricipants - 1))}
+            onClick={() => setParicipants(paricipants - 1)}
           >
             <i className="icon icon-minus" />
           </button>

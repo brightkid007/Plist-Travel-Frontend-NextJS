@@ -166,6 +166,18 @@ $_displays: none, inline-block, block, flex;
   &-right-4 {
     border-radius: 0 4px 4px 0;
   }
+  &-right-8 {
+    border-radius: 0 8px 8px 0;
+  }
+  &-left-4 {
+    border-radius: 4px 0 0 4px;
+  }
+  &-left-8 {
+    border-radius: 8px 0 0 8px;
+  }
+  &-left-22 {
+    border-radius: 22px 0 0 22px;
+  }
 }
 
 @include media-below(lg) {
@@ -208,6 +220,9 @@ $_displays: none, inline-block, block, flex;
   }
   &-light {
     border: 1px solid var(--color-border) !important;
+  }
+  &-dashed {
+    border-style: dashed !important;
   }
 }
 
@@ -1218,6 +1233,11 @@ $_displays: none, inline-block, block, flex;
 
 .w-140 {
   width: 140px;
+  max-width: 100%;
+}
+
+.w-180 {
+  width: 180px;
   max-width: 100%;
 }
 

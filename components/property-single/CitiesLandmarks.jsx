@@ -55,8 +55,8 @@ const CitiesLandmarks = ({ service }) => {
             </div>
           </div>
           <div className="accordion__icon size-40 flex-center rounded-full">
-            <span class="material-symbols-outlined">keyboard_arrow_down</span>
-            <span class="material-symbols-outlined">keyboard_arrow_up</span>
+            <span className="material-symbols-outlined">keyboard_arrow_down</span>
+            <span className="material-symbols-outlined">keyboard_arrow_up</span>
           </div>
         </div>
         {/* End accordion button */}

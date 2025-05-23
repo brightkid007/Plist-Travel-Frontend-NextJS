@@ -15,32 +15,32 @@ const Sidebar = () => {
     },
     {
       icon: "/img/dashboard/sidebar/map.svg",
-      title: "Manage Tour",
-      href: "#",
+      title: "Operations Management",
+      href: "/vendor/operations",
     },
     {
       icon: "/img/dashboard/sidebar/sneakers.svg",
-      title: "Manage Activity",
-      href: "#",
+      title: "Listings Management",
+      href: "/vendor/listings",
     },
     {
       icon: "/img/dashboard/sidebar/house.svg",
-      title: "Manage Holiday Rental",
+      title: "Booking Management",
       href: "#",
     },
     {
       icon: "/img/dashboard/sidebar/taxi.svg",
-      title: "Manage Car",
+      title: "Messaging & Communication",
       href: "#",
     },
     {
       icon: "/img/dashboard/sidebar/canoe.svg",
-      title: "Manage Cruise",
+      title: "Coupons & Promotions",
       href: "#",
     },
     {
       icon: "/img/dashboard/sidebar/airplane.svg",
-      title: "Manage Flights",
+      title: "Subscription & Payments",
       href: "#",
     },
     {
