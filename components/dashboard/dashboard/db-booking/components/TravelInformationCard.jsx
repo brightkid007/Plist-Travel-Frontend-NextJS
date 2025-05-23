@@ -1,11 +1,21 @@
-const TravelerInformationCard = ({ index , travelerCount, setTravelerCount}) => {
+const TravelerInformationCard = ({
+  index,
+  travelerCount,
+  setTravelerCount,
+}) => {
   return (
     <div className="col-12 border-light rounded-8 py-20 px-20 w-full mt-10">
       <div className="row">
         <div className="d-flex justify-between items-center mb-10">
           <h1 className="text-15 lh-14 fw-500">Traveler {index + 1}</h1>
           {index != 0 && (
-            <button className="button text-13 fw-500 w-25" onClick={() => setTravelerCount(Math.max(travelerCount - 1, 1))}>Remove</button>
+            <button
+              className="button text-13 fw-500 w-25"
+              disabled={travelerCount === 1}
+              onClick={() => setTravelerCount(travelerCount - 1)}
+            >
+              Remove
+            </button>
           )}
         </div>
         <div className="row y-gap-10">

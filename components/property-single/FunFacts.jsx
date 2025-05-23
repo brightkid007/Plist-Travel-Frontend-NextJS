@@ -62,7 +62,7 @@ const FunFacts = () => {
           </button>
 
           <div
-            className="offcanvas offcanvas-end rounded-start"
+            className="offcanvas offcanvas-end rounded-left-22"
             style={{ width: "600px" }}
             tabindex="-1"
             id="questionOffCanvas"
@@ -149,7 +149,7 @@ const GuidelinesModal = () => {
               </div>
               <button
                 type="button"
-                class="btn-close"
+                className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
               />

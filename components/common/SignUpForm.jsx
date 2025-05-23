@@ -3,30 +3,7 @@ import Image from "next/image";
 import logo from "/public/img/general/plist logo 1.png";
 import { useEffect, useState } from "react";
 
-const backIcon = (
-  <svg
-    width="36"
-    height="37"
-    viewBox="0 0 36 37"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M28.5 18.5H7.49999"
-      stroke="#09090B"
-      stroke-width="3"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M18 29L7.5 18.5L18 7.99999"
-      stroke="#09090B"
-      stroke-width="3"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
-);
+import svgIcon from "../data/svgIcon";
 
 const SignUpForm = () => {
   const accountType = [
@@ -258,7 +235,7 @@ const VenderSignUpForm = ({ setFormType }) => {
     <div className="row bg-white y-gap-20 rounded-22 border-light-1 shadow-1 px-30 py-20 mt-0">
       <div className="col-12 d-flex items-center">
         <div className="mr-10" onClick={() => setFormType(0)}>
-          {backIcon}
+          {svgIcon.back}
         </div>
         <div>
           <h1 className="text-26 fw-600">Vendor Registration</h1>
@@ -356,7 +333,7 @@ const AgentSignUpForm = ({ setFormType }) => {
     <div className="row bg-white y-gap-20 rounded-22 border-light-1 shadow-1 px-30 py-30 mt-0">
       <div className="col-12 d-flex items-center">
         <div className="mr-10" onClick={() => setFormType(0)}>
-          {backIcon}
+          {svgIcon.back}
         </div>
         <div>
           <h1 className="text-26 fw-600">Agent Registration</h1>
@@ -455,7 +432,7 @@ const CustomerSignUpForm = ({ setFormType }) => {
     <div className="row bg-white y-gap-20 rounded-22 border-light-1 shadow-1 px-30 py-30 mt-0">
       <div className="col-12 d-flex items-center">
         <div className="mr-10" onClick={() => setFormType(0)}>
-          {backIcon}
+          {svgIcon.back}
         </div>
         <div>
           <h1 className="text-26 fw-600">Customer Registration</h1>

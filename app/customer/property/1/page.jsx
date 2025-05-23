@@ -34,7 +34,8 @@ import Link from "next/link";
 // };
 
 const PropertySinglePage = ({ params }) => {
-  const id = params.id;
+  // const id = params.id;
+  const id = 1;
   const hotel = hotelsData.find((item) => item.id == id) || hotelsData[0];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);

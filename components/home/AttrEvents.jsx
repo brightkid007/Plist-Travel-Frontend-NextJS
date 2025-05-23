@@ -25,7 +25,7 @@ const AttrEvents = () => {
     <>
       {addContent.map((item) => (
         <div
-          className="col-md-6"
+          className="col-lg-6 col-md-12"
           data-aos="fade-up"
           data-aos-delay={item.delayAnimation}
           key={item.id}
@@ -41,7 +41,7 @@ const AttrEvents = () => {
                 unoptimized
               />
             </div>
-            <div className="ctaCard__content py-70 px-70 lg:py-30 lg:px-30">
+            <div className="ctaCard__content d-flex justify-center items-center flex-column">
               {item.meta ? (
                 <>
                   <div className="text-15 fw-500 text-white mb-10">
@@ -52,8 +52,8 @@ const AttrEvents = () => {
                 ""
               )}
 
-              <p className="text-30 lg:text-26 text-white">{item.title}</p>
-              <div className="d-inline-block mt-60">
+              <div className="text-30 lg:text-26 text-white text-center">{item.title}</div>
+              <div className="d-inline-block mt-20">
                 <Link
                   href={item.routerPath}
                   className="button px-48 py-15 -blue-1 -min-180 bg-white text-dark-1"

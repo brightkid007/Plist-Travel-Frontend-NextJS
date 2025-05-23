@@ -1,5 +1,4 @@
-
-'use client'
+"use client";
 
 import GoogleMapReact from "google-map-react";
 
@@ -8,8 +7,8 @@ const AnyReactComponent = ({ text }) => <div>{text}</div>;
 export default function MapFinder() {
   const defaultProps = {
     center: {
-      lat: 10.99835602,
-      lng: 77.01502627,
+      lat: 40.7128,
+      lng: -74.006,
     },
     zoom: 11,
   };
@@ -22,7 +21,7 @@ export default function MapFinder() {
       defaultCenter={defaultProps.center}
       defaultZoom={defaultProps.zoom}
     >
-      <AnyReactComponent lat={59.955413} lng={30.337844} text="My Marker" />
+      <AnyReactComponent lat={40.7128} lng={-74.006} text="" />
     </GoogleMapReact>
   );
 }

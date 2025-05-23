@@ -2,8 +2,16 @@ const TravelerInformationCard = ({ index, adults, setAdults }) => {
   return (
     <div className="col-12 row border-light rounded-8 py-20 px-20 w-full ml-15 mt-10">
       <div className="d-flex justify-between items-center mb-10">
-        <h1 className="text-15 lh-14 fw-500">Traveler {index + 1}</h1> 
-        {index != 0 && <button className="button text-13 fw-500 w-25" onClick={() => setAdults(Math.max(adults - 1, 1))}>Remove</button>}
+        <h1 className="text-15 lh-14 fw-500">Traveler {index + 1}</h1>
+        {index != 0 && (
+          <button
+            className="button text-13 fw-500 w-25"
+            disabled={adults == 1}
+            onClick={() => setAdults(adults - 1)}
+          >
+            Remove
+          </button>
+        )}
       </div>
       <div className="row y-gap-10">
         <div className="col-lg-6 col-md-6 col-sm-12">
