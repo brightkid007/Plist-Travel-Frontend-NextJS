@@ -3,79 +3,124 @@
 import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
 import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@mui/material";
 import { Checkbox } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
+import { 
+  getAdminUsers, 
+  createAdminUser, 
+  updateAdminUser, 
+  deleteAdminUser,
+  updateUserStatus,
+  getUserRoles,
+  assignUserRole,
+  isAdminAuthenticated
+} from "@/helpers/backend_helper";
 const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  
+  // Backend integration states
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleClose = () => {
     setShowModal(false);
+    setSelectedUser(null);
   };
-  const clients = [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@example.com",
-      role: "Vendor",
-      company_name: "Apple",
-      location: "New York, USA",
-      bookings: 8,
-      total_spent: "$12,450",
-      status: "Active",
-      created_at: "2025-05-22T08:20:00Z",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      email: "sarah.j@example.com",
-      role: "Admin",
-      company_name: "Xiaomi",
-      location: "Miami, USA",
-      bookings: 5,
-      total_spent: "$8,320",
-      status: "Active",
-      created_at: "2025-05-22T08:20:00Z",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      email: "michael.b@example.com",
-      role: "Agent",
-      company_name: "NASDAQ",
-      location: "Los Angeles, USA",
-      bookings: 3,
-      total_spent: "$5,670",
-      status: "Active",
-      created_at: "2025-05-22T08:20:00Z",
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      email: "emily.d@example.com",
-      role: "Agent",
-      company_name: "NASDAQ",
-      location: "Chicago, USA",
-      bookings: 2,
-      total_spent: "$3,450",
-      status: "Inactive",
-      created_at: "2025-05-22T08:20:00Z",
-    },
-    {
-      id: 5,
-      name: "Robert Wilson",
-      email: "robert.w@example.com",
-      role: "Customer",
-      company_name: "NASDAQ",
-      location: "Dallas, USA",
-      bookings: 6,
-      status: "Active",
-      created_at: "2025-05-22T08:20:00Z",
-    },
-  ];
+
+  // Load users data
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setLoading(true);
+        
+        if (!isAdminAuthenticated()) {
+          setError("Admin authentication required");
+          return;
+        }
+
+        const [usersData, rolesData] = await Promise.all([
+          getAdminUsers({ role: activeTab === "all" ? undefined : activeTab }),
+          getUserRoles()
+        ]);
+
+        setUsers(usersData?.data || []);
+        setRoles(rolesData?.data || []);
+        
+      } catch (err) {
+        console.error("Failed to load users:", err);
+        setError(err.message || "Failed to load users");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, [activeTab]);
+
+  // Handle user actions
+  const handleCreateUser = async (userData) => {
+    try {
+      const newUser = await createAdminUser(userData);
+      setUsers(prev => [...prev, newUser.data]);
+      setShowModal(false);
+    } catch (err) {
+      console.error("Failed to create user:", err);
+      setError("Failed to create user");
+    }
+  };
+
+  const handleUpdateUser = async (userId, userData) => {
+    try {
+      const updatedUser = await updateAdminUser(userId, userData);
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? updatedUser.data : user
+      ));
+    } catch (err) {
+      console.error("Failed to update user:", err);
+      setError("Failed to update user");
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await deleteAdminUser(userId);
+      setUsers(prev => prev.filter(user => user.id !== userId));
+    } catch (err) {
+      console.error("Failed to delete user:", err);
+      setError("Failed to delete user");
+    }
+  };
+
+  const handleUpdateUserStatus = async (userId, status) => {
+    try {
+      await updateUserStatus(userId, { status });
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, status } : user
+      ));
+    } catch (err) {
+      console.error("Failed to update user status:", err);
+      setError("Failed to update user status");
+    }
+  };
+
+  const handleAssignRole = async (userId, role) => {
+    try {
+      await assignUserRole(userId, { role });
+      setUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, role } : user
+      ));
+    } catch (err) {
+      console.error("Failed to assign role:", err);
+      setError("Failed to assign role");
+    }
+  };
   const tabs = [
     {
       label: "All",
@@ -158,13 +203,26 @@ const index = () => {
                 </tr>
               </thead>
               <tbody>
-                {clients
-                  .filter((item) => {
-                    return activeTab === "all"
-                      ? true
-                      : item.role.toLowerCase() === activeTab;
-                  })
-                  .map((client, index) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-20">
+                      <div className="text-16 text-light-1">Loading users...</div>
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-20">
+                      <div className="text-16 text-red-1">Error: {error}</div>
+                    </td>
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-20">
+                      <div className="text-16 text-light-1">No users found</div>
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((client, index) => (
                     <tr key={index}>
                       <td className="align-middle">
                         <div className="d-flex items-center gap-2">
@@ -215,21 +273,31 @@ const index = () => {
                         </div>
                       </td>
                       <td className="align-middle">
-                        <span className="text-12 border-blue-1 text-blue-1 fw-500 rounded-4 px-10 cursor-pointer">
+                        <span 
+                          className="text-12 border-blue-1 text-blue-1 fw-500 rounded-4 px-10 cursor-pointer"
+                          onClick={() => setSelectedUser(client)}
+                        >
                           Manage
                         </span>
                         <span className="text-12 border-green-3 text-green-3 fw-500 rounded-4 px-10 cursor-pointer text-nowrap mx-1">
                           Add Subscription
                         </span>
-                        <span className="text-12 border-yellow-3 text-yellow-3 fw-500 rounded-4 px-10 cursor-pointer">
-                          Deactive
+                        <span 
+                          className="text-12 border-yellow-3 text-yellow-3 fw-500 rounded-4 px-10 cursor-pointer"
+                          onClick={() => handleUpdateUserStatus(client.id, client.status === 'Active' ? 'Inactive' : 'Active')}
+                        >
+                          {client.status === 'Active' ? 'Deactivate' : 'Activate'}
                         </span>
-                        <span className="text-12 border-red-2 text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1">
+                        <span 
+                          className="text-12 border-red-2 text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
+                          onClick={() => handleDeleteUser(client.id)}
+                        >
                           Delete
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -242,7 +310,7 @@ const index = () => {
         aria-describedby="alert-dialog-title"
       >
         <div className="px-20 py-20 w-500 sm:w-full">
-          <ModalContent />
+          <ModalContent roles={roles} />
           <div className="d-flex justify-end gap-2 mt-10">
             <button
               className="text-14 border-light rounded-8 px-10 py-5"
@@ -253,10 +321,11 @@ const index = () => {
             <button
               className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
               onClick={() => {
+                // Handle form submission here
                 setShowModal(false);
               }}
             >
-              Create Role
+              Create User
             </button>
           </div>
         </div>
@@ -265,25 +334,11 @@ const index = () => {
   );
 };
 
-const ModalContent = () => {
-  const options = [
-    {
-      label: "Admin",
-      value: "admin",
-    },
-    {
-      label: "Vendor",
-      value: "vendor",
-    },
-    {
-      label: "Agent",
-      value: "agent",
-    },
-    {
-      label: "Customer",
-      value: "customer",
-    },
-  ];
+const ModalContent = ({ roles = [] }) => {
+  const options = roles.map(role => ({
+    label: role.name,
+    value: role.value || role.name.toLowerCase(),
+  }));
 
   const status = [
     {

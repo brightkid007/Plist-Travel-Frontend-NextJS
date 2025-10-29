@@ -4,11 +4,22 @@ import DashboardCard from "./components/DashboardCard";
 // import ChartMain from "./components/ChartMain";
 import Link from "next/link";
 import RecentBooking from "./components/RecentBooking";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PerformenceMetrics from "./components/PerformenceMetrics";
 import AdminDashboardLayout from "../common/layout";
 import data from "./data";
 import DatePicker, { DateObject } from "react-multi-date-picker";
+import { 
+  getAdminDashboard, 
+  getAdminAnalytics, 
+  getAdminMetrics,
+  getAdminBookings,
+  getAdminUsers,
+  getAdminListings,
+  exportAdminData,
+  isAdminAuthenticated,
+  getLoggedInAdmin
+} from "@/helpers/backend_helper";
 
 const index = () => {
   const [activeMetricTab, setActiveMetricTab] = useState("daily");
@@ -16,11 +27,86 @@ const index = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [startDate, setStartDate] = useState(new DateObject());
   const [endDate, setEndDate] = useState(new DateObject());
+  
+  // Backend integration states
+  const [dashboardData, setDashboardData] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [metricsData, setMetricsData] = useState(null);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [adminUser, setAdminUser] = useState(null);
+  
   const tabs = [
     { label: "Overview", value: "overview" },
     { label: "Analytics", value: "analytics" },
     { label: "Reports", value: "reports" },
   ];
+
+  // Load dashboard data on component mount
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Check if admin is authenticated
+        if (!isAdminAuthenticated()) {
+          setError("Admin authentication required");
+          return;
+        }
+
+        const admin = getLoggedInAdmin();
+        setAdminUser(admin);
+
+        // Load dashboard data based on active tab
+        const params = {
+          startDate: startDate.format("YYYY-MM-DD"),
+          endDate: endDate.format("YYYY-MM-DD"),
+          type: option,
+          period: activeMetricTab
+        };
+
+        const [dashboard, analytics, metrics, bookings] = await Promise.all([
+          getAdminDashboard(params),
+          getAdminAnalytics(params),
+          getAdminMetrics(params),
+          getAdminBookings({ limit: 10, status: 'all' })
+        ]);
+
+        setDashboardData(dashboard);
+        setAnalyticsData(analytics);
+        setMetricsData(metrics);
+        setRecentBookings(bookings?.data || []);
+        
+      } catch (err) {
+        console.error("Failed to load dashboard data:", err);
+        setError(err.message || "Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [activeTab, option, activeMetricTab, startDate, endDate]);
+
+  // Handle export data
+  const handleExportData = async () => {
+    try {
+      const params = {
+        startDate: startDate.format("YYYY-MM-DD"),
+        endDate: endDate.format("YYYY-MM-DD"),
+        type: option,
+        format: 'csv'
+      };
+      
+      const exportResult = await exportAdminData(params);
+      // Handle file download
+      console.log("Export data:", exportResult);
+    } catch (err) {
+      console.error("Export failed:", err);
+      setError("Failed to export data");
+    }
+  };
 
   return (
     <AdminDashboardLayout>
@@ -29,8 +115,12 @@ const index = () => {
           <h1 className="text-30 lh-14 fw-600">Admin Dashboard</h1>
         </div>
         <div className="col-auto ms-auto">
-          <button className="button border-blue-1 text-blue-1 px-15 py-10 rounded-8">
-            Export Data
+          <button 
+            className="button border-blue-1 text-blue-1 px-15 py-10 rounded-8"
+            onClick={handleExportData}
+            disabled={loading}
+          >
+            {loading ? "Exporting..." : "Export Data"}
           </button>
         </div>
         <div className="col-auto">
@@ -38,7 +128,9 @@ const index = () => {
             Create Package
           </button>
         </div>
-        <div className="col-12 text-16 fw-500">Welcome to Super Admin!</div>
+        <div className="col-12 text-16 fw-500">
+          Welcome {adminUser?.name || 'Super Admin'}!
+        </div>
         {/* <div className="col-12 text-14 text-light-1">Sales Summary</div> */}
       </div>
       <div className="row px-10 mb-20">
@@ -159,7 +251,17 @@ const index = () => {
         </div>
       </div>
 
-      <DashboardCard data={data[option][activeTab]} />
+      {loading ? (
+        <div className="text-center py-20">
+          <div className="text-16 text-light-1">Loading dashboard data...</div>
+        </div>
+      ) : error ? (
+        <div className="text-center py-20">
+          <div className="text-16 text-red-1">Error: {error}</div>
+        </div>
+      ) : (
+        <DashboardCard data={dashboardData || data[option][activeTab]} />
+      )}
 
       <div className="row y-gap-30 pt-20 chart_responsive">
         <div className="col-12">
@@ -323,7 +425,7 @@ const index = () => {
               </div>
             </div>
             
-            <RecentBooking />
+            <RecentBooking bookings={recentBookings} loading={loading} />
           </div>
         </div>
 
