@@ -1,10 +1,10 @@
-import { 
-  AdminAPIClient, 
-  AuthAPIClient, 
-  ListingAPIClient, 
+import {
+  AdminAPIClient,
+  AuthAPIClient,
+  ListingAPIClient,
   BookingAPIClient,
-  setAdminAuthorization, 
-  clearAuthorization 
+  setAdminAuthorization,
+  clearAuthorization
 } from "./api_helper";
 import * as url from "./url_helper";
 
@@ -12,41 +12,41 @@ import * as url from "./url_helper";
 const api = AdminAPIClient;
 
 // ===========================================
-// ADMIN AUTHENTICATION & SESSION MANAGEMENT
+// AUTHENTICATION & SESSION MANAGEMENT (GLOBAL)
 // ===========================================
 
 /**
- * Set admin authentication token
- * @param {string} token - Admin JWT token
+ * Set authentication token (global)
+ * @param {string} token - JWT token
  */
-export const setAdminAuth = (token) => {
+export const setAuth = (token) => {
   setAdminAuthorization(token);
-  localStorage.setItem("adminToken", token);
+  localStorage.setItem("authToken", token);
 };
 
 /**
- * Get admin authentication token
- * @returns {string|null} Admin token or null
+ * Get authentication token (global)
+ * @returns {string|null} Token or null
  */
-export const getAdminToken = () => {
-  return localStorage.getItem("adminToken");
+export const getAuthToken = () => {
+  return localStorage.getItem("authToken");
 };
 
 /**
- * Clear admin authentication
+ * Clear authentication
  */
-export const clearAdminAuth = () => {
+export const clearAuth = () => {
   clearAuthorization();
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("adminUser");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUser");
 };
 
 /**
- * Get logged in admin user
- * @returns {Object|null} Admin user data or null
+ * Get logged in user object
+ * @returns {Object|null} User data or null
  */
-export const getLoggedInAdmin = () => {
-  const user = localStorage.getItem("adminUser");
+export const getLoggedInUser = () => {
+  const user = localStorage.getItem("authUser");
   if (!user) {
     return null;
   }
@@ -54,24 +54,24 @@ export const getLoggedInAdmin = () => {
 };
 
 /**
- * Set logged in admin user
- * @param {Object} user - Admin user data
+ * Set logged in user object
+ * @param {Object} user
  */
-export const setLoggedInAdmin = (user) => {
-  localStorage.setItem("adminUser", JSON.stringify(user));
+export const setLoggedInUser = (user) => {
+  localStorage.setItem("authUser", JSON.stringify(user));
 };
 
 /**
- * Check if admin is authenticated
- * @returns {boolean} True if admin is logged in
+ * Check if the user is authenticated (global)
+ * @returns {boolean} True if logged in
  */
-export const isAdminAuthenticated = () => {
-  const token = getAdminToken();
-  const user = getLoggedInAdmin();
+export const isAuthenticated = () => {
+  const token = getAuthToken();
+  const user = getLoggedInUser();
   return !!(token && user);
 };
-// Gets the logged in user data from local session
 
+// Gets the logged in user data from local session
 
 // ===========================================
 // ADMIN API METHODS

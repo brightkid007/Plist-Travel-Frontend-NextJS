@@ -1,17 +1,20 @@
 import Header from "@/components/header/dashboard-header";
 import Sidebar from "./Sidebar";
 import Footer from "@/components/footer/Footer";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import Forbidden403 from "@/components/common/Forbidden403";
 
 const AdminDashboardLayout = ({ children }) => {
-  const { isAuthenticated, loading } = useAdminAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/login");
+    if (!loading) {
+      if (!isAuthenticated) {
+        router.push("/login");
+      }
     }
   }, [isAuthenticated, loading, router]);
 
@@ -23,28 +26,29 @@ const AdminDashboardLayout = ({ children }) => {
     );
   }
 
+  // Show 403 if the user is authenticated but not admin
+  if (isAuthenticated && (!user || user.role !== "admin")) {
+    return <Forbidden403 role="admin" />;
+  }
+
   if (!isAuthenticated) {
-    return null; // Will redirect to login
+    return null;
   }
 
   return (
     <>
       <div className="header-margin"></div>
-
       <Header />
-
       <div className="dashboard">
         <div className="dashboard__sidebar bg-white scroll-bar-1">
           <Sidebar />
         </div>
-
         <div className="dashboard__main">
           <div
             className="dashboard__content bg-light-2 d-flex flex-column justify-between"
             style={{ minHeight: "calc(100vh - 90px)" }}
           >
             <div className="flex-fill">{children}</div>
-
             <Footer />
           </div>
         </div>

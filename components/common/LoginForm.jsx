@@ -5,9 +5,10 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import logo from "/public/img/general/plist logo 1.png";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LoginForm = () => {
+  const { login } = useAuth();
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
@@ -16,7 +17,8 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  const { login: adminLogin } = useAdminAuth();
+  // Replace destructure/use of adminLogin with usage of your main auth's login function
+  // After login, check user.role and route accordingly.
   const router = useRouter();
 
   // Role options
@@ -33,23 +35,11 @@ const LoginForm = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Route based on selected role
-      switch (credentials.role) {
-        case "admin":
-          await adminLogin(credentials);
-          router.push("/admin/dashboard");
-          break;
-        case "vendor":
-          router.push("/vendor");
-          break;
-        case "agent":
-          router.push("/agent");
-          break;
-        case "customer":
-        default:
-          router.push("/customer");
-          break;
+      const response = await login(credentials);
+      if (response.success) {
+        router.push(`/${response.user.role}/dashboard`);
+      } else {
+        setError(response.error || "Login failed");
       }
     } catch (err) {
       setError(err.message || "Login failed");

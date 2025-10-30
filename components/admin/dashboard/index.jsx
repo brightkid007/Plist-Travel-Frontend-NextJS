@@ -14,11 +14,9 @@ import {
   getAdminAnalytics, 
   getAdminMetrics,
   getAdminBookings,
-  getAdminUsers,
-  getAdminListings,
   exportAdminData,
-  isAdminAuthenticated,
-  getLoggedInAdmin
+  isAuthenticated,
+  getLoggedInUser
 } from "@/helpers/backend_helper";
 
 const index = () => {
@@ -35,7 +33,7 @@ const index = () => {
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [adminUser, setAdminUser] = useState(null);
+  const [user, setUser] = useState(null);
   
   const tabs = [
     { label: "Overview", value: "overview" },
@@ -50,13 +48,13 @@ const index = () => {
         setLoading(true);
         
         // Check if admin is authenticated
-        if (!isAdminAuthenticated()) {
+        if (!isAuthenticated()) {
           setError("Admin authentication required");
           return;
         }
 
-        const admin = getLoggedInAdmin();
-        setAdminUser(admin);
+        const user = getLoggedInUser();
+        setUser(user);
 
         // Load dashboard data based on active tab
         const params = {
@@ -129,7 +127,7 @@ const index = () => {
           </button>
         </div>
         <div className="col-12 text-16 fw-500">
-          Welcome {adminUser?.name || 'Super Admin'}!
+          Welcome {user?.name || 'Super Admin'}!
         </div>
         {/* <div className="col-12 text-14 text-light-1">Sales Summary</div> */}
       </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function AdminLayout({ children }) {
   return (
-    <AdminAuthProvider>
+    <AuthProvider>
       {children}
-    </AdminAuthProvider>
+    </AuthProvider>
   );
 }

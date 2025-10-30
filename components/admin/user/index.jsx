@@ -15,7 +15,7 @@ import {
   updateUserStatus,
   getUserRoles,
   assignUserRole,
-  isAdminAuthenticated
+  isAuthenticated
 } from "@/helpers/backend_helper";
 const index = () => {
   const router = useRouter();
@@ -40,7 +40,7 @@ const index = () => {
       try {
         setLoading(true);
         
-        if (!isAdminAuthenticated()) {
+        if (!isAuthenticated()) {
           setError("Admin authentication required");
           return;
         }
