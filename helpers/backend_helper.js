@@ -92,29 +92,58 @@ export const getAdminMetrics = (params) => api.get(url.GET_ADMIN_METRICS, params
 export const exportAdminData = (params) => api.get(url.EXPORT_ADMIN_DATA, params);
 
 // USER MANAGEMENT
-// Get all users (admin)
-export const getAdminUsers = (params) => api.get(url.GET_ADMIN_USERS, params);
+// Get all users (admin) - uses GET /users endpoint
+export const getAdminUsers = (params) => {
+  return AuthAPIClient.get("/users", params);
+};
 
 // Get user by ID
-export const getAdminUserById = (id) => api.get(`${url.GET_ADMIN_USER_BY_ID}/${id}`);
+export const getAdminUserById = (id) => AuthAPIClient.get(`/users/${id}`);
 
-// Create new user
-export const createAdminUser = (data) => api.create(url.CREATE_ADMIN_USER, data);
+// Create new user - uses /auth/register endpoint
+export const createAdminUser = (data) => AuthAPIClient.create("/auth/register", data);
 
-// Update user
-export const updateAdminUser = (id, data) => api.update(`${url.UPDATE_ADMIN_USER}/${id}`, data);
+// Update user - uses PUT /users/:id endpoint
+export const updateAdminUser = (id, data) => AuthAPIClient.update(`/users/${id}`, data);
 
-// Delete user
-export const deleteAdminUser = (id) => api.delete(`${url.DELETE_ADMIN_USER}/${id}`);
+// Delete user - uses DELETE /users/:id to permanently delete user
+export const deleteAdminUser = (id) => {
+  return AuthAPIClient.delete(`/users/${id}`).then(response => {
+    // Handle response structure: { status, message, data }
+    if (response?.data) return response.data;
+    if (response?.status === 200) return response;
+    return response;
+  });
+};
 
-// Update user status
-export const updateUserStatus = (id, data) => api.update(`${url.UPDATE_USER_STATUS}/${id}/status`, data);
+// Update user status (disable/enable)
+export const updateUserStatus = (id, data) => {
+  // Use PATCH to disable user
+  if (data.status === 'Inactive' || data.is_active === false) {
+    return AuthAPIClient.patch(`/users/${id}`, {}).then(response => {
+      if (response?.data) return response.data;
+      return response;
+    });
+  } else {
+    // Re-enable by setting disabledAt to null
+    return AuthAPIClient.update(`/users/${id}`, { disabledAt: null });
+  }
+};
 
-// Get user roles
-export const getUserRoles = () => api.get(url.GET_USER_ROLES);
+// Get user roles - Returns static roles list
+export const getUserRoles = () => {
+  return Promise.resolve({
+    data: [
+      { name: "Admin", value: "admin" },
+      { name: "Vendor", value: "vendor" },
+      { name: "Agent", value: "agent" },
+      { name: "Customer", value: "customer" }
+    ]
+  });
+};
 
 // Assign role to user
-export const assignUserRole = (id, data) => api.update(`${url.ASSIGN_USER_ROLE}/${id}/role`, data);
+export const assignUserRole = (id, data) => AuthAPIClient.update(`/users/${id}`, { role: data.role });
 
 // BOOKING MANAGEMENT
 // Get all bookings (admin) - using BookingAPIClient

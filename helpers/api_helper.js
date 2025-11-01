@@ -148,13 +148,20 @@ class APIClient {
     let paramKeys = [];
 
     if(params){
-      Object.keys(params).map(key => {
-        paramKeys.push(key + '=' + params[key])
-        return paramKeys;
-    });
+      Object.keys(params).forEach(key => {
+        // Only include params that are not undefined, null, or empty
+        const value = params[key];
+        if (value !== undefined && value !== null && value !== "") {
+          paramKeys.push(key + '=' + encodeURIComponent(value));
+        }
+      });
     
       const queryString = paramKeys && paramKeys.length ? paramKeys.join('&') : "";
-      response = this.service.get(`${url}?${queryString}`, params);
+      if (queryString) {
+        response = this.service.get(`${url}?${queryString}`, params);
+      } else {
+        response = this.service.get(`${url}`, params);
+      }
     } else {
         response = this.service.get(`${url}`, params);
     }
@@ -174,6 +181,13 @@ class APIClient {
    */
   update = (url, data) => {
     return this.service.put(url, data);
+  };
+
+  /**
+   * Patch data (partial update)
+   */
+  patch = (url, data) => {
+    return this.service.patch(url, data);
   };
 
   /**
