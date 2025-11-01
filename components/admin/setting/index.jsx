@@ -18,11 +18,11 @@ const index = () => {
             value: "general",
             content: <General key={"general"} />,
         },
-        {
-            label: "Appearance",
-            value: "appearance",
-            content: <Appearance key={"appearance"} />,
-        },
+        // {
+        //     label: "Appearance",
+        //     value: "appearance",
+        //     content: <Appearance key={"appearance"} />,
+        // },
         {
             label: "Localization",
             value: "localization",

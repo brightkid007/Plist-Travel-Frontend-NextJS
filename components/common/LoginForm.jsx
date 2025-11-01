@@ -6,19 +6,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import logo from "/public/img/general/plist logo 1.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const LoginForm = () => {
-  const { login } = useAuth();
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
     role: "customer"
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  
-  // Replace destructure/use of adminLogin with usage of your main auth's login function
-  // After login, check user.role and route accordingly.
+
+  const { login } = useAuth();
   const router = useRouter();
 
   // Role options
@@ -34,15 +32,31 @@ const LoginForm = () => {
     
     try {
       setLoading(true);
-      setError(null);
+
       const response = await login(credentials);
-      if (response.success) {
-        router.push(`/${response.user.role}/dashboard`);
-      } else {
-        setError(response.error || "Login failed");
+      const role = response?.user?.role || credentials.role;
+
+      // Optional success toast
+      toast.success("Signed in successfully");
+
+      switch (role) {
+        case "admin":
+          router.push("/admin/dashboard");
+          break;
+        case "vendor":
+          router.push("/vendor");
+          break;
+        case "agent":
+          router.push("/agent");
+          break;
+        case "customer":
+        default:
+          router.push("/customer");
+          break;
       }
     } catch (err) {
-      setError(err.message || "Login failed");
+      const message = typeof err === "string" ? err : err?.message || "Login failed";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -68,14 +82,7 @@ const LoginForm = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="col-12">
-            <div className="bg-red-1 text-white rounded-4 p-10 text-14">
-              {error}
-            </div>
-          </div>
-        )}
-
+        {/* Email */}
         <div className="col-12">
           <h1 className="text-15 lh-14 fw-500">Email</h1>
           <input
@@ -88,6 +95,7 @@ const LoginForm = () => {
           />
         </div>
 
+        {/* Password */}
         <div className="col-12">
           <h1 className="text-15 lh-14 fw-500">Password</h1>
           <input
@@ -100,6 +108,7 @@ const LoginForm = () => {
           />
         </div>
 
+        {/* Role */}
         <div className="col-12">
           <h1 className="text-15 lh-14 fw-500">Select Role</h1>
           <select

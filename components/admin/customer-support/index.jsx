@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardCard from "../common/DashboardCard";
 import AdminDashboardLayout from "../common/layout";
 import data from "./data";
@@ -10,17 +10,44 @@ import { Filter } from "lucide-react";
 import TicketList from "./TicketList";
 import Conversation from "./Conversation";
 import { ChatBubbleOutline } from "@mui/icons-material";
+import { getConversations } from "@/helpers/backend_helper";
 
 const index = () => {
   const [openFilter, setOpenFilter] = useState(false);
+  const [cards, setCards] = useState(data);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
+
   const handleClose = () => {
     setOpenFilter(false);
   };
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getConversations();
+        const conversations = res?.conversations || res?.data?.conversations || res?.data || res || [];
+        const total = conversations.length || 0;
+        const open = conversations.filter((c) => (c.status || "Open") === "Open" || (c.status || "Open") === "open").length;
+        const inProgress = conversations.filter((c) => (c.status || "") === "In Progress" || (c.status || "") === "in_progress").length;
+        const resolved = conversations.filter((c) => (c.status || "") === "Resolved" || (c.status || "") === "resolved").length;
+        
+        setCards([
+          { ...data[0], amount: String(total) },
+          { ...data[1], amount: String(open + inProgress) },
+          data[2],
+          { ...data[3], amount: resolved > 0 ? `${Math.round((resolved / total) * 100)}%` : "0%" },
+        ]);
+      } catch (_) {
+        // keep defaults
+      }
+    };
+    load();
+  }, []);
+
   const [activeTab, setActiveTab] = useState("tickets");
   const tabs = [
-    { label: "Tickets", value: "tickets", content: <TicketList /> },
-    { label: "Conversation", value: "conversation", content: <Conversation /> },
+    { label: "Tickets", value: "tickets" },
+    { label: "Conversation", value: "conversation" },
   ];
 
   return (
@@ -66,7 +93,7 @@ const index = () => {
         </div>
       </div>
 
-      <DashboardCard data={data} />
+      <DashboardCard data={cards} />
 
       <div className="row px-10 mb-20 mt-20">
         {tabs.map((item) => (
@@ -84,7 +111,11 @@ const index = () => {
       </div>
 
       <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100">
-        {tabs.find((item) => item.value === activeTab)?.content}
+        {activeTab === "tickets" ? (
+          <TicketList onSelectTicket={setSelectedTicketId} />
+        ) : (
+          <Conversation ticketId={selectedTicketId} />
+        )}
       </div>
     </AdminDashboardLayout>
   );

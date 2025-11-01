@@ -1,72 +1,43 @@
-import { User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User, Inbox } from "lucide-react";
+import { getConversations } from "@/helpers/backend_helper";
 
-const TicketList = () => {
-  const tickets = [
-    {
-      ticket_id: "TKT-1001",
-      customer_name: "John Smith",
-      customer_email: "john@example.com",
-      issue: "Booking cancellation issue",
-      ticket_type: "Booking Issues",
-      status: "Open",
-      priority: "High",
-      last_updated: "2023-10-16",
-    },
-    {
-      ticket_id: "TKT-1002",
-      customer_name: "Sarah Johnson",
-      customer_email: "sarah@example.com",
-      issue: "Payment not processed",
-      ticket_type: "Payment Issues",
-      status: "In Progress",
-      priority: "High",
-      last_updated: "2023-10-16",
-    },
-    {
-      ticket_id: "TKT-1003",
-      customer_name: "Michael Brown",
-      customer_email: "michael@example.com",
-      issue: "Unable to update profile",
-      ticket_type: "Website Issues",
-      status: "Open",
-      priority: "Medium",
-      last_updated: "2023-10-13",
-    },
-    {
-      ticket_id: "TKT-1004",
-      customer_name: "Emily Davis",
-      customer_email: "emily@example.com",
-      issue: "Hotel amenities not as described",
-      ticket_type: "Vendor Issues",
-      status: "In Progress",
-      priority: "Medium",
-      last_updated: "2023-10-15",
-    },
-    {
-      ticket_id: "TKT-1005",
-      customer_name: "David Wilson",
-      customer_email: "david@example.com",
-      issue: "Refund request for cancellation",
-      ticket_type: "Booking Issues",
-      status: "Resolved",
-      priority: "High",
-      last_updated: "2023-10-14",
-    },
-  ];
+const TicketList = ({ filterType = "all", onSelectTicket }) => {
+  const [tickets, setTickets] = useState([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getConversations();
+        const conversations = res?.conversations || res?.data?.conversations || res?.data || res || [];
+        console.log(conversations);
+        const mapped = (Array.isArray(conversations) ? conversations : []).map((c) => ({
+          ticket_id: c.ticket_id || c.id || `TKT-${c.id}`,
+          customer_name: c.user?.user_profile?.first_name && c.user?.user_profile?.last_name
+            ? `${c.user.user_profile.first_name} ${c.user.user_profile.last_name}`
+            : c.user?.email?.split("@")[0] || "Unknown",
+          customer_email: c.user?.email || "—",
+          issue: c.subject || c.ticket_id || "No subject",
+          ticket_type: c.type || c.category || "Other",
+          status: c.status || "Open",
+          priority: c.priority || "Medium",
+          last_updated: c.updated_at || c.updatedAt || c.created_at || c.createdAt || "—",
+          conversation_id: c.id,
+        }));
+        setTickets(mapped);
+      } catch (_) {
+        setTickets([]);
+      }
+    };
+    load();
+  }, [filterType]);
+
+  const filteredTickets = filterType !== "all" 
+    ? tickets.filter((t) => t.ticket_type?.toLowerCase().includes(filterType.toLowerCase()))
+    : tickets;
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
-      <select className="form-select border-light h-45 px-15 w-140">
-        <option value="all">All Ticket Type</option>
-        <option value="booking">Booking Issues</option>
-        <option value="payment">Payment Issues</option>
-        <option value="website">Website Issues</option>
-        <option value="vendor">Vendor Issues</option>
-        <option value="agent">Agent Issues</option>
-        <option value="subscription">Subscription Issues</option>
-        <option value="billing">Billing Issues</option>
-        <option value="other">Other Issues</option>
-      </select>
       <table className="table-2 col-12">
         <thead>
           <tr className="text-light-1 fw-600">
@@ -81,8 +52,25 @@ const TicketList = () => {
           </tr>
         </thead>
         <tbody>
-          {tickets.map((row, index) => (
-            <tr key={index}>
+          {filteredTickets.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="text-center py-40">
+                <div className="d-flex flex-column items-center gap-10">
+                  <div className="size-60 flex-center rounded-circle bg-light-2">
+                    <Inbox size={32} className="text-light-1" />
+                  </div>
+                  <div className="text-16 text-light-1 fw-500">No tickets found.</div>
+                  <div className="text-14 text-light-1">There are no support tickets matching your criteria.</div>
+                </div>
+              </td>
+            </tr>
+          ) : (
+            filteredTickets.map((row, index) => (
+            <tr 
+              key={index}
+              onClick={() => onSelectTicket?.(row.conversation_id)}
+              style={{ cursor: onSelectTicket ? "pointer" : "default" }}
+            >
               <td className="align-middle">{row.ticket_id}</td>
               <td className="align-middle">
                 <div className="d-flex items-center gap-3">
@@ -128,7 +116,8 @@ const TicketList = () => {
                 <span className="material-symbols-outlined">more_horiz</span>
               </td>
             </tr>
-          ))}
+            ))
+          )}
         </tbody>
       </table>
     </div>

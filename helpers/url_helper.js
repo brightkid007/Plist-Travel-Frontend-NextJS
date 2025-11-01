@@ -83,3 +83,19 @@ export const UPDATE_EMAIL_TEMPLATE = "/admin/email-templates";
 export const GET_ADMIN_REPORTS = "/admin/reports";
 export const GENERATE_REPORT = "/admin/reports/generate";
 export const GET_PLATFORM_STATISTICS = "/admin/statistics";
+
+// Support Tickets / Conversations (Communication Service)
+export const GET_CONVERSATIONS = "/conversations";
+export const CREATE_CONVERSATION = "/conversations";
+export const GET_CONVERSATION_BY_ID = "/conversations";
+export const UPDATE_CONVERSATION = "/conversations";
+export const DELETE_CONVERSATION = "/conversations";
+export const GET_CONVERSATIONS_BY_USER = "/conversations/by-user";
+
+// Messages (Communication Service)
+export const GET_MESSAGES = "/messages";
+export const CREATE_MESSAGE = "/messages";
+export const GET_MESSAGE_BY_ID = "/messages";
+export const UPDATE_MESSAGE = "/messages";
+export const DELETE_MESSAGE = "/messages";
+export const GET_MESSAGES_BY_CONVERSATION = "/messages/by-conversation";

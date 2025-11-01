@@ -81,13 +81,6 @@ const config = {
         'Content-Type': 'application/json',
       }
     },
-    ADMIN: {
-      baseURL: process.env.NEXT_PUBLIC_ADMIN_SERVICE_URL,
-      timeout: 15000,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }
   },
 
   // Environment

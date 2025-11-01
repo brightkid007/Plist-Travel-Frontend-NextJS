@@ -1,15 +1,16 @@
 import {
-  AdminAPIClient,
+  APIClient,
   AuthAPIClient,
   ListingAPIClient,
   BookingAPIClient,
-  setAdminAuthorization,
+  CommunicationAPIClient,
+  setAuthorization,
   clearAuthorization
 } from "./api_helper";
 import * as url from "./url_helper";
 
-// Use AdminAPIClient for admin operations
-const api = AdminAPIClient;
+// Use APIClient for all operations
+const api = APIClient;
 
 // ===========================================
 // AUTHENTICATION & SESSION MANAGEMENT (GLOBAL)
@@ -20,7 +21,7 @@ const api = AdminAPIClient;
  * @param {string} token - JWT token
  */
 export const setAuth = (token) => {
-  setAdminAuthorization(token);
+  setAuthorization(token);
   localStorage.setItem("authToken", token);
 };
 
@@ -116,20 +117,20 @@ export const getUserRoles = () => api.get(url.GET_USER_ROLES);
 export const assignUserRole = (id, data) => api.update(`${url.ASSIGN_USER_ROLE}/${id}/role`, data);
 
 // BOOKING MANAGEMENT
-// Get all bookings (admin)
-export const getAdminBookings = (params) => api.get(url.GET_ADMIN_BOOKINGS, params);
+// Get all bookings (admin) - using BookingAPIClient
+export const getAdminBookings = (params) => BookingAPIClient.get(url.GET_ADMIN_BOOKINGS, params);
 
 // Get booking by ID
-export const getAdminBookingById = (id) => api.get(`${url.GET_ADMIN_BOOKING_BY_ID}/${id}`);
+export const getAdminBookingById = (id) => BookingAPIClient.get(`${url.GET_ADMIN_BOOKING_BY_ID}/${id}`);
 
 // Update booking status
-export const updateBookingStatus = (id, data) => api.update(`${url.UPDATE_BOOKING_STATUS}/${id}/status`, data);
+export const updateBookingStatus = (id, data) => BookingAPIClient.update(`${url.UPDATE_BOOKING_STATUS}/${id}/status`, data);
 
 // Force booking status (admin override)
-export const forceBookingStatus = (id, status) => api.update(`${url.FORCE_BOOKING_STATUS}/${id}/${status}`);
+export const forceBookingStatus = (id, status) => BookingAPIClient.update(`${url.FORCE_BOOKING_STATUS}/${id}/${status}`);
 
-// Get booking analytics
-export const getBookingAnalytics = (params) => api.get(url.GET_BOOKING_ANALYTICS, params);
+// Get booking analytics - using BookingAPIClient
+export const getBookingAnalytics = (params) => BookingAPIClient.get(url.GET_BOOKING_ANALYTICS, params);
 
 // LISTING MANAGEMENT
 // Get all listings (admin)
@@ -245,10 +246,10 @@ export const deleteBanner = (id) => api.delete(`${url.DELETE_BANNER}/${id}`);
 
 // SYSTEM SETTINGS
 // Get system settings
-export const getSystemSettings = () => api.get(url.GET_SYSTEM_SETTINGS);
+export const getSystemSettings = () => BookingAPIClient.get(url.GET_SYSTEM_SETTINGS);
 
 // Update system settings
-export const updateSystemSettings = (data) => api.update(url.UPDATE_SYSTEM_SETTINGS, data);
+export const updateSystemSettings = (data) => BookingAPIClient.update(url.UPDATE_SYSTEM_SETTINGS, data);
 
 // Email templates
 export const getEmailTemplates = () => api.get(url.GET_EMAIL_TEMPLATES);
@@ -263,3 +264,47 @@ export const generateReport = (data) => api.create(url.GENERATE_REPORT, data);
 
 // Get platform statistics
 export const getPlatformStatistics = (params) => api.get(url.GET_PLATFORM_STATISTICS, params);
+
+// ===========================================
+// SUPPORT TICKETS / CONVERSATIONS (Communication Service)
+// ===========================================
+
+// Get all conversations/tickets
+export const getConversations = (params) => CommunicationAPIClient.get(url.GET_CONVERSATIONS, params);
+
+// Create new conversation/ticket
+export const createConversation = (data) => CommunicationAPIClient.create(url.CREATE_CONVERSATION, data);
+
+// Get conversation by ID
+export const getConversationById = (id) => CommunicationAPIClient.get(`${url.GET_CONVERSATION_BY_ID}/${id}`);
+
+// Update conversation
+export const updateConversation = (id, data) => CommunicationAPIClient.update(`${url.UPDATE_CONVERSATION}/${id}`, data);
+
+// Delete conversation
+export const deleteConversation = (id) => CommunicationAPIClient.delete(`${url.DELETE_CONVERSATION}/${id}`);
+
+// Get conversations by user
+export const getConversationsByUser = (userId) => CommunicationAPIClient.get(`${url.GET_CONVERSATIONS_BY_USER}/${userId}`);
+
+// ===========================================
+// MESSAGES (Communication Service)
+// ===========================================
+
+// Get all messages
+export const getMessages = (params) => CommunicationAPIClient.get(url.GET_MESSAGES, params);
+
+// Create new message
+export const createMessage = (data) => CommunicationAPIClient.create(url.CREATE_MESSAGE, data);
+
+// Get message by ID
+export const getMessageById = (id) => CommunicationAPIClient.get(`${url.GET_MESSAGE_BY_ID}/${id}`);
+
+// Update message
+export const updateMessage = (id, data) => CommunicationAPIClient.update(`${url.UPDATE_MESSAGE}/${id}`, data);
+
+// Delete message
+export const deleteMessage = (id) => CommunicationAPIClient.delete(`${url.DELETE_MESSAGE}/${id}`);
+
+// Get messages by conversation
+export const getMessagesByConversation = (conversationId) => CommunicationAPIClient.get(`${url.GET_MESSAGES_BY_CONVERSATION}/${conversationId}`);

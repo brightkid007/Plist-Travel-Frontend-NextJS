@@ -9,6 +9,22 @@ const createServiceInstance = (serviceConfig) => {
     headers: serviceConfig.headers
   });
 
+  // Attach auth token on every request (from localStorage)
+  instance.interceptors.request.use((config) => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+      if (token) {
+        // Support both common header styles used across services
+        config.headers = config.headers || {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+        config.headers["x-access-token"] = token;
+      }
+    } catch (_) {
+      // ignore storage errors in SSR
+    }
+    return config;
+  });
+
   // Add response interceptor
   instance.interceptors.response.use(
     function (response) {
@@ -23,19 +39,19 @@ const createServiceInstance = (serviceConfig) => {
           message = "Internal Server Error";
           break;
         case 401:
-          message = "Invalid credentials or unauthorized access";
+          message = error.response?.data?.message || "Invalid credentials or unauthorized access";
           break;
         case 403:
-          message = "Access forbidden. Insufficient permissions";
+          message = error.response?.data?.message || "Access forbidden. Insufficient permissions";
           break;
         case 404:
-          message = "Sorry! the data you are looking for could not be found";
+          message = error.response?.data?.message || "Sorry! the data you are looking for could not be found";
           break;
         case 422:
           message = error.response?.data?.message || "Validation error";
           break;
         case 429:
-          message = "Too many requests. Please try again later";
+          message = error.response?.data?.message || "Too many requests. Please try again later";
           break;
         default:
           message = error.response?.data?.message || error.message || "An error occurred";
@@ -55,7 +71,6 @@ export const paymentAPI = createServiceInstance(config.SERVICES.PAYMENT);
 export const communicationAPI = createServiceInstance(config.SERVICES.COMMUNICATION);
 export const reviewAPI = createServiceInstance(config.SERVICES.REVIEW);
 export const pricingAPI = createServiceInstance(config.SERVICES.PRICING);
-export const adminAPI = createServiceInstance(config.SERVICES.ADMIN);
 
 // Default API instance (for backward compatibility)
 axios.defaults.baseURL = config.API_URL;
@@ -177,7 +192,6 @@ export const PaymentAPIClient = new APIClient(paymentAPI);
 export const CommunicationAPIClient = new APIClient(communicationAPI);
 export const ReviewAPIClient = new APIClient(reviewAPI);
 export const PricingAPIClient = new APIClient(pricingAPI);
-export const AdminAPIClient = new APIClient(adminAPI);
 const getLoggedinUser = () => {
   const user = localStorage.getItem("authUser");
   if (!user) {

@@ -1,46 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 
-const Filter = () => {
+const Filter = ({ onFilterChange }) => {
+  const [status, setStatus] = useState("all");
+  const [category, setCategory] = useState("all");
+  const [subcategory, setSubcategory] = useState("all");
+  const [type, setType] = useState("all");
   const [startDate, setStartDate] = useState(new DateObject());
   const [endDate, setEndDate] = useState(new DateObject());
+  const debounceTimer = useRef(null);
+
+  useEffect(() => {
+    if (onFilterChange) {
+      // Clear previous timer
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+
+      // Set new timer for debouncing
+      debounceTimer.current = setTimeout(() => {
+        const filters = {
+          status: status !== "all" ? status : undefined,
+          category: category !== "all" ? category : undefined,
+          subcategory: subcategory !== "all" ? subcategory : undefined,
+          type: type !== "all" ? type : undefined,
+          startDate: startDate ? startDate.format("YYYY-MM-DD") : new DateObject(),
+          endDate: endDate ? endDate.format("YYYY-MM-DD") : new DateObject(),
+        };
+        onFilterChange(filters);
+      }, 300); // 300ms debounce delay
+    }
+
+    // Cleanup timer on unmount
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [status, category, subcategory, type, startDate, endDate]);
 
   return (
     <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
-      {/* <div className="col-sm-auto d-flex">
-              <div className="position-relative d-flex items-center w-180 sm:w-full">
-                <input
-                  type="text"
-                  placeholder="Search listings..."
-                  className="border-light bg-white rounded-8 px-10 py-5 pl-30"
-                />
-                <i
-                  className="icon-search text-light-1 position-absolute"
-                  style={{
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                  }}
-                ></i>
-              </div>
-            </div> */}
       <div className="col-sm-auto">
-        <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
+        <select
+          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
           <option value="all">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="expired">Expired</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="pending">Pending</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </div>
 
       <div className="col-sm-auto">
-        <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-          <option value="all">Category</option>
+        <select
+          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="all">All Categories</option>
         </select>
       </div>
       <div className="col-sm-auto">
-        <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-          <option value="all">Sub Category</option>
+        <select
+          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+          value={subcategory}
+          onChange={(e) => setSubcategory(e.target.value)}
+        >
+          <option value="all">All Subcategories</option>
         </select>
       </div>
       <div className="col-sm-auto">
@@ -75,8 +104,12 @@ const Filter = () => {
       </div>
 
       <div className="col-sm-auto">
-        <select className="form-select rounded-8 border-light justify-between py-10 px-15 w-140 sm:w-full text-14">
-          <option value="all">All</option>
+        <select
+          className="form-select rounded-8 border-light justify-between py-10 px-15 w-140 sm:w-full text-14"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option value="all">All Types</option>
           <optgroup label="Property List">
             <option value="hotel">Hotel</option>
             <option value="vacation">Vacation Rental</option>

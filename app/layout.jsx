@@ -13,10 +13,12 @@ import "../styles/index.scss";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ToastContainer } from "react-toastify";
 
 if (typeof window !== "undefined") {
   require("bootstrap/dist/js/bootstrap");
 }
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RootLayout({ children }) {
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               {children}
               <SrollTop />
+              <ToastContainer position="top-right" autoClose={4000} newestOnTop closeOnClick pauseOnHover theme="light" />
             </AuthProvider>
           </Provider>
         </main>
