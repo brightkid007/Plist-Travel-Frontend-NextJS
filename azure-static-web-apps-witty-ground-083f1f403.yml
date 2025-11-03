@@ -17,6 +17,20 @@ jobs:
     vmImage: ubuntu-latest
   variables:
   - group: Azure-Static-Web-Apps-witty-ground-083f1f403-variable-group
+  - name: NEXT_PUBLIC_AUTH_SERVICE_URL
+    value: $(NEXT_PUBLIC_AUTH_SERVICE_URL)
+  - name: NEXT_PUBLIC_LISTING_SERVICE_URL
+    value: $(NEXT_PUBLIC_LISTING_SERVICE_URL)
+  - name: NEXT_PUBLIC_BOOKING_SERVICE_URL
+    value: $(NEXT_PUBLIC_BOOKING_SERVICE_URL)
+  - name: NEXT_PUBLIC_PAYMENT_SERVICE_URL
+    value: $(NEXT_PUBLIC_PAYMENT_SERVICE_URL)
+  - name: NEXT_PUBLIC_COMMUNICATION_SERVICE_URL
+    value: $(NEXT_PUBLIC_COMMUNICATION_SERVICE_URL)
+  - name: NEXT_PUBLIC_REVIEW_SERVICE_URL
+    value: $(NEXT_PUBLIC_REVIEW_SERVICE_URL)
+  - name: NEXT_PUBLIC_PRICING_SERVICE_URL
+    value: $(NEXT_PUBLIC_PRICING_SERVICE_URL)
   steps:
   - checkout: self
     submodules: true
