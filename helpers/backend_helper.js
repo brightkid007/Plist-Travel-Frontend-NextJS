@@ -162,23 +162,43 @@ export const forceBookingStatus = (id, status) => BookingAPIClient.update(`${url
 export const getBookingAnalytics = (params) => BookingAPIClient.get(url.GET_BOOKING_ANALYTICS, params);
 
 // LISTING MANAGEMENT
-// Get all listings (admin)
-export const getAdminListings = (params) => api.get(url.GET_ADMIN_LISTINGS, params);
+// Get all listings (admin) - Listing Service
+export const getAdminListings = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get(url.GET_ADMIN_LISTINGS, sanitized)
+      : ListingAPIClient.get(url.GET_ADMIN_LISTINGS);
+  }
+  return ListingAPIClient.get(url.GET_ADMIN_LISTINGS);
+};
 
-// Get listing by ID
-export const getAdminListingById = (id) => api.get(`${url.GET_ADMIN_LISTING_BY_ID}/${id}`);
+// Get listing by ID - Listing Service
+export const getAdminListingById = (id) => ListingAPIClient.get(`${url.GET_ADMIN_LISTING_BY_ID}/${id}`);
 
-// Update listing status
-export const updateListingStatus = (id, data) => api.update(`${url.UPDATE_LISTING_STATUS}/${id}/status`, data);
+// Update listing status (generic) - Listing Service
+export const updateListingStatus = (id, data) => ListingAPIClient.update(`${url.UPDATE_LISTING_STATUS}/${id}/status`, data);
 
-// Approve listing
-export const approveListing = (id) => api.update(`${url.APPROVE_LISTING}/${id}/approve`);
+// Approve listing (PATCH /admin/listings/:id/approved) - Listing Service
+export const approveListing = (id) => ListingAPIClient.patch(`${url.APPROVE_LISTING}/${id}/approved`);
 
-// Reject listing
-export const rejectListing = (id, data) => api.update(`${url.REJECT_LISTING}/${id}/reject`, data);
+// Reject listing (PATCH /admin/listings/:id/rejected) - Listing Service
+export const rejectListing = (id, data) => ListingAPIClient.patch(`${url.REJECT_LISTING}/${id}/rejected`, data);
 
-// Get listing analytics
-export const getListingAnalytics = (params) => api.get(url.GET_LISTING_ANALYTICS, params);
+// Set listing status flexibly (PATCH /admin/listings/:id/:status)
+export const setListingStatus = (id, status) => {
+  const normalized = (status || "").toString().toLowerCase();
+  if (!id || !normalized) throw new Error("id and status are required");
+  return ListingAPIClient.patch(`${url.UPDATE_LISTING_STATUS}/${id}/${normalized}`);
+};
+
+// Get listing analytics - Listing Service
+export const getListingAnalytics = (params) => ListingAPIClient.get(url.GET_LISTING_ANALYTICS, params);
 
 // CATEGORY MANAGEMENT
 // Get all categories (admin)
