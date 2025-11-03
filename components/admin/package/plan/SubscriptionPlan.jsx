@@ -2,7 +2,6 @@ import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import CheckIcon from "@mui/icons-material/Check";
 import { green } from "@mui/material/colors";
 import { CreditCard, Edit, Star, Trash } from "lucide-react";
-import { isArray } from "chart.js/dist/helpers/helpers.core";
 
 const SubscriptionPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = () => { } }) => {
   const subscriptionPlans = plans.length > 0 ? plans.map(p => ({
@@ -16,7 +15,7 @@ const SubscriptionPlan = ({ plans = [], loading = false, onEdit = () => { }, onD
       </div>
     ),
     price: p.price || 0,
-    services: isArray(p.features) 
+    services: Array.isArray(p.features) 
       ? p.features 
       : typeof (p.features) === 'string' 
         ? (() => { 

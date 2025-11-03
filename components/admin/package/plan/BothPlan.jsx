@@ -16,7 +16,7 @@ const BothPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = 
     ),
     commission_percent: p.commission_percent || 0,
     price: p.price || 0,
-    services: isArray(p.features) 
+    services: Array.isArray(p.features) 
       ? p.features 
       : typeof (p.features) === 'string' 
         ? (() => { 

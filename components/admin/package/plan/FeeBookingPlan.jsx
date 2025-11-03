@@ -22,7 +22,7 @@ const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDel
           ) : (
             <div className="row y-gap-20 mt-20 w-100">
               {plans.map((p) => {
-                const features = isArray(p.features) 
+                const features = Array.isArray(p.features) 
                   ? p.features 
                   : typeof (p.features) === 'string' 
                     ? (() => { 
