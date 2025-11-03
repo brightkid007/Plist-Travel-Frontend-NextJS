@@ -12,6 +12,9 @@ const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("category");
   const [showModal, setShowModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   const handleClose = () => {
     setShowModal(false);
@@ -93,7 +96,7 @@ const index = () => {
       description: "Hotels near or inside airports.",
     },
   ];
-  
+
   const Subcategories = [
     {
       id: 1,
@@ -159,7 +162,7 @@ const index = () => {
       description: "Hotels available for short-term day bookings.",
     },
   ];
-  
+
 
   return (
     <AdminDashboardLayout>
@@ -177,9 +180,8 @@ const index = () => {
             {tabs.map((item) => (
               <div className="col-auto px-5" key={item.value}>
                 <button
-                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${
-                    activeTab === item.value ? "bg-white" : "text-light-1"
-                  }`}
+                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${activeTab === item.value ? "bg-white" : "text-light-1"
+                    }`}
                   onClick={() => {
                     setActiveTab(item.value);
                   }}
@@ -208,9 +210,9 @@ const index = () => {
         </div> */}
 
         <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
-          
+
           <div className="col-sm-auto">
-            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
+            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -218,7 +220,7 @@ const index = () => {
           </div>
 
           <div className="col-sm-auto">
-            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
+            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
               <option value="all">All Types</option>
               <option value="property">Property</option>
               <option value="activity">Activity</option>
@@ -230,16 +232,16 @@ const index = () => {
           </div>
 
           <div className="col-sm-auto">
-            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
+            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
               <option value="all">Category</option>
             </select>
           </div>
-          
+
           <div className="col-sm-auto ms-auto d-flex">
-            <button className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full me-2">
-              Export Listings
-            </button>
-            <button className="button -md px-15 py-10 fw-400 text-14 text-white bg-blue-1 rounded-8 sm:w-full">
+            <button
+              className="button -md px-15 py-10 fw-400 text-14 text-white bg-blue-1 rounded-8 sm:w-full"
+              onClick={() => { setStatusFilter("all"); setTypeFilter("all"); setCategoryFilter("all"); }}
+            >
               View All
             </button>
           </div>
@@ -280,11 +282,10 @@ const index = () => {
                         </td>
                         <td className="align-middle">
                           <span
-                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                              client.status === "Active"
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${client.status === "Active"
                                 ? "bg-green-1 text-green-2"
                                 : "bg-light-2 text-dark-1"
-                            }`}
+                              }`}
                           >
                             {client.status}
                           </span>
@@ -302,40 +303,39 @@ const index = () => {
                         </td>
                       </tr>
                     ))
-                  ) : (
-                    Subcategories.map((item, index) => (
-                      <tr key={index}>
-                        <td className="align-middle text-12 lh-16 fw-500">
-                          {item.subcategory}
-                        </td>
-                        <td className="align-middle text-12 lh-16 fw-500">
-                          {Categories.find(cat => cat.id === item.parent_category_id)?.category}
-                        </td>
-                        <td className="align-middle">
-                          <span
-                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                              item.status === "Active"
-                                ? "bg-green-1 text-green-2"
-                                : "bg-light-2 text-dark-1"
+                ) : (
+                  Subcategories.map((item, index) => (
+                    <tr key={index}>
+                      <td className="align-middle text-12 lh-16 fw-500">
+                        {item.subcategory}
+                      </td>
+                      <td className="align-middle text-12 lh-16 fw-500">
+                        {Categories.find(cat => cat.id === item.parent_category_id)?.category}
+                      </td>
+                      <td className="align-middle">
+                        <span
+                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${item.status === "Active"
+                              ? "bg-green-1 text-green-2"
+                              : "bg-light-2 text-dark-1"
                             }`}
-                          >
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="align-middle text-12 lh-16 fw-500">
-                          {item.description}
-                        </td>
-                        <td className="align-middle">
-                          <span className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" onClick={() => setShowModal(true)}>
-                            Edit
-                          </span>
-                          <span className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1">
-                            Delete
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="align-middle text-12 lh-16 fw-500">
+                        {item.description}
+                      </td>
+                      <td className="align-middle">
+                        <span className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" onClick={() => setShowModal(true)}>
+                          Edit
+                        </span>
+                        <span className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1">
+                          Delete
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -348,7 +348,7 @@ const index = () => {
         aria-describedby="alert-dialog-title"
       >
         <div className="px-20 py-20 w-500 sm:w-full">
-          <ModalContent activeTab={activeTab}/>
+          <ModalContent activeTab={activeTab} />
           <div className="d-flex justify-end gap-2 mt-10">
             <button
               className="text-14 border-light rounded-8 px-10 py-5"
@@ -371,7 +371,7 @@ const index = () => {
   );
 };
 
-const ModalContent = ( {activeTab} ) => {
+const ModalContent = ({ activeTab }) => {
 
   const listingTypeOptions = [
     { value: "Properties", label: "Properties" },
@@ -393,7 +393,7 @@ const ModalContent = ( {activeTab} ) => {
     { value: "Business Class", label: "Business Class" },
     { value: "Standard Lounges", label: "Standard Lounges" },
   ];
-  
+
 
   const listingSubTypeOptions = [
     { value: "default", label: "default" },
@@ -418,7 +418,7 @@ const ModalContent = ( {activeTab} ) => {
           <div className="text-12 text-light-1 lh-14 mb-15">
             Define a new category
           </div>
-    
+
           <FormInput
             label="Listing Type"
             required={true}
@@ -427,21 +427,21 @@ const ModalContent = ( {activeTab} ) => {
             gridClass="col-12 mt-5"
             options={listingTypeOptions}
           />
-    
+
           <FormInput
             label="Category"
             type="text"
             placeholder="Enter Category Name"
             gridClass="col-12 mt-5"
           />
-    
+
           <FormInput
             label="Description"
             type="textarea"
             placeholder="Fill Description"
             gridClass="col-12 mt-5"
           />
-    
+
           <FormInput
             label="Status"
             type="select"
@@ -456,7 +456,7 @@ const ModalContent = ( {activeTab} ) => {
           <div className="text-12 text-light-1 lh-14 mb-15">
             Define a new subcategory
           </div>
-    
+
           <FormInput
             label="Parent Category"
             required={true}
@@ -465,21 +465,21 @@ const ModalContent = ( {activeTab} ) => {
             gridClass="col-12 mt-5"
             options={categoryOptions}
           />
-    
+
           <FormInput
             label="Sub-Category"
             type="text"
             placeholder="Enter Sub-Category Name"
             gridClass="col-12 mt-5"
           />
-    
+
           <FormInput
             label="Description"
             type="textarea"
             placeholder="Fill Description"
             gridClass="col-12 mt-5"
           />
-    
+
           <FormInput
             label="Status"
             type="select"

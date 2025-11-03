@@ -1,61 +1,6 @@
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
+import { MapPin } from "lucide-react";
 
-const RecentBooking = ({ detail = false }) => {
-  const data = [
-    {
-      id: "BK001",
-      service: "Hotel Sunshine",
-      status: "Paid",
-      total: "$600",
-      paid: "$600",
-      customer_type: "Individual Customer",
-      vendor: "Vendor A",
-      agent: "Agent X",
-      booking_channel: "SaaS Platform",
-      location: "New York, USA",
-      created_at: "2025-04-16",
-    },
-    {
-      id: "BK002",
-      service: "Hotel Sunshine",
-      status: "Unpaid",
-      total: "$600",
-      paid: "$0",
-      customer_type: "Business Prospect",
-      vendor: "Vendor B",
-      agent: "Agent Y",
-      booking_channel: "Affiliate Agent",
-      location: "Berlin, Germany",
-      created_at: "2025-04-16",
-    },
-    {
-      id: "BK003",
-      service: "Hotel Sunshine",
-      status: "Paid",
-      total: "$600",
-      paid: "$600",
-      customer_type: "Business Customer",
-      vendor: "Vendor C",
-      agent: "Agent Z",
-      booking_channel: "OTA Channel",
-      location: "Tokyo, Japan",
-      created_at: "2025-04-16",
-    },
-    {
-      id: "BK004",
-      service: "Hotel Sunshine",
-      status: "Process",
-      total: "$600",
-      paid: "$300",
-      customer_type: "Individual Prospect",
-      vendor: "Vendor D",
-      agent: "Agent W",
-      booking_channel: "Reseller Agent",
-      location: "Paris, France",
-      created_at: "2025-04-16",
-    },
-  ];
-  
+const RecentBooking = ({ bookings = [], loading = false }) => {
 
   const statusColor = (status) => {
     switch (status) {
@@ -88,33 +33,35 @@ const RecentBooking = ({ detail = false }) => {
           <th>Created At</th>
         </tr>
       </thead>
-        <tbody>
-          {data.map((row, index) => (
-            <tr key={index}>
-              <td className="align-middle">{index + 1}</td>
-              <td className="align-middle fw-600">{row.service}</td>
+      <tbody>
+        {loading ? (
+          <tr><td colSpan={11} className="text-12 text-light-1 py-10">Loading...</td></tr>
+        ) : bookings.length === 0 ? (
+          <tr><td colSpan={11} className="text-12 text-light-1 py-10">No bookings found.</td></tr>
+        ) : (
+          bookings.map((row, index) => (
+            <tr key={row.id || index}>
+              <td className="align-middle">{row.id || index + 1}</td>
+              <td className="align-middle fw-600">{row.service || row.listing_type || '-'}</td>
               <td className="align-middle fw-500">
-                <span
-                  className={`rounded-100 px-10 text-center text-12 ${statusColor(
-                    row.status
-                  )}`}
-                >
-                  {row.status}
+                <span className={`rounded-100 px-10 text-center text-12 ${statusColor(row.status || row.payment_status)}`}>
+                  {(row.status || row.payment_status || '-').toString()}
                 </span>
               </td>
-              <td className="align-middle fw-500">{row.total}</td>
-              <td className="align-middle fw-500">{row.paid}</td>
-              <td className="align-middle fw-500">{row.customer_type}</td>
-              <td className="align-middle fw-500">{row.vendor}</td>
-              <td className="align-middle fw-500">{row.agent}</td>
-              <td className="align-middle fw-500">{row.booking_channel}</td>
-              <td className="align-middle fw-500"><MapPin size={14} />{row.location}</td>
-              <td className="align-middle fw-500">{new Date(row.created_at).toLocaleDateString()}</td>
+              <td className="align-middle fw-500">{typeof row.total !== 'undefined' ? row.total : (row.total_amount || row.amount || '-')}</td>
+              <td className="align-middle fw-500">{row.paid || (row.payment_status === 'paid' ? 'Paid' : 'Unpaid')}</td>
+              <td className="align-middle fw-500">{row.customer_type || '-'}</td>
+              <td className="align-middle fw-500">{row.vendor || row.vendor_name || '-'}</td>
+              <td className="align-middle fw-500">{row.agent || row.agent_name || '-'}</td>
+              <td className="align-middle fw-500">{row.booking_channel || '-'}</td>
+              <td className="align-middle fw-500"><MapPin size={14} />{row.location || '-'}</td>
+              <td className="align-middle fw-500">{new Date(row.created_at || row.createdAt || Date.now()).toLocaleDateString()}</td>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
   );
 };
 

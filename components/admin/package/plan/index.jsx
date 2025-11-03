@@ -7,11 +7,44 @@ import svgIcon from "@/components/data/svgIcon";
 import SubscriptionPlan from "./SubscriptionPlan";
 import FeeBookingPlan from "./FeeBookingPlan";
 import BothPlan from "./BothPlan";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getPackagePlans, deletePackagePlan } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
 
 const index = () => {
   const [selectedModel, setSelectedModel] = useState("subscription");
   const router = useRouter();
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const reloadPlans = async () => {
+    try {
+      setLoading(true);
+      const res = await getPackagePlans();
+      const list = res?.plans || res?.data?.plans || res?.data || res || [];
+      setPlans(list);
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to load plans");
+      setPlans([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deletePackagePlan(id);
+      toast.success("Plan deleted");
+      await reloadPlans();
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to delete plan");
+    }
+  };
+
+  const handleEdit = (id) => {
+    router.push(`/admin/package/plan/add?edit=${id}`);
+  };
+
   const paymentModel = [
     {
       title: "Subscription Plan",
@@ -22,7 +55,7 @@ const index = () => {
           {svgIcon.subscription_plan}
         </div>
       ),
-      content: <SubscriptionPlan />,
+      content: <SubscriptionPlan plans={plans.filter(p => p.model === "subscription")} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />,
     },
     {
       title: "Fee Per Booking",
@@ -33,7 +66,7 @@ const index = () => {
           {svgIcon.fee_model}
         </div>
       ),
-      content: <FeeBookingPlan />,
+      content: <FeeBookingPlan plans={plans.filter(p => p.model === "fee-per-booking")} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />,
     },
     {
       title: "Both",
@@ -44,9 +77,13 @@ const index = () => {
           {svgIcon.subscription_plan} + {svgIcon.fee_model}
         </div>
       ),
-      content: <BothPlan />,
+      content: <BothPlan plans={plans.filter(p => p.model === "both")} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />,
     },
   ];
+
+  useEffect(() => {
+    reloadPlans();
+  }, []);
 
   return (
     <AdminDashboardLayout>

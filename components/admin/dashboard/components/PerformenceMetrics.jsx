@@ -100,10 +100,14 @@ export const data = {
   ],
 };
 
-const PerformenceMetrics = () => {
+const PerformenceMetrics = ({ metrics = data }) => {
+  const chartData = metrics && metrics.labels && metrics.datasets ? {
+    labels: metrics.labels,
+    datasets: metrics.datasets,
+  } : data;
   return (
     <div className="widget-content">
-      <Bar options={options} data={data} />
+      <Bar options={options} data={chartData} />
     </div>
   );
 };

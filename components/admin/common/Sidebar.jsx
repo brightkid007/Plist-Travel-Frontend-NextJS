@@ -8,11 +8,11 @@ const Sidebar = () => {
       title: "Dashboard",
       href: "/admin/dashboard",
     },
-    {
-      icon: "/img/dashboard/sidebar/booking.svg",
-      title: "Permissions & Roles",
-      href: "/admin/roles",
-    },
+    // {
+    //   icon: "/img/dashboard/sidebar/booking.svg",
+    //   title: "Permissions & Roles",
+    //   href: "/admin/roles",
+    // },
     // {
     //   icon: "/img/dashboard/sidebar/house.svg",
     //   title: "Booking Management",
@@ -37,7 +37,7 @@ const Sidebar = () => {
       href: "/admin/user",
     },
     {
-      icon: "/img/dashboard/sidebar/booking.svg",
+      icon: "/img/dashboard/sidebar/taxi.svg",
       title: "Category Management",
       href: "/admin/category",
     },
@@ -82,11 +82,11 @@ const Sidebar = () => {
         },
       ],
     },
-    {
-      icon: "/img/dashboard/sidebar/house.svg",
-      title: "CMS Management",
-      href: "/admin/cms",
-    },
+    // {
+    //   icon: "/img/dashboard/sidebar/house.svg",
+    //   title: "CMS Management",
+    //   href: "/admin/cms",
+    // },
     {
       icon: "/img/dashboard/sidebar/taxi.svg",
       title: "Email Template",
@@ -97,11 +97,11 @@ const Sidebar = () => {
       title: "Notification",
       href: "/admin/notification",
     },
-    {
-      icon: "/img/dashboard/sidebar/canoe.svg",
-      title: "SEO Optimization",
-      href: "/admin/seo",
-    },
+    // {
+    //   icon: "/img/dashboard/sidebar/canoe.svg",
+    //   title: "SEO Optimization",
+    //   href: "/admin/seo",
+    // },
     {
       icon: "/img/dashboard/sidebar/airplane.svg",
       title: "Customer Support",

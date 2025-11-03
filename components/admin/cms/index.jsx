@@ -13,12 +13,15 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
-import data from "./data";
+import { useEffect, useState, useMemo } from "react";
+import { getAdminContent, getBanners, deleteAdminContent, deleteBanner } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
 
 const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("static");
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState([]);
 
   const tabs = [
     {
@@ -41,6 +44,59 @@ const index = () => {
         return "bg-red-4 text-red-1";
       default:
         return "bg-light-2 text-light-1";
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      if (activeTab === "static") {
+        const res = await getAdminContent({ type: "static" });
+        const list = res?.data?.items || res?.data || res?.items || res || [];
+        const mapped = list.map((row) => ({
+          id: row.id,
+          title: row.title || row.name || "Untitled",
+          status: row.status || (row.published ? "Published" : "Draft"),
+          last_updated: row.updatedAt || row.updated_at || row.modified_at || row.createdAt || row.created_at,
+        }));
+        setItems(mapped);
+      } else {
+        const res = await getBanners();
+        const list = res?.data?.banners || res?.data || res?.items || res || [];
+        const mapped = list.map((row) => ({
+          id: row.id,
+          title: row.title || row.name || "Untitled Banner",
+          position: row.position || row.placement || "-",
+          status: row.status || (row.active ? "Active" : "Inactive"),
+          last_updated: row.updatedAt || row.updated_at || row.modified_at || row.createdAt || row.created_at,
+        }));
+        setItems(mapped);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message || "Failed to load data");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const handleDelete = async (id) => {
+    try {
+      if (!id) return;
+      if (activeTab === "static") {
+        await deleteAdminContent(id);
+      } else {
+        await deleteBanner(id);
+      }
+      toast.success("Deleted successfully");
+      loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message || "Delete failed");
     }
   };
 
@@ -99,8 +155,16 @@ const index = () => {
                 </tr>
               </thead>
               <tbody>
-                {data[activeTab].map((row, index) => (
-                  <tr key={index}>
+                {loading ? (
+                  <tr>
+                    <td colSpan={activeTab !== "static" ? 5 : 4} className="text-center py-30 text-14 text-light-1">Loading...</td>
+                  </tr>
+                ) : items.length === 0 ? (
+                  <tr>
+                    <td colSpan={activeTab !== "static" ? 5 : 4} className="text-center py-30 text-14 text-light-1">No records found</td>
+                  </tr>
+                ) : items.map((row) => (
+                  <tr key={row.id}>
                     <td className="align-middle text-14 fw-500 lh-16">
                       {row.title}
                     </td>
@@ -119,7 +183,7 @@ const index = () => {
                       </span>
                     </td>
                     <td className="align-middle text-12 lh-16 fw-500">
-                      {row.last_updated}
+                      {row.last_updated ? new Date(row.last_updated).toLocaleString() : "—"}
                     </td>
                     <td className="align-middle">
                       <button className="size-30 bg-white">
@@ -128,7 +192,7 @@ const index = () => {
                       <button className="size-30 bg-white">
                         <Pencil size={16} />
                       </button>
-                      <button className="size-30 bg-white">
+                      <button className="size-30 bg-white" onClick={() => handleDelete(row.id)}>
                         <Trash2 size={16} />
                       </button>
                     </td>

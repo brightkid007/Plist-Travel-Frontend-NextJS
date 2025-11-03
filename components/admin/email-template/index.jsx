@@ -1,15 +1,19 @@
 "use client";
 
 import AgentDashboardLayout from "../common/layout";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, Drawer } from "@mui/material";
-import Filter from "@/components/admin/common/Filter";
 import { useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 import { MailOutline } from "@mui/icons-material";
+import { getEmailTemplates } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
 
 const index = () => {
   const [openFilter, setOpenFilter] = useState(false);
+  const [email_templates, setEmail_templates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const handleClose = () => {
     setOpenFilter(false);
   };
@@ -25,70 +29,106 @@ const index = () => {
 
   const router = useRouter();
 
-  const email_templates = [
-    {
-      name: "Welcome Email",
-      category: "User",
-      subject: "Welcome to TravelSaaS!",
-      type: "text",
-      status: "Active",
-      content:
-        "Dear {{client_name}},\n\nThank you for joining TravelSaaS! We're excited to have you as part of our travel community.\n\nGet started by exploring our platform and booking your next adventure.\n\nBest regards,\nThe TravelSaaS Team",
-      last_used: "2023-10-15",
-    },
-    {
-      name: "Booking Confirmation",
-      category: "Booking",
-      subject: "Your booking has been confirmed",
-      type: "text",
-      status: "Active",
-      content:
-        "Dear {{client_name}},\n\nThank you for choosing TravelSaaS! Your booking is confirmed.\n\n📌 **Booking Details**\n- Booking ID: {{booking_id}}\n- Date: {{booking_date}}\n\nWe're excited to serve you. For any changes, please contact us.\n\nBest regards,\nThe Travel Team",
-      last_used: "2023-09-22",
-    },
-    {
-      name: "Password Reset",
-      category: "User",
-      subject: "Reset your password",
-      type: "html",
-      status: "Active",
-      content: `<div class="email-template">
-            <h2>Password Reset Request</h2>
-            <p>Dear {{client_name}},</p>
-            <p>We received a request to reset your password. Click the link below to proceed:</p>
-            <a href="{{reset_link}}" style="background: #3182ce; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0;">Reset Password</a>
-            <p>If you didn't request this, please ignore this email.</p>
-        </div>`,
-      last_used: "2023-11-05",
-    },
-    {
-      name: "Booking Cancellation",
-      category: "Booking",
-      subject: "Your booking has been cancelled",
-      type: "html",
-      status: "Active",
-      content: `<div class="email-template">
-            <h2 style="color: #702459;">Booking Cancellation</h2>
-            <p>Dear {{client_name}},</p>
-            <div style="background: #faf5ff; padding: 16px; border-radius: 8px; margin: 16px 0;">
-                <p>We've processed your cancellation for your booking.</p>
-                <p>Cancellation date: {{cancellation_date}}</p>
-            </div>
-            <p>We're sorry to see you go. If this was a mistake, please reply to this email.</p>
-        </div>`,
-      last_used: "2023-08-30",
-    },
-    {
-      name: "Payment Receipt",
-      category: "Payment",
-      subject: "Receipt for your payment",
-      type: "text",
-      status: "Active",
-      content:
-        "Dear {{client_name}},\n\nHere is your payment receipt:\n\n💰 **Payment Details**\n- Amount: {{amount}}\n- Date: {{payment_date}}\n- Transaction ID: {{transaction_id}}\n\nThank you for your payment!\n\nBest regards,\nThe TravelSaaS Team",
-      last_used: "2023-10-10",
-    },
-  ];
+  // Filters state
+  const [filters, setFilters] = useState({
+    status: "all", // Active / Inactive
+    category: "all",
+    type: "all", // text / html
+    startDate: null,
+    endDate: null,
+  });
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      (filters.status && filters.status !== "all") ||
+      (filters.category && filters.category !== "all") ||
+      (filters.type && filters.type !== "all") ||
+      filters.startDate ||
+      filters.endDate
+    );
+  }, [filters]);
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters({ status: "all", category: "all", type: "all", startDate: null, endDate: null });
+  };
+
+  useEffect(() => {
+    loadEmailTemplates();
+  }, []);
+
+  const loadEmailTemplates = async () => {
+    try {
+      setLoading(true);
+      const res = await getEmailTemplates();
+      const templates = res?.email_templates || res?.data?.email_templates || res?.data || res || [];
+      const mapped = templates.map((t) => ({
+        id: t.id,
+        name: t.name || "Untitled Template",
+        category: t.category || "General",
+        subject: t.subject || "No Subject",
+        type: t.type || "text",
+        status: t.status || "Active",
+        content: t.content || t.body || "",
+        body: t.body || t.content || "",
+        last_used: t.last_used ? new Date(t.last_used).toISOString().split("T")[0] : null,
+      }));
+      setEmail_templates(mapped);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message || "Failed to load email templates");
+      setEmail_templates([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredTemplates = email_templates.filter((t) => {
+    // Search filter
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      const matchesSearch =
+        t.name.toLowerCase().includes(s) ||
+        t.subject.toLowerCase().includes(s) ||
+        t.category.toLowerCase().includes(s);
+      if (!matchesSearch) return false;
+    }
+
+    // Status filter
+    if (filters.status !== "all") {
+      if ((t.status || "").toLowerCase() !== filters.status.toLowerCase()) return false;
+    }
+
+    // Category filter
+    if (filters.category !== "all") {
+      if ((t.category || "").toLowerCase() !== filters.category.toLowerCase()) return false;
+    }
+
+    // Type filter
+    if (filters.type !== "all") {
+      if ((t.type || "").toLowerCase() !== filters.type.toLowerCase()) return false;
+    }
+
+    // Date range filter (last_used)
+    if (filters.startDate || filters.endDate) {
+      if (!t.last_used) return false;
+      const d = new Date(t.last_used);
+      if (filters.startDate) {
+        const start = new Date(filters.startDate);
+        start.setHours(0, 0, 0, 0);
+        if (d < start) return false;
+      }
+      if (filters.endDate) {
+        const end = new Date(filters.endDate);
+        end.setHours(23, 59, 59, 999);
+        if (d > end) return false;
+      }
+    }
+
+    return true;
+  });
 
   return (
     <AgentDashboardLayout>
@@ -101,26 +141,89 @@ const index = () => {
         </div>
         <div className="col-auto ms-auto">
           <button
-            className="button border-blue-1 text-blue-1 px-15 py-10 rounded-8"
+            className={`button px-15 py-10 rounded-8 ${hasActiveFilters ? "bg-blue-1 text-white" : "border-blue-1 text-blue-1"}`}
             onClick={() => setOpenFilter(true)}
           >
-            Filter
+            Filter{hasActiveFilters ? ` (${Object.values(filters).filter(v => v !== "all" && v !== null).length})` : ""}
           </button>
           <Drawer anchor="right" open={openFilter} onClose={handleClose}>
             <div className="w-300 rounded-left rounded-8 bg-white px-20 py-20 h-100 d-flex flex-column justify-between">
-              <Filter />
-              <div className="col-12 d-flex justify-end gap-2">
+              <div className="overflow-y-auto flex-grow-1">
+                <h2 className="text-20 fw-600 mb-20">Filter Templates</h2>
+                <div className="d-flex flex-column y-gap-15">
+                  <div>
+                    <h3 className="text-14 fw-600 mb-10">Status</h3>
+                    <select
+                      className="form-select rounded-8 border-light py-10 px-15 w-100 text-14"
+                      value={filters.status}
+                      onChange={(e) => handleFilterChange("status", e.target.value)}
+                    >
+                      <option value="all">All</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <h3 className="text-14 fw-600 mb-10">Category</h3>
+                    <select
+                      className="form-select rounded-8 border-light py-10 px-15 w-100 text-14"
+                      value={filters.category}
+                      onChange={(e) => handleFilterChange("category", e.target.value)}
+                    >
+                      <option value="all">All</option>
+                      <option value="Booking">Booking</option>
+                      <option value="Payment">Payment</option>
+                      <option value="User">User</option>
+                      <option value="Refund">Refund</option>
+                      <option value="Technical">Technical</option>
+                      <option value="Commission">Commission</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <h3 className="text-14 fw-600 mb-10">Type</h3>
+                    <select
+                      className="form-select rounded-8 border-light py-10 px-15 w-100 text-14"
+                      value={filters.type}
+                      onChange={(e) => handleFilterChange("type", e.target.value)}
+                    >
+                      <option value="all">All</option>
+                      <option value="text">Text</option>
+                      <option value="html">HTML</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <h3 className="text-14 fw-600 mb-10">Date Range (Last Used)</h3>
+                    <input
+                      type="date"
+                      className="form-control border-light rounded-8 py-10 px-15 text-14 mb-10"
+                      value={filters.startDate || ""}
+                      onChange={(e) => handleFilterChange("startDate", e.target.value || null)}
+                    />
+                    <input
+                      type="date"
+                      className="form-control border-light rounded-8 py-10 px-15 text-14"
+                      value={filters.endDate || ""}
+                      onChange={(e) => handleFilterChange("endDate", e.target.value || null)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="col-12 d-flex justify-end gap-2 mt-20 pt-20 border-top-light">
                 <button
                   className="border-light rounded-8 py-5 px-15 text-14"
-                  onClick={handleClose}
+                  onClick={handleResetFilters}
                 >
-                  Cancel
+                  Reset
                 </button>
                 <button
                   className="bg-blue-1 text-white rounded-8 py-5 px-15 text-14"
                   onClick={handleClose}
                 >
-                  Save
+                  Apply
                 </button>
               </div>
             </div>
@@ -141,8 +244,10 @@ const index = () => {
           <div className="position-relative d-flex items-center w-180 sm:w-full">
             <input
               type="text"
-              placeholder="Search pages..."
+              placeholder="Search templates..."
               className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
             <i
               className="icon-search text-light-1 position-absolute"
@@ -153,50 +258,66 @@ const index = () => {
               }}
             ></i>
           </div>
-          <button className="button border-light px-20 py-10 rounded-8">
+          {/* <button className="button border-light px-20 py-10 rounded-8">
             <MailOutline className="text-18 mr-10" /> Test Email
-          </button>
+          </button> */}
         </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
-          <div className="overflow-scroll scroll-bar-1">
-            <table className="table-2 col-12">
-              <thead>
-                <tr className="text-light-1 fw-600">
-                  <th>Template Name</th>
-                  <th>Category</th>
-                  <th>Subject</th>
-                  <th>Last Used</th>
-                  <th>Status</th>
-                  <th>Preview</th>
-                </tr>
-              </thead>
-              <tbody>
-                {email_templates.map((row, index) => (
-                  <tr key={index}>
-                    <td className="align-middle">{row.name}</td>
-                    <td className="align-middle">{row.category}</td>
-                    <td className="align-middle">{row.subject}</td>
-                    <td className="align-middle">{row.last_used}</td>
-                    <td className="align-middle">
-                      <span className="text-14 px-10 text-white bg-dark-blue rounded-100 fw-500">
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="align-middle">
-                      <Eye
-                        size={18}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setPreview(row);
-                          handleOpenModal();
-                        }}
-                      />
-                    </td>
+          {loading ? (
+            <div className="d-flex justify-center items-center py-40">
+              <div className="text-14 text-light-1">Loading email templates...</div>
+            </div>
+          ) : (
+            <div className="overflow-scroll scroll-bar-1">
+              <table className="table-2 col-12">
+                <thead>
+                  <tr className="text-light-1 fw-600">
+                    <th>Template Name</th>
+                    <th>Category</th>
+                    <th>Subject</th>
+                    <th>Last Used</th>
+                    <th>Status</th>
+                    <th>Preview</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredTemplates.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-40">
+                        <div className="text-14 text-light-1">
+                          {searchTerm ? "No templates found matching your search." : "No email templates found."}
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredTemplates.map((row) => (
+                      <tr key={row.id}>
+                        <td className="align-middle">{row.name}</td>
+                        <td className="align-middle">{row.category}</td>
+                        <td className="align-middle">{row.subject}</td>
+                        <td className="align-middle">{row.last_used || "—"}</td>
+                        <td className="align-middle">
+                          <span className="text-14 px-10 text-white bg-dark-blue rounded-100 fw-500">
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="align-middle">
+                          <Eye
+                            size={18}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setPreview(row);
+                              handleOpenModal();
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

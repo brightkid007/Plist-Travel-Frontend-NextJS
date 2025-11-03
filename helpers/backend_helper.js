@@ -4,6 +4,8 @@ import {
   ListingAPIClient,
   BookingAPIClient,
   CommunicationAPIClient,
+  PricingAPIClient,
+  PaymentAPIClient,
   setAuthorization,
   clearAuthorization
 } from "./api_helper";
@@ -206,6 +208,9 @@ export const getCommissionAnalytics = (params) => api.get(url.GET_COMMISSION_ANA
 // FINANCIAL MANAGEMENT
 // Get all transactions (admin)
 export const getAdminTransactions = (params) => api.get(url.GET_ADMIN_TRANSACTIONS, params);
+export const getTransactions = (params) => PaymentAPIClient.get(url.GET_TRANSACTIONS, params);
+export const getPaymentAnalytics = () => PaymentAPIClient.get(url.GET_PAYMENT_ANALYTICS);
+export const refundTransaction = (id) => PaymentAPIClient.patch(`${url.REFUND_TRANSACTION}/${id}/refund`);
 
 // Get revenue data
 export const getAdminRevenue = (params) => api.get(url.GET_ADMIN_REVENUE, params);
@@ -280,9 +285,24 @@ export const getSystemSettings = () => BookingAPIClient.get(url.GET_SYSTEM_SETTI
 // Update system settings
 export const updateSystemSettings = (data) => BookingAPIClient.update(url.UPDATE_SYSTEM_SETTINGS, data);
 
-// Email templates
-export const getEmailTemplates = () => api.get(url.GET_EMAIL_TEMPLATES);
-export const updateEmailTemplate = (id, data) => api.update(`${url.UPDATE_EMAIL_TEMPLATE}/${id}`, data);
+// ===========================================
+// EMAIL TEMPLATES (Communication Service)
+// ===========================================
+
+// Get all email templates
+export const getEmailTemplates = (params) => CommunicationAPIClient.get(url.GET_EMAIL_TEMPLATES, params);
+
+// Get email template by ID
+export const getEmailTemplateById = (id) => CommunicationAPIClient.get(`${url.GET_EMAIL_TEMPLATE_BY_ID}/${id}`);
+
+// Create new email template
+export const createEmailTemplate = (data) => CommunicationAPIClient.create(url.CREATE_EMAIL_TEMPLATE, data);
+
+// Update email template
+export const updateEmailTemplate = (id, data) => CommunicationAPIClient.update(`${url.UPDATE_EMAIL_TEMPLATE}/${id}`, data);
+
+// Delete email template
+export const deleteEmailTemplate = (id) => CommunicationAPIClient.delete(`${url.DELETE_EMAIL_TEMPLATE}/${id}`);
 
 // REPORTS & ANALYTICS
 // Get admin reports
@@ -313,6 +333,28 @@ export const updateConversation = (id, data) => CommunicationAPIClient.update(`$
 // Delete conversation
 export const deleteConversation = (id) => CommunicationAPIClient.delete(`${url.DELETE_CONVERSATION}/${id}`);
 
+// ===========================================
+// NOTIFICATIONS (Admin)
+// ===========================================
+
+// Get all notifications
+export const getNotifications = (params) => CommunicationAPIClient.get(url.GET_ADMIN_NOTIFICATIONS, params);
+
+// Create new notification
+export const createNotification = (data) => CommunicationAPIClient.create(url.CREATE_ADMIN_NOTIFICATION, data);
+
+// Get notification by ID
+export const getNotificationById = (id) => CommunicationAPIClient.get(`${url.GET_ADMIN_NOTIFICATION_BY_ID}/${id}`);
+
+// Update notification
+export const updateNotification = (id, data) => CommunicationAPIClient.update(`${url.UPDATE_ADMIN_NOTIFICATION}/${id}`, data);
+
+// Delete notification
+export const deleteNotification = (id) => CommunicationAPIClient.delete(`${url.DELETE_ADMIN_NOTIFICATION}/${id}`);
+
+// Send notification
+export const sendNotification = (id) => CommunicationAPIClient.update(`${url.SEND_NOTIFICATION}/${id}/send`);
+
 // Get conversations by user
 export const getConversationsByUser = (userId) => CommunicationAPIClient.get(`${url.GET_CONVERSATIONS_BY_USER}/${userId}`);
 
@@ -337,3 +379,18 @@ export const deleteMessage = (id) => CommunicationAPIClient.delete(`${url.DELETE
 
 // Get messages by conversation
 export const getMessagesByConversation = (conversationId) => CommunicationAPIClient.get(`${url.GET_MESSAGES_BY_CONVERSATION}/${conversationId}`);
+
+// ===========================================
+// PACKAGE PLANS (Pricing-Loyalty Service)
+// ===========================================
+
+export const getPackagePlans = (params) => PricingAPIClient.get(url.GET_PACKAGE_PLANS, params);
+export const createPackagePlan = (data) => PricingAPIClient.create(url.CREATE_PACKAGE_PLAN, data);
+export const updatePackagePlan = (id, data) => PricingAPIClient.update(`${url.UPDATE_PACKAGE_PLAN}/${id}`, data);
+export const deletePackagePlan = (id) => PricingAPIClient.delete(`${url.DELETE_PACKAGE_PLAN}/${id}`);
+
+// Package Subscriptions
+export const getPackageSubscriptions = (params) => PricingAPIClient.get(url.GET_PACKAGE_SUBSCRIPTIONS, params);
+export const exportPackageSubscriptionsPdf = (data) => PricingAPIClient.create(url.EXPORT_PACKAGE_SUBSCRIPTIONS_PDF, data);
+export const updatePackageSubscriptionStatus = (id, data) => PricingAPIClient.patch(`${url.UPDATE_PACKAGE_SUBSCRIPTION_STATUS}/${id}/status`, data);
+export const updatePackageSubscription = (id, data) => PricingAPIClient.update(`${url.UPDATE_PACKAGE_SUBSCRIPTION}/${id}`, data);

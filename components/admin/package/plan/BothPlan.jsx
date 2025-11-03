@@ -3,8 +3,23 @@ import CheckIcon from "@mui/icons-material/Check";
 import { green } from "@mui/material/colors";
 import { CreditCard, Edit, Star, Trash } from "lucide-react";
 
-const BothPlan = () => {
-  const subscriptionPlans = [
+const BothPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = () => { } }) => {
+  const subscriptionPlans = plans.length > 0 ? plans.map(p => ({
+    id: p.id,
+    title: p.name,
+    value: p.name?.toLowerCase?.() || String(p.id),
+    description: p.description || "",
+    icon: (
+      <div className="size-40 flex-center rounded-full bg-light-2 text-dark-1">
+        <CreditCard />
+      </div>
+    ),
+    commission_percent: p.commission_percent || 0,
+    price: p.price || 0,
+    services: JSON.parse(p.features || '[]'),
+    isPopular: !!p.is_popular,
+    status: p.status || "Active",
+  })) : [
     {
       id: 1,
       title: "Basic",
@@ -15,6 +30,7 @@ const BothPlan = () => {
           <CreditCard />
         </div>
       ),
+      commission_percent: 12,
       price: 19.99,
       services: ["Up to 5 listings", "Standard support", "Basic analytics"],
       status: "Active",
@@ -29,6 +45,7 @@ const BothPlan = () => {
           <Star />
         </div>
       ),
+      commission_percent: 12,
       price: 49.99,
       services: [
         "Up to 25 listings",
@@ -56,6 +73,7 @@ const BothPlan = () => {
         "Featured listings",
         "Priority search placement",
       ],
+      commission_percent: 12,
       price: 99.99,
       status: "Active",
     },
@@ -63,25 +81,11 @@ const BothPlan = () => {
 
   return (
     <>
-      <div className="row y-gap-20 justify-between">
-        <div className="text-20 fw-600 col-auto">Subscription Plan</div>
-        <div className="col-sm-auto d-flex justify-end items-center">
-          <div className="text-14 fw-500 mr-10">Monthly</div>
-          <div className="form-check form-switch mt-5">
-            <input
-              className="form-check-input border-light"
-              type="checkbox"
-              role="switch"
-              id="serviceActive"
-            />
-          </div>
-          <div className="text-14 fw-500 mr-20">
-            Yearly
-            <span className="text-green-2 text-14 fw-400 ml-5">(Save 20%)</span>
-          </div>
-        </div>
-      </div>
+      <div className="text-20 fw-600 col-auto">Both</div>
       <div className="row y-gap-20">
+        {loading && (
+          <div className="col-12 text-14 text-light-1">Loading plans...</div>
+        )}
         {subscriptionPlans.map((item, index) => (
           <div className="col-md-4" key={index}>
             <div
@@ -110,7 +114,7 @@ const BothPlan = () => {
                   <div className="text-14 text-light-1 mb-5">/ month</div>
                 </div>
                 <div className="text-14 text-green-3 mb-5">
-                  12 % <span className="text-12">commission per booking</span>
+                  {item.commission_percent}% <span className="text-12">commission per booking</span>
                 </div>
                 {item.services.map((service, idx) => (
                   <div
@@ -126,8 +130,8 @@ const BothPlan = () => {
                 <span className="text-12 fw-500 text-white bg-green-3 rounded-100 px-10">
                   {item.status}
                 </span>
-                <Edit size={16} className="text-light-1 cursor-pointer" />
-                <Trash size={16} className="text-light-1 cursor-pointer" />
+                <Edit size={16} className="text-light-1 cursor-pointer" onClick={() => onEdit(item.id)} />
+                <Trash size={16} className="text-light-1 cursor-pointer" onClick={() => onDelete(item.id)} />
               </div>
             </div>
           </div>

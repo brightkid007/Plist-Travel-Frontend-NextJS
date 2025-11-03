@@ -53,7 +53,7 @@ const config = {
         'Content-Type': 'application/json',
       }
     },
-     PAYMENT: {
+    PAYMENT: {
        baseURL: process.env.NEXT_PUBLIC_PAYMENT_SERVICE_URL,
        timeout: 30000,
        headers: {

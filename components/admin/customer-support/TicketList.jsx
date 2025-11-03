@@ -1,40 +1,55 @@
-import { useEffect, useState } from "react";
-import { User, Inbox } from "lucide-react";
-import { getConversations } from "@/helpers/backend_helper";
+import { User, Inbox, ChevronRight } from "lucide-react";
 
-const TicketList = ({ filterType = "all", onSelectTicket }) => {
-  const [tickets, setTickets] = useState([]);
+const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelectTicket }) => {
+  const formatDateTime = (dateString) => {
+    if (!dateString || dateString === "—") return "—";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "—";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    } catch {
+      return "—";
+    }
+  };
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getConversations();
-        const conversations = res?.conversations || res?.data?.conversations || res?.data || res || [];
-        console.log(conversations);
-        const mapped = (Array.isArray(conversations) ? conversations : []).map((c) => ({
-          ticket_id: c.ticket_id || c.id || `TKT-${c.id}`,
-          customer_name: c.user?.user_profile?.first_name && c.user?.user_profile?.last_name
-            ? `${c.user.user_profile.first_name} ${c.user.user_profile.last_name}`
-            : c.user?.email?.split("@")[0] || "Unknown",
-          customer_email: c.user?.email || "—",
-          issue: c.subject || c.ticket_id || "No subject",
-          ticket_type: c.type || c.category || "Other",
-          status: c.status || "Open",
-          priority: c.priority || "Medium",
-          last_updated: c.updated_at || c.updatedAt || c.created_at || c.createdAt || "—",
-          conversation_id: c.id,
-        }));
-        setTickets(mapped);
-      } catch (_) {
-        setTickets([]);
-      }
+  const formatStatus = (status) => {
+    if (!status) return "—";
+    const statusMap = {
+      open: "Open",
+      in_progress: "In Progress",
+      resolved: "Resolved",
+      closed: "Closed",
     };
-    load();
-  }, [filterType]);
+    return statusMap[status.toLowerCase()] || status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
+
+  const formatPriority = (priority) => {
+    if (!priority) return "—";
+    const priorityMap = {
+      low: "Low",
+      medium: "Medium",
+      high: "High",
+      urgent: "Urgent",
+    };
+    return priorityMap[priority.toLowerCase()] || priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
+  };
 
   const filteredTickets = filterType !== "all" 
     ? tickets.filter((t) => t.ticket_type?.toLowerCase().includes(filterType.toLowerCase()))
     : tickets;
+
+  if (loading) {
+    return (
+      <div className="overflow-scroll scroll-bar-1 pt-0 d-flex justify-center items-center py-40">
+        <div className="text-16 text-light-1">Loading tickets...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
@@ -86,34 +101,48 @@ const TicketList = ({ filterType = "all", onSelectTicket }) => {
                 </div>
               </td>
               <td className="align-middle">{row.issue}</td>
-              <td className="align-middle">
+              <td className="align-middle">{row.ticket_type}</td>
+              <td className="align-middle" style={{ minWidth: "120px", whiteSpace: "nowrap" }}>
                 <span
-                  className={`rounded-100 px-15 text-center text-12 fw-500 ${
+                  className={`rounded-100 px-15 py-5 text-center text-12 fw-500 ${
                     {
-                      Open: "bg-red-4 text-red-1",
-                      "In Progress": "bg-dark-blue text-white",
-                      Resolved: "bg-light-2 text-dark-1",
-                    }[row.status] || "bg-gray-4 text-gray-3"
+                      open: "bg-red-4 text-red-1",
+                      in_progress: "bg-dark-blue text-white",
+                      resolved: "bg-light-2 text-dark-1",
+                      closed: "bg-green-4 text-green-1",
+                    }[row.status?.toLowerCase()] || "bg-gray-4 text-gray-3"
                   }`}
+                  style={{ whiteSpace: "nowrap", display: "inline-block" }}
                 >
-                  {row.status}
+                  {formatStatus(row.status)}
                 </span>
               </td>
-              <td className="align-middle">
+              <td className="align-middle" style={{ minWidth: "100px", whiteSpace: "nowrap" }}>
                 <span
-                  className={`rounded-100 px-15 text-center text-12 fw-500 ${
+                  className={`rounded-100 px-15 py-5 text-center text-12 fw-500 ${
                     {
-                      Medium: "bg-yellow-4 text-brown-1",
-                      High: "bg-red-3 text-brown-1",
-                    }[row.priority] || "bg-gray-4 text-gray-3"
+                      medium: "bg-yellow-4 text-brown-1",
+                      high: "bg-red-3 text-brown-1",
+                      urgent: "bg-red-3 text-brown-1",
+                      low: "bg-gray-4 text-gray-3",
+                    }[row.priority?.toLowerCase()] || "bg-gray-4 text-gray-3"
                   }`}
+                  style={{ whiteSpace: "nowrap", display: "inline-block" }}
                 >
-                  {row.priority}
+                  {formatPriority(row.priority)}
                 </span>
               </td>
-              <td className="align-middle">{row.last_updated}</td>
+              <td className="align-middle">{formatDateTime(row.last_updated)}</td>
               <td className="align-middle">
-                <span className="material-symbols-outlined">more_horiz</span>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectTicket?.(row.conversation_id);
+                  }}
+                  style={{ cursor: onSelectTicket ? "pointer" : "default" }}
+                >
+                  <ChevronRight size={18} className="text-light-1" />
+                </div>
               </td>
             </tr>
             ))

@@ -3,10 +3,22 @@ import CheckIcon from "@mui/icons-material/Check";
 import { green } from "@mui/material/colors";
 import { CreditCard, Edit, Star, Trash } from "lucide-react";
 
-const SubscriptionPlan = () => {
-  const currentPlan = 2;
-
-  const subscriptionPlans = [
+const SubscriptionPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = () => { } }) => {
+  const subscriptionPlans = plans.length > 0 ? plans.map(p => ({
+    id: p.id,
+    title: p.name,
+    value: p.name?.toLowerCase?.() || String(p.id),
+    description: p.description || "",
+    icon: (
+      <div className="size-40 flex-center rounded-full bg-light-2 text-dark-1">
+        <CreditCard />
+      </div>
+    ),
+    price: p.price || 0,
+    services: JSON.parse(p.features || '[]'),
+    isPopular: !!p.is_popular,
+    status: p.status || "Active",
+  })) : [
     {
       id: 1,
       title: "Basic",
@@ -65,24 +77,7 @@ const SubscriptionPlan = () => {
 
   return (
     <>
-      <div className="row y-gap-20 justify-between">
-        <div className="text-20 fw-600 col-auto">Subscription Plan</div>
-        <div className="col-sm-auto d-flex justify-end items-center">
-          <div className="text-14 fw-500 mr-10">Monthly</div>
-          <div className="form-check form-switch mt-5">
-            <input
-              className="form-check-input border-light"
-              type="checkbox"
-              role="switch"
-              id="serviceActive"
-            />
-          </div>
-          <div className="text-14 fw-500 mr-20">
-            Yearly
-            <span className="text-green-2 text-14 fw-400 ml-5">(Save 20%)</span>
-          </div>
-        </div>
-      </div>
+      <div className="text-20 fw-600 col-auto">Subscription Plan</div>
       <div className="row y-gap-20">
         {subscriptionPlans.map((item, index) => (
           <div className="col-md-4" key={index}>
@@ -109,7 +104,7 @@ const SubscriptionPlan = () => {
                 </div>
                 <div className="d-flex items-end mt-20">
                   <h1 className="text-30 fw-600 mr-5">${item.price} </h1>
-                  <div className="text-14 text-light-1 mb-5">/ month</div>
+                  <div className="text-14 text-light-1 mb-5">/ {item.duration_value} {item.duration_unit}</div>
                 </div>
                 {item.services.map((service, idx) => (
                   <div
@@ -125,8 +120,8 @@ const SubscriptionPlan = () => {
                 <span className="text-12 fw-500 text-white bg-green-3 rounded-100 px-10">
                   {item.status}
                 </span>
-                <Edit size={16} className="text-light-1 cursor-pointer" />
-                <Trash size={16} className="text-light-1 cursor-pointer" />
+                <Edit size={16} className="text-light-1 cursor-pointer" onClick={() => onEdit(item.id)} />
+                <Trash size={16} className="text-light-1 cursor-pointer" onClick={() => onDelete(item.id)} />
               </div>
             </div>
           </div>

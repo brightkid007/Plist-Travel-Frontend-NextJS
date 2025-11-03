@@ -47,6 +47,9 @@ export const GET_ADMIN_REVENUE = "/admin/revenue";
 export const GET_ADMIN_PAYOUTS = "/admin/payouts";
 export const PROCESS_PAYOUT = "/admin/payouts";
 export const GET_FINANCIAL_ANALYTICS = "/admin/financial/analytics";
+export const GET_TRANSACTIONS = "/transactions";
+export const GET_PAYMENT_ANALYTICS = "/analytics";
+export const REFUND_TRANSACTION = "/transactions";
 
 // Vendor Management
 export const GET_ADMIN_VENDORS = "/admin/vendors";
@@ -73,11 +76,28 @@ export const CREATE_BANNER = "/admin/banners";
 export const UPDATE_BANNER = "/admin/banners";
 export const DELETE_BANNER = "/admin/banners";
 
+// Package Plans (Pricing-Loyalty Service)
+export const GET_PACKAGE_PLANS = "/package-plans";
+export const CREATE_PACKAGE_PLAN = "/package-plans";
+export const UPDATE_PACKAGE_PLAN = "/package-plans";
+export const DELETE_PACKAGE_PLAN = "/package-plans";
+
+// Package Subscriptions (Pricing-Loyalty Service)
+export const GET_PACKAGE_SUBSCRIPTIONS = "/package-subscriptions";
+export const EXPORT_PACKAGE_SUBSCRIPTIONS_PDF = "/package-subscriptions/export";
+export const UPDATE_PACKAGE_SUBSCRIPTION_STATUS = "/package-subscriptions";
+export const UPDATE_PACKAGE_SUBSCRIPTION = "/package-subscriptions";
+
 // System Settings
 export const GET_SYSTEM_SETTINGS = "/admin/settings";
 export const UPDATE_SYSTEM_SETTINGS = "/admin/settings";
-export const GET_EMAIL_TEMPLATES = "/admin/email-templates";
-export const UPDATE_EMAIL_TEMPLATE = "/admin/email-templates";
+
+// Email Templates (Communication Service)
+export const GET_EMAIL_TEMPLATES = "/email-templates";
+export const GET_EMAIL_TEMPLATE_BY_ID = "/email-templates";
+export const CREATE_EMAIL_TEMPLATE = "/email-templates";
+export const UPDATE_EMAIL_TEMPLATE = "/email-templates";
+export const DELETE_EMAIL_TEMPLATE = "/email-templates";
 
 // Reports & Analytics
 export const GET_ADMIN_REPORTS = "/admin/reports";
@@ -99,3 +119,11 @@ export const GET_MESSAGE_BY_ID = "/messages";
 export const UPDATE_MESSAGE = "/messages";
 export const DELETE_MESSAGE = "/messages";
 export const GET_MESSAGES_BY_CONVERSATION = "/messages/by-conversation";
+
+// Notifications (Admin)
+export const GET_ADMIN_NOTIFICATIONS = "/admin/notifications";
+export const CREATE_ADMIN_NOTIFICATION = "/admin/notifications";
+export const GET_ADMIN_NOTIFICATION_BY_ID = "/admin/notifications";
+export const UPDATE_ADMIN_NOTIFICATION = "/admin/notifications";
+export const DELETE_ADMIN_NOTIFICATION = "/admin/notifications";
+export const SEND_NOTIFICATION = "/admin/notifications";

@@ -3,13 +3,132 @@
 import AdminDashboardLayout from "../../common/layout";
 import FormInput from "@/components/common/form/FormInput";
 import { Checkbox } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import CancelIcon from "@mui/icons-material/Cancel";
+import { green, red } from "@mui/material/colors";
 import { useState } from "react";
+import { createPackagePlan } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 const index = () => {
   const router = useRouter();
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [planType, setPlanType] = useState("subscription");
+  const [features, setFeatures] = useState([]);
+  const [newFeature, setNewFeature] = useState("");
+  const [price, setPrice] = useState("");
+  const [commissionPercent, setCommissionPercent] = useState("");
+  const [durationUnit, setDurationUnit] = useState("months");
+  const [durationValue, setDurationValue] = useState("1");
+  const [trialDays, setTrialDays] = useState("");
+  const [isPopular, setIsPopular] = useState(false);
+  const [sortOrder, setSortOrder] = useState("");
+  const [hoverFeatureIdx, setHoverFeatureIdx] = useState(-1);
+  const [saving, setSaving] = useState(false);
+
+  const addFeature = () => {
+    const value = (newFeature || "").trim();
+    if (!value) return;
+    if (!features.includes(value)) setFeatures([...features, value]);
+    setNewFeature("");
+    setHoverFeatureIdx(-1);
+  };
+
+  const removeFeatureAt = (index) => {
+    setFeatures(features.filter((_, i) => i !== index));
+    setHoverFeatureIdx(-1);
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const name = document.querySelector('input[placeholder="Enter package name"]').value || "";
+      const description = document.querySelector('input[placeholder="Enter package description"]').value || "";
+      const payload = {
+        name,
+        description,
+        model: planType,
+        status: isActive ? "Active" : "Inactive",
+        sort_order: sortOrder ? parseInt(sortOrder) : null,
+        is_popular: isPopular,
+        features: features,
+      };
+
+      if (planType === "subscription") {
+        payload.price = price ? parseFloat(price) : null;
+        payload.duration_unit = durationUnit;
+        payload.duration_value = durationValue ? parseInt(durationValue) : null;
+        payload.trial_days = trialDays ? parseInt(trialDays) : 0;
+      } else if (planType === "fee-per-booking") {
+        payload.commission_percent = commissionPercent ? parseFloat(commissionPercent) : null;
+      } else if (planType === "both") {
+        payload.price = price ? parseFloat(price) : null;
+        payload.duration_unit = durationUnit;
+        payload.duration_value = durationValue ? parseInt(durationValue) : null;
+        payload.commission_percent = commissionPercent ? parseFloat(commissionPercent) : null;
+      }
+
+      if (!payload.name.trim()) {
+        toast.error("Please enter package name");
+        setSaving(false);
+        return;
+      }
+      if (!["subscription", "fee-per-booking", "both"].includes(planType)) {
+        toast.error("Please select a valid plan type");
+        setSaving(false);
+        return;
+      }
+      // Additional validations
+      const validUnits = ["days", "months", "quarters", "years"];
+      if (!Array.isArray(payload.features) || payload.features.some((f) => typeof f !== "string" || !f.trim())) {
+        toast.error("Features must be non-empty text items");
+        setSaving(false);
+        return;
+      }
+      if (payload.sort_order !== null && (!Number.isInteger(payload.sort_order) || payload.sort_order < 0)) {
+        toast.error("Sort order must be a non-negative integer");
+        setSaving(false);
+        return;
+      }
+      if (planType === "subscription" || planType === "both") {
+        if (!(typeof payload.price === "number") || !(payload.price > 0)) {
+          toast.error("Price must be greater than 0");
+          setSaving(false);
+          return;
+        }
+        if (!validUnits.includes(payload.duration_unit)) {
+          toast.error("Duration unit must be days, months, quarters or years");
+          setSaving(false);
+          return;
+        }
+        if (!Number.isInteger(payload.duration_value) || payload.duration_value < 1) {
+          toast.error("Duration value must be an integer ≥ 1");
+          setSaving(false);
+          return;
+        }
+        if (!Number.isInteger(payload.trial_days) || payload.trial_days < 0) {
+          toast.error("Trial days must be an integer ≥ 0");
+          setSaving(false);
+          return;
+        }
+      }
+      if (planType === "fee-per-booking" || planType === "both") {
+        if (typeof payload.commission_percent !== "number" || payload.commission_percent < 0 || payload.commission_percent > 100) {
+          toast.error("Commission percent must be between 0 and 100");
+          setSaving(false);
+          return;
+        }
+      }
+      await createPackagePlan(payload);
+      toast.success("Plan created");
+      router.push("/admin/package/plan");
+    } catch (e) {
+      toast.error(e?.response?.data?.message || e?.message || "Failed to create plan");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <AdminDashboardLayout>
@@ -37,95 +156,76 @@ const index = () => {
             gridClass="col-sm-6"
           />
 
-          <FormInput
-            type="number"
-            step="1"
-            label="Number of Locations/Properties"
-            placeholder="Enter number of locations/properties"
-            gridClass="col-sm-6"
-          />
-
-          <FormInput
-            type="number"
-            step="1"
-            label="Number of Active Users"
-            placeholder="Enter number of active users"
-            gridClass="col-sm-6"
-          />
-
-          <FormInput
-            type="number"
-            step="1"
-            label="Number of Listing Types"
-            placeholder="Enter number of listing types"
-            gridClass="col-sm-6"
-          />
-
-          <FormInput
-            type="number"
-            step="1"
-            label="Number of Listings"
-            placeholder="Enter number of listings"
-            gridClass="col-sm-6"
-          />
 
           <div className="col-sm-6 mt-5">
-            <h1 className="text-14 fw-500 lh-14">Support Tiers Included</h1>
-            <select className="form-select border-light rounded-8 h-40 mt-10 px-15">
-              <option value="tier1">Tier 1</option>
-              <option value="tier2">Tier 2</option>
-              <option value="tier3">Tier 3</option>
-              <option value="tier4">Tier 4</option>
+            <h1 className="text-14 fw-500 lh-14">Plan Type</h1>
+            <select
+              className="form-select border-light rounded-8 h-45 mt-5 px-15"
+              value={planType}
+              onChange={(e) => setPlanType(e.target.value)}
+            >
+              <option value="subscription">Subscription</option>
+              <option value="fee-per-booking">Fee per Booking</option>
+              <option value="both">Both</option>
             </select>
           </div>
 
-          <FormInput
-            type="number"
-            step="1"
-            label="Number of Featured Listings"
-            placeholder="Enter number of featured listings"
-            gridClass="col-sm-6"
-          />
+          {(planType === "subscription" || planType === "both") && (
+            <>
+              <FormInput
+                type="number"
+                step="0.01"
+                label="Price($)"
+                tooltip="Package price currency is set from System Setting"
+                placeholder="Enter price"
+                gridClass="col-sm-6"
+                onChange={(e) => setPrice(e.target.value)}
+              />
 
-          <div className="col-sm-6 mt-5">
-            <h1 className="text-14 fw-500 lh-14">Package Duration</h1>
-            <select className="form-select border-light rounded-8 h-40 mt-10 px-15">
-              <option value="days">Days</option>
-              <option value="months">Months</option>
-              <option value="quarters">Quarters</option>
-              <option value="years">Years</option>
-            </select>
-          </div>
+              <div className="col-sm-6 mt-5">
+                <h1 className="text-14 fw-500 lh-14">Package Duration Unit</h1>
+                <select className="form-select border-light rounded-8 h-40 mt-10 px-15" value={durationUnit} onChange={(e) => setDurationUnit(e.target.value)}>
+                  <option value="days">Days</option>
+                  <option value="months">Months</option>
+                  <option value="quarters">Quarters</option>
+                  <option value="years">Years</option>
+                </select>
+              </div>
 
-          <div className="col-sm-6 mt-5">
-            <h1 className="text-14 fw-500 lh-14">Duration Timeframe</h1>
-            <select className="form-select border-light rounded-8 h-40 mt-10 px-15">
-              {Array(40)
-                .fill(null)
-                .map((_, index) => (
-                  <option value={index + 1} key={index}>
-                    {index + 1}
-                  </option>
-                ))}
-            </select>
-          </div>
+              <div className="col-sm-6 mt-5">
+                <h1 className="text-14 fw-500 lh-14">Duration Value</h1>
+                <select className="form-select border-light rounded-8 h-40 mt-10 px-15" value={durationValue} onChange={(e) => setDurationValue(e.target.value)}>
+                  {Array(10)
+                    .fill(null)
+                    .map((_, index) => (
+                      <option value={index + 1} key={index}>
+                        {index + 1}
+                      </option>
+                    ))}
+                </select>
+              </div>
 
-          <FormInput
-            type="number"
-            step="1"
-            label="Trial Days"
-            placeholder="Enter trial days"
-            gridClass="col-sm-6"
-          />
+              <FormInput
+                type="number"
+                step="1"
+                label="Trial Days"
+                placeholder="Enter trial days"
+                gridClass="col-sm-6"
+                onChange={(e) => setTrialDays(e.target.value)}
+              />
+            </>
+          )}
 
-          <FormInput
-            type="number"
-            step="0.01"
-            label="Price($)"
-            tooltip="Package price currency is set from System Setting"
-            placeholder="Enter price"
-            gridClass="col-sm-6"
-          />
+          {(planType === "fee-per-booking" || planType === "both") && (
+            <FormInput
+              type="number"
+              step="0.01"
+              label="Commission Percent (%)"
+              placeholder="Enter commission percent"
+              gridClass="col-sm-6"
+              onChange={(e) => setCommissionPercent(e.target.value)}
+            />
+          )}
 
           <FormInput
             type="number"
@@ -133,59 +233,64 @@ const index = () => {
             label="Sort Order"
             placeholder="i.e. 1"
             gridClass="col-sm-6"
+            onChange={(e) => setSortOrder(e.target.value)}
           />
 
-          <div className="col-sm-6 mt-5">
-            <h1 className="text-14 fw-500 lh-14">Plan Type</h1>
-            <select
-              className="form-select border-light rounded-8 h-45 mt-5 px-15"
-              onChange={() => setPlanType(event.target.value)}
-            >
-              <option value="subscription">Subscription</option>
-              <option value="fee">Fee per Booking</option>
-              <option value="both">Both</option>
-            </select>
+
+          <div className="col-12">
+            <label className="text-14 fw-500">Feature</label>
+            <div className="d-flex gap-2 mt-5">
+              <input
+                className="form-control border-light rounded-8"
+                placeholder="Enter a feature"
+                value={newFeature}
+                onChange={(e) => setNewFeature(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addFeature();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="button bg-blue-1 text-white px-15 rounded-8"
+                onClick={addFeature}
+              >
+                +
+              </button>
+            </div>
+            {features.length > 0 && (
+              <div className="mt-10">
+                {features.map((f, idx) => (
+                  <div
+                    key={idx}
+                    className="d-flex items-center text-14 gap-2 mt-5"
+                    onMouseEnter={() => setHoverFeatureIdx(idx)}
+                    onMouseLeave={() => setHoverFeatureIdx(-1)}
+                  >
+                    {hoverFeatureIdx === idx ? (
+                      <CancelIcon
+                        sx={{ color: red[500], fontSize: 18, cursor: "pointer" }}
+                        onClick={() => removeFeatureAt(idx)}
+                        titleAccess="Remove feature"
+                      />
+                    ) : (
+                      <CheckIcon sx={{ color: green[400], fontSize: 16 }} />
+                    )}
+                    {f}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {planType != "subscription" && (
-            <>
-              <div className="text-18 fw-500 lh-14 mt-10">
-                Percentage Markup
-              </div>
-              {[
-                "Hotels",
-                "Spaces",
-                "Event Venues",
-                "Vocation Rentals",
-                "Events",
-                "Tours",
-                "Activities",
-              ].map((item, index) => (
-                <FormInput
-                  key={index}
-                  label={item + "(%)"}
-                  type="number"
-                  step={0.01}
-                  gridClass="col-sm-3"
-                />
-              ))}
-            </>
-          )}
           <div className="col-12"></div>
-          {[
-            "Channel Manager",
-            "One time only subscription",
-            "Mark Package as Popular",
-            "API Included",
-          ].map((item, index) => (
-            <div
-              className="col-sm-auto mt-5 d-flex gap-2 items-center"
-              key={index}
-            >
-              <Checkbox className="px-0 py-0" />
-              <div className="text-14 fw-500 lh-14">{item}</div>
-            </div>
-          ))}
+
+          <div className="col-sm-auto mt-5 d-flex gap-2 items-center">
+            <Checkbox className="px-0 py-0" checked={isPopular} onClick={() => setIsPopular(!isPopular)} />
+            <div className="text-14 fw-500 lh-14">Mark package as Popular</div>
+          </div>
 
           <div className="col-12"></div>
           <div className="col-sm-2 mt-5 d-flex gap-2 items-center">
@@ -196,23 +301,7 @@ const index = () => {
             />
             <div className="text-14 fw-500 lh-14">Is Active</div>
           </div>
-          {isActive && (
-            <>
-              <FormInput
-                type="text"
-                label="Only for these Vendors"
-                tooltip="Select Vendors to which this package will be shown. If empty, then package will be shown to all Vendors."
-                gridClass="col-sm-4"
-              />
-
-              <FormInput
-                type="text"
-                label="ERP Package Subscription"
-                tooltip="Select applicable ERP Package."
-                gridClass="col-sm-4"
-              />
-            </>
-          )}
+          {/* No vendor/ERP linkage fields in current DB schema */}
 
           <div className="col-12 d-flex justify-end gap-2">
             <button
@@ -223,9 +312,10 @@ const index = () => {
             </button>
             <button
               className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-15 py-5"
-              onClick={() => router.push("/admin/package/plan")}
+              onClick={handleSave}
+              disabled={saving}
             >
-              Save
+              {saving ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
