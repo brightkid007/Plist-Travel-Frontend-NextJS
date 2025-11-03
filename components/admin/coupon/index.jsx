@@ -36,36 +36,51 @@ const index = () => {
     setShowModal(false);
   };
 
-  const summaryCards = [
-    {
-      title: "Active Coupons",
-      amount: "4",
-      improve: "+1 from last month",
-      icon: "/img/dashboard/icons/1.svg",
-      description: "Number of active coupons"
-    },
-    {
-      title: "Total Redemptions",
-      amount: "568",
-      improve: "+23.6% from last month",
-      icon: "/img/dashboard/icons/2.svg",
-      description: "Total coupon redemptions"
-    },
-    {
-      title: "Discount Value",
-      amount: "$12,450",
-      improve: "+15.2% from last month",
-      icon: "/img/dashboard/icons/3.svg",
-      description: "Total value of discounts given"
-    },
-    {
-      title: "Conversion Rate",
-      amount: "24.5%",
-      improve: "+2.1% from last month",
-      icon: "/img/dashboard/icons/4.svg",
-      description: "Percentage of successful conversions"
-    }
-  ];
+  // Derive dashboard card analytics from loaded entries
+  const summaryCards = useMemo(() => {
+    const now = new Date();
+    const inDays = (d1, d2) => Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+    const activeCount = entries.filter(e => e.status === "Active").length;
+    const inactiveCount = entries.filter(e => e.status !== "Active").length;
+    const totalDiscount = entries.reduce((sum, e) => sum + (Number(e.discount) || 0), 0);
+    const expiringSoon = entries.filter(e => {
+      if (!e.expiry) return false;
+      const dt = new Date(e.expiry);
+      const days = inDays(now, dt);
+      return days >= 0 && days <= 30;
+    }).length;
+
+    return [
+      {
+        title: "Active Coupons",
+        amount: String(activeCount),
+        improve: "",
+        icon: "/img/dashboard/icons/1.svg",
+        description: "Number of active coupons"
+      },
+      {
+        title: "Total Discount Value",
+        amount: `$${totalDiscount.toFixed(2)}`,
+        improve: "",
+        icon: "/img/dashboard/icons/3.svg",
+        description: "Sum of discount values"
+      },
+      {
+        title: "Inactive Coupons",
+        amount: String(inactiveCount),
+        improve: "",
+        icon: "/img/dashboard/icons/2.svg",
+        description: "Currently inactive coupons"
+      },
+      {
+        title: "Expiring in 30 days",
+        amount: String(expiringSoon),
+        improve: "",
+        icon: "/img/dashboard/icons/4.svg",
+        description: "Coupons approaching expiry"
+      }
+    ];
+  }, [entries]);
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -291,7 +306,7 @@ const index = () => {
         aria-describedby="alert-dialog-title"
       >
         <div className="px-20 py-20 w-500 sm:w-full">
-          <ModalContent onCreated={(newItem) => {
+          <ModalContent onClose={handleClose} onCreated={(newItem) => {
             // Refresh list after creation
             setEntries((prev) => [newItem, ...prev]);
           }} />
@@ -328,7 +343,7 @@ const index = () => {
   );
 };
 
-const ModalContent = ({ onCreated }) => {
+const ModalContent = ({ onCreated, onClose }) => {
   const [startDate, setStartDate] = useState(new DateObject());
   const [endDate, setEndDate] = useState(new DateObject());
   const [form, setForm] = useState({
@@ -398,9 +413,7 @@ const ModalContent = ({ onCreated }) => {
           expiry: created.date_to,
         });
       }
-      // close dialog by simulating Escape; parent controls open state
-      const event = new KeyboardEvent('keydown', { key: 'Escape' });
-      document.dispatchEvent(event);
+      if (typeof onClose === 'function') onClose();
     } catch (e) {
       setError(e?.toString?.() || "Failed to create coupon");
     } finally {
