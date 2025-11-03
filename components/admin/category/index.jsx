@@ -76,11 +76,11 @@ const index = () => {
       }
 
       const payload = { name: formData.name.trim() };
-      
+
       if (formData.description) {
         payload.description = formData.description.trim();
       }
-      
+
       if (activeTab === "category") {
         // Category fields: name, description, type, status
         if (!formData.type) {
@@ -116,7 +116,7 @@ const index = () => {
         );
         toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} created successfully`);
       }
-      
+
       handleClose();
       // Refresh data
       if (activeTab === "category") {
@@ -164,7 +164,7 @@ const index = () => {
         `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}/${id}`
       );
       toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} deleted successfully`);
-      
+
       // Refresh data
       if (activeTab === "category") {
         await fetchCategories();
@@ -261,7 +261,7 @@ const index = () => {
       description: "Hotels near or inside airports.",
     },
   ];
-  
+
   const Subcategories = [
     {
       id: 1,
@@ -327,7 +327,7 @@ const index = () => {
       description: "Hotels available for short-term day bookings.",
     },
   ];
-  
+
 
   return (
     <AdminDashboardLayout>
@@ -441,7 +441,7 @@ const index = () => {
                       <div className="text-14 text-light-1">Loading...</div>
                     </td>
                   </tr>
-                ) : activeTab == "category" ? (
+                ) : activeTab == "category" ?
                   categories.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="text-center py-20">
@@ -459,8 +459,7 @@ const index = () => {
                         </td>
                         <td className="align-middle">
                           <span
-                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                              client.status === "Active"
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${client.status === "Active"
                                 ? "bg-green-1 text-green-2"
                                 : "bg-light-2 text-dark-1"
                               }`}
@@ -472,13 +471,13 @@ const index = () => {
                           {item.description || "-"}
                         </td>
                         <td className="align-middle">
-                          <span 
-                            className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" 
+                          <span
+                            className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer"
                             onClick={() => handleEdit(item)}
                           >
                             Edit
                           </span>
-                          <span 
+                          <span
                             className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
                             onClick={() => handleDelete(item.id)}
                           >
@@ -498,11 +497,10 @@ const index = () => {
                         </td>
                         <td className="align-middle">
                           <span
-                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                              item.status === "Active"
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${item.status === "Active"
                                 ? "bg-green-1 text-green-2"
                                 : "bg-light-2 text-dark-1"
-                            }`}
+                              }`}
                           >
                             {item.status}
                           </span>
@@ -533,7 +531,7 @@ const index = () => {
         aria-describedby="alert-dialog-title"
       >
         <div className="px-20 py-20 w-500 sm:w-full">
-          <ModalContent activeTab={activeTab}/>
+          <ModalContent activeTab={activeTab} />
           <div className="d-flex justify-end gap-2 mt-10">
             <button
               className="text-14 border-light rounded-8 px-10 py-5"
@@ -555,7 +553,7 @@ const index = () => {
   );
 };
 
-const ModalContent = ( {activeTab} ) => {
+const ModalContent = ({ activeTab }) => {
 
   const listingTypeOptions = [
     { value: "Properties", label: "Properties" },
@@ -574,7 +572,7 @@ const ModalContent = ( {activeTab} ) => {
     { value: "flight", label: "Flight" },
     { value: "ride", label: "Ride" }
   ];
-  
+
 
   const statusOptions = [
     { value: "active", label: "Active" },
@@ -598,7 +596,7 @@ const ModalContent = ( {activeTab} ) => {
             gridClass="col-12 mt-5"
             options={listingTypeOptions}
           />
-    
+
           <FormInput
             label="Category"
             type="text"
