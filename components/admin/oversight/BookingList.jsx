@@ -3,22 +3,35 @@ import { useMemo } from "react";
 const BookingList = ({ bookings = [] }) => {
   const rows = useMemo(() => {
     const list = Array.isArray(bookings) ? bookings : [];
-    return list.map((b, i) => ({
-      id: b.id || b._id || i,
-      image: b.image || "/img/testimonials/1/4.png",
-      name: b.title || b.name || b.listingName || "—",
-      type: b.type || b.listingType || b.categoryType || "—",
-      category: b.category || b.listingCategory || "—",
-      subcategory: b.subcategory || b.listingSubcategory || "—",
-      orderDate: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : b.orderDate || "—",
-      exeTime:
-        b.startDate && b.endDate
-          ? `${new Date(b.startDate).toLocaleDateString()} ~ ${new Date(b.endDate).toLocaleDateString()}`
-          : b.exeTime || "—",
-      totalPrice: b.totalPrice != null ? b.totalPrice : b.amount || b.price || 0,
-      paid: b.paidAmount != null ? b.paidAmount : b.paid || 0,
-      status: b.status || b.bookingStatus || "Pending",
-    }));
+    return list.map((b, i) => {
+      const start = b.start_date || b.startDate;
+      const end = b.end_date || b.endDate;
+      const listing = b.listing || {};
+      const category = listing.category || {};
+      const subcategory = listing.subcategory || {};
+
+      return {
+        id: b.id ?? b._id ?? i,
+        image: b.image || "/img/testimonials/1/4.png",
+        name: listing.title || b.title || b.name || b.listingName || "—",
+        type: listing.type || b.type || b.listingType || b.category_type || "—",
+        category: category.name || b.category || b.listingCategory || "—",
+        subcategory: subcategory.name || b.subcategory || b.listingSubcategory || "—",
+        orderDate: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : b.orderDate || "—",
+        exeTime:
+          start && end
+            ? `${new Date(start).toLocaleDateString()} ~ ${new Date(end).toLocaleDateString()}`
+            : b.exeTime || "—",
+        totalPrice:
+          b.total_price != null
+            ? Number(b.total_price)
+            : b.totalPrice != null
+            ? Number(b.totalPrice)
+            : b.amount || b.price || 0,
+        paid: b.payment_status != null ? b.payment_status : 'unpaid',
+        status: (b.status || b.bookingStatus || "pending").replace(/^./, (c) => c.toUpperCase()),
+      };
+    });
   }, [bookings]);
 
   return (
@@ -68,7 +81,20 @@ const BookingList = ({ bookings = [] }) => {
                 <td className="align-middle">{row.orderDate}</td>
                 <td className="align-middle">{row.exeTime}</td>
                 <td className="align-middle">{String(row.totalPrice)}</td>
-                <td className="align-middle">{String(row.paid)}</td>
+                <td className="align-middle">
+                  <span
+                    className={`rounded-100 py-4 px-10 text-center text-14 fw-500 ${
+                      {
+                        Paid: "bg-green-4 text-green-3",
+                        Unpaid: "bg-yellow-4 text-yellow-3",
+                        Refunded: "bg-blue-1-05 text-blue-1",
+                      }[(String(row.paid) || "Unpaid").replace(/^./, (c) => c.toUpperCase())] ||
+                      "bg-gray-4 text-gray-3"
+                    }`}
+                  >
+                    {(String(row.paid) || "unpaid").replace(/^./, (c) => c.toUpperCase())}
+                  </span>
+                </td>
                 <td className="align-middle">
                   <span
                     className={`rounded-100 py-4 px-10 text-center text-14 fw-500 ${
