@@ -143,30 +143,18 @@ class APIClient {
    * Fetches data from given url
    */
   get = (url, params) => {
-    let response;
-
-    let paramKeys = [];
-
-    if(params){
-      Object.keys(params).forEach(key => {
-        // Only include params that are not undefined, null, or empty
+    // Sanitize params and let axios build the query string to avoid sending undefined values
+    if (params && typeof params === 'object') {
+      const sanitized = {};
+      Object.keys(params).forEach((key) => {
         const value = params[key];
         if (value !== undefined && value !== null && value !== "") {
-          paramKeys.push(key + '=' + encodeURIComponent(value));
+          sanitized[key] = value;
         }
       });
-    
-      const queryString = paramKeys && paramKeys.length ? paramKeys.join('&') : "";
-      if (queryString) {
-        response = this.service.get(`${url}?${queryString}`, params);
-      } else {
-        response = this.service.get(`${url}`, params);
-      }
-    } else {
-        response = this.service.get(`${url}`, params);
+      return this.service.get(url, { params: sanitized });
     }
-
-    return response;
+    return this.service.get(url);
   }
 
   /**

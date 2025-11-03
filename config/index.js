@@ -33,21 +33,21 @@ const config = {
   // Service-specific configurations
   SERVICES: {
     AUTH: {
-      baseURL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL,
+      baseURL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || "http://localhost:3001/api",
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     LISTING: {
-      baseURL: process.env.NEXT_PUBLIC_LISTING_SERVICE_URL,
+      baseURL: process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || "http://localhost:3000/api",
       timeout: 15000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     BOOKING: {
-      baseURL: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL,
+      baseURL: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || "http://localhost:3003/api",
       timeout: 20000,
       headers: {
         'Content-Type': 'application/json',
@@ -61,21 +61,21 @@ const config = {
        }
      },
     COMMUNICATION: {
-      baseURL: process.env.NEXT_PUBLIC_COMMUNICATION_SERVICE_URL,
+      baseURL: process.env.NEXT_PUBLIC_COMMUNICATION_SERVICE_URL || "http://localhost:3005/api",
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     REVIEW: {
-      baseURL: process.env.NEXT_PUBLIC_REVIEW_SERVICE_URL,
+      baseURL: process.env.NEXT_PUBLIC_REVIEW_SERVICE_URL || "http://localhost:3006/api",
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     PRICING: {
-      baseURL: process.env.NEXT_PUBLIC_PRICING_SERVICE_URL,
+      baseURL: process.env.NEXT_PUBLIC_PRICING_SERVICE_URL || "http://localhost:3007/api",
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',

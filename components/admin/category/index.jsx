@@ -1,15 +1,14 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { useRouter } from "next/navigation";
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
-import { useState } from "react";
+import { Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@mui/material";
-import { Checkbox } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
-import { InsertEmoticon } from "@mui/icons-material";
+import { ListingAPIClient } from "@/helpers/api_helper";
+import { toast } from "react-toastify";
+
 const index = () => {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("category");
   const [showModal, setShowModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -18,6 +17,172 @@ const index = () => {
 
   const handleClose = () => {
     setShowModal(false);
+    setEditingId(null);
+    setFormData({
+      name: "",
+      description: "",
+      category_id: "",
+      type: "",
+      status: "active"
+    });
+  };
+
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await ListingAPIClient.get("/listing-categories");
+      setCategories(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast.error(error?.message || "Failed to fetch categories");
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch subcategories
+  const fetchSubcategories = async () => {
+    try {
+      setLoading(true);
+      const response = await ListingAPIClient.get("/listing-subcategories");
+      setSubcategories(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching subcategories:", error);
+      toast.error(error?.message || "Failed to fetch subcategories");
+      setSubcategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data on mount and tab change
+  useEffect(() => {
+    if (activeTab === "category") {
+      fetchCategories();
+    } else {
+      fetchSubcategories();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Handle create/update
+  const handleSubmit = async () => {
+    try {
+      if (!formData.name.trim()) {
+        toast.error("Name is required");
+        return;
+      }
+
+      const payload = { name: formData.name.trim() };
+      
+      if (formData.description) {
+        payload.description = formData.description.trim();
+      }
+      
+      if (activeTab === "category") {
+        // Category fields: name, description, type, status
+        if (!formData.type) {
+          toast.error("Type is required");
+          return;
+        }
+        payload.type = formData.type;
+        payload.is_active = formData.status === "active";
+      } else {
+        // Subcategory fields: name, description, parent category id, status
+        if (!formData.category_id) {
+          toast.error("Parent category is required");
+          return;
+        }
+        payload.category_id = parseInt(formData.category_id);
+        // Status field for subcategory
+        payload.is_active = (formData.status || "active") === "active";
+      }
+
+      let response;
+      if (editingId) {
+        // Update
+        response = await ListingAPIClient.update(
+          `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}/${editingId}`,
+          payload
+        );
+        toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} updated successfully`);
+      } else {
+        // Create
+        response = await ListingAPIClient.create(
+          `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}`,
+          payload
+        );
+        toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} created successfully`);
+      }
+      
+      handleClose();
+      // Refresh data
+      if (activeTab === "category") {
+        await fetchCategories();
+      } else {
+        await fetchSubcategories();
+      }
+    } catch (error) {
+      console.error("Error saving:", error);
+      toast.error(error?.message || `Failed to ${editingId ? "update" : "create"} ${activeTab}`);
+    }
+  };
+
+  // Handle edit
+  const handleEdit = (item) => {
+    setEditingId(item.id);
+    if (activeTab === "category") {
+      setFormData({
+        name: item.name || "",
+        description: item.description || "",
+        category_id: "",
+        type: item.type || "",
+        status: item.is_active !== false ? "active" : "inactive"
+      });
+    } else {
+      setFormData({
+        name: item.name || "",
+        description: item.description || "",
+        category_id: item.category_id || "",
+        type: "",
+        status: item.is_active !== false ? "active" : "inactive"
+      });
+    }
+    setShowModal(true);
+  };
+
+  // Handle delete
+  const handleDelete = async (id) => {
+    if (!window.confirm(`Are you sure you want to delete this ${activeTab}?`)) {
+      return;
+    }
+
+    try {
+      await ListingAPIClient.delete(
+        `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}/${id}`
+      );
+      toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} deleted successfully`);
+      
+      // Refresh data
+      if (activeTab === "category") {
+        await fetchCategories();
+      } else {
+        await fetchSubcategories();
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
+      toast.error(error?.message || `Failed to delete ${activeTab}`);
+    }
+  };
+
+  // Handle form change
+  const handleFormChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const tabs = [
@@ -96,7 +261,7 @@ const index = () => {
       description: "Hotels near or inside airports.",
     },
   ];
-
+  
   const Subcategories = [
     {
       id: 1,
@@ -162,7 +327,7 @@ const index = () => {
       description: "Hotels available for short-term day bookings.",
     },
   ];
-
+  
 
   return (
     <AdminDashboardLayout>
@@ -270,28 +435,80 @@ const index = () => {
                 )}
               </thead>
               <tbody>
-                {activeTab == "category" ? (
-                  Categories
-                    .map((client, index) => (
-                      <tr key={index}>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-20">
+                      <div className="text-14 text-light-1">Loading...</div>
+                    </td>
+                  </tr>
+                ) : activeTab == "category" ? (
+                  categories.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-20">
+                        <div className="text-14 text-light-1">No categories found</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    categories.map((item, index) => (
+                      <tr key={item.id || index}>
                         <td className="align-middle text-12 lh-16 fw-500">
-                          {client.listing_type}
+                          {item.name}
                         </td>
                         <td className="align-middle text-12 lh-16 fw-500">
-                          {client.category}
+                          {item.type || "-"}
                         </td>
                         <td className="align-middle">
                           <span
-                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${client.status === "Active"
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
+                              client.status === "Active"
                                 ? "bg-green-1 text-green-2"
                                 : "bg-light-2 text-dark-1"
                               }`}
                           >
-                            {client.status}
+                            {item.is_active !== false ? "Active" : "Inactive"}
                           </span>
                         </td>
                         <td className="align-middle text-12 lh-16 fw-500">
-                          {client.description}
+                          {item.description || "-"}
+                        </td>
+                        <td className="align-middle">
+                          <span 
+                            className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" 
+                            onClick={() => handleEdit(item)}
+                          >
+                            Edit
+                          </span>
+                          <span 
+                            className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            Delete
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    Subcategories.map((item, index) => (
+                      <tr key={index}>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {item.subcategory}
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {Categories.find(cat => cat.id === item.parent_category_id)?.category}
+                        </td>
+                        <td className="align-middle">
+                          <span
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
+                              item.status === "Active"
+                                ? "bg-green-1 text-green-2"
+                                : "bg-light-2 text-dark-1"
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {item.description}
                         </td>
                         <td className="align-middle">
                           <span className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" onClick={() => setShowModal(true)}>
@@ -303,39 +520,7 @@ const index = () => {
                         </td>
                       </tr>
                     ))
-                ) : (
-                  Subcategories.map((item, index) => (
-                    <tr key={index}>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {item.subcategory}
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {Categories.find(cat => cat.id === item.parent_category_id)?.category}
-                      </td>
-                      <td className="align-middle">
-                        <span
-                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${item.status === "Active"
-                              ? "bg-green-1 text-green-2"
-                              : "bg-light-2 text-dark-1"
-                            }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {item.description}
-                      </td>
-                      <td className="align-middle">
-                        <span className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" onClick={() => setShowModal(true)}>
-                          Edit
-                        </span>
-                        <span className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1">
-                          Delete
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                  )}
               </tbody>
             </table>
           </div>
@@ -348,7 +533,7 @@ const index = () => {
         aria-describedby="alert-dialog-title"
       >
         <div className="px-20 py-20 w-500 sm:w-full">
-          <ModalContent activeTab={activeTab} />
+          <ModalContent activeTab={activeTab}/>
           <div className="d-flex justify-end gap-2 mt-10">
             <button
               className="text-14 border-light rounded-8 px-10 py-5"
@@ -358,11 +543,10 @@ const index = () => {
             </button>
             <button
               className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
-              onClick={() => {
-                setShowModal(false);
-              }}
+              onClick={handleSubmit}
+              disabled={loading}
             >
-              Create Category
+              {editingId ? "Update" : "Create"} {activeTab === "category" ? "Category" : "Subcategory"}
             </button>
           </div>
         </div>
@@ -371,7 +555,7 @@ const index = () => {
   );
 };
 
-const ModalContent = ({ activeTab }) => {
+const ModalContent = ( {activeTab} ) => {
 
   const listingTypeOptions = [
     { value: "Properties", label: "Properties" },
@@ -382,77 +566,86 @@ const ModalContent = ({ activeTab }) => {
     { value: "Rides", label: "Rides" },
   ];
 
-  const categoryOptions = [
-    { value: "Hotels", label: "Hotels" },
-    { value: "Airport Hotels", label: "Airport Hotels" },
-    { value: "Flights", label: "Flights" },
-    { value: "Cultural Experiences", label: "Cultural Experiences" },
-    { value: "Concerts & Shows", label: "Concerts & Shows" },
-    { value: "Food & Drink", label: "Food & Drink" },
-    { value: "Corporate Concierge", label: "Corporate Concierge" },
-    { value: "Business Class", label: "Business Class" },
-    { value: "Standard Lounges", label: "Standard Lounges" },
+  const typeOptions = [
+    { value: "property", label: "Property" },
+    { value: "activity", label: "Activity" },
+    { value: "tour", label: "Tour" },
+    { value: "event", label: "Event" },
+    { value: "flight", label: "Flight" },
+    { value: "ride", label: "Ride" }
   ];
+  
 
-
-  const listingSubTypeOptions = [
-    { value: "default", label: "default" },
-  ];
-
-  const status = [
-    {
-      label: "Active",
-      value: "active",
-    },
-    {
-      label: "Inactive",
-      value: "inactive",
-    },
+  const statusOptions = [
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" }
   ];
 
   return (
     <div className="row x-gap-10 y-gap-10 items-center">
       {activeTab === "category" ? (
         <>
-          <h1 className="text-20 lh-14 fw-500">Create New Category</h1>
+          <h1 className="text-20 lh-14 fw-500">{editingId ? "Edit" : "Create New"} Category</h1>
           <div className="text-12 text-light-1 lh-14 mb-15">
             Define a new category
           </div>
 
           <FormInput
-            label="Listing Type"
+            label="Category Name"
             required={true}
             type="select"
             placeholder="What's the listing type?"
             gridClass="col-12 mt-5"
             options={listingTypeOptions}
           />
-
+    
           <FormInput
             label="Category"
             type="text"
+            name="name"
             placeholder="Enter Category Name"
             gridClass="col-12 mt-5"
+            value={formData.name}
+            onChange={handleFormChange}
           />
 
           <FormInput
             label="Description"
             type="textarea"
+            name="description"
             placeholder="Fill Description"
             gridClass="col-12 mt-5"
+            value={formData.description}
+            onChange={handleFormChange}
+          />
+
+          <FormInput
+            label="Type"
+            required={true}
+            type="select"
+            name="type"
+            placeholder="Select type"
+            gridClass="col-12 mt-5"
+            options={typeOptions}
+            value={formData.type}
+            onChange={handleFormChange}
           />
 
           <FormInput
             label="Status"
+            required={true}
             type="select"
-            placeholder="What's the status?"
+            name="status"
+            placeholder="Select status"
             gridClass="col-12 mt-5"
-            options={status}
+            options={statusOptions}
+            value={formData.status}
+            onChange={handleFormChange}
           />
         </>
       ) : (
         <>
-          <h1 className="text-20 lh-14 fw-500">Create New Sub-Category</h1>
+          <h1 className="text-20 lh-14 fw-500">{editingId ? "Edit" : "Create New"} Sub-Category</h1>
           <div className="text-12 text-light-1 lh-14 mb-15">
             Define a new subcategory
           </div>
@@ -461,31 +654,45 @@ const ModalContent = ({ activeTab }) => {
             label="Parent Category"
             required={true}
             type="select"
-            placeholder="What's the parent category?"
+            name="category_id"
+            placeholder="Select parent category"
             gridClass="col-12 mt-5"
             options={categoryOptions}
+            value={formData.category_id}
+            onChange={handleFormChange}
           />
 
           <FormInput
-            label="Sub-Category"
+            label="Sub-Category Name"
+            required={true}
             type="text"
+            name="name"
             placeholder="Enter Sub-Category Name"
             gridClass="col-12 mt-5"
+            value={formData.name}
+            onChange={handleFormChange}
           />
 
           <FormInput
             label="Description"
             type="textarea"
+            name="description"
             placeholder="Fill Description"
             gridClass="col-12 mt-5"
+            value={formData.description}
+            onChange={handleFormChange}
           />
 
           <FormInput
             label="Status"
+            required={true}
             type="select"
-            placeholder="What's the status?"
+            name="status"
+            placeholder="Select status"
             gridClass="col-12 mt-5"
-            options={status}
+            options={statusOptions}
+            value={formData.status}
+            onChange={handleFormChange}
           />
         </>
       )}
