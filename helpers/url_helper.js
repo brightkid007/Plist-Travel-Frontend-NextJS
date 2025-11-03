@@ -56,12 +56,13 @@ export const APPROVE_VENDOR = "/admin/vendors";
 export const REJECT_VENDOR = "/admin/vendors";
 export const GET_VENDOR_ANALYTICS = "/admin/vendors/analytics";
 
-// Coupon & Promotion Management
-export const GET_ADMIN_COUPONS = "/admin/coupons";
-export const CREATE_ADMIN_COUPON = "/admin/coupons";
-export const UPDATE_ADMIN_COUPON = "/admin/coupons";
-export const DELETE_ADMIN_COUPON = "/admin/coupons";
-export const GET_COUPON_ANALYTICS = "/admin/coupons/analytics";
+// Coupon & Promotion Management (Pricing Service)
+// These endpoints live in the Pricing & Loyalty service and are not under /admin
+export const GET_ADMIN_COUPONS = "/coupons";
+export const CREATE_ADMIN_COUPON = "/coupons";
+export const UPDATE_ADMIN_COUPON = "/coupons";
+export const DELETE_ADMIN_COUPON = "/coupons";
+export const GET_COUPON_ANALYTICS = "/coupons/analytics";
 
 // Content Management
 export const GET_ADMIN_CONTENT = "/admin/content";

@@ -2,18 +2,35 @@
 
 import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
-import { useState } from "react";
+import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus, MoreVertical } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardCard from "./components/DashboardCard";
-import { Dialog } from "@mui/material";
+import { Dialog, Menu, MenuItem } from "@mui/material";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import FormInput from "@/components/common/form/FormInput";
 import Filter from "../common/Filter";
+import { createAdminCoupon, getAdminCoupons, updateAdminCoupon, deleteAdminCoupon } from "@/helpers/backend_helper";
 
 const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [entries, setEntries] = useState([]);
+  const [actionOpenIndex, setActionOpenIndex] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState({});
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const handleMenuOpen = (event, id) => {
+    setMenuAnchor({ [id]: event.currentTarget });
+    setActionOpenIndex(id);
+  };
+  const handleMenuClose = (id) => {
+    setMenuAnchor({ [id]: null });
+    setActionOpenIndex(null);
+  };
 
   const handleClose = () => {
     setShowModal(false);
@@ -49,65 +66,34 @@ const index = () => {
       description: "Percentage of successful conversions"
     }
   ];
-  
-  
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await getAdminCoupons();
+        // APIClient returns { message, data } or raw array depending on service settings
+        const items = res?.data?.coupons || res?.coupons || res?.data || res || [];
+        const normalized = (Array.isArray(items) ? items : []).map((c) => ({
+          id: c.id || c.ID || c.uuid,
+          code: c.code,
+          description: c.description,
+          discount: Number(c.discount_value),
+          type: c.discount_type === "percent" ? "percentage" : "fixed",
+          usageLimit: c.usage_limit,
+          status: c.is_active ? "Active" : "Inactive",
+          expiry: c.date_to,
+        }));
+        setEntries(normalized);
+      } catch (e) {
+        setError(e?.toString?.() || "Failed to load coupons");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
-  const entries = [
-    {
-      code: "DISC10",
-      description: "10% off for VIP customers",
-      discount: 10,
-      type: "percentage",
-      usage: "78/200",
-      status: "Active",
-      expiry: "2025-12-31T23:59:59Z",
-      action: "Edit"
-    },
-    {
-      code: "SAVE50",
-      description: "$50 off for new customers",
-      discount: 50,
-      type: "fixed amount",
-      usage: "45/100",
-      status: "Inactive",
-      expiry: "2025-08-31T23:59:59Z",
-      action: "Edit"
-    },
-    {
-      code: "SUMMER25",
-      description: "25% off summer sale",
-      discount: 25,
-      type: "percentage",
-      usage: "150/300",
-      status: "Active",
-      expiry: "2025-09-30T23:59:59Z",
-      action: "Edit"
-    },
-    {
-      code: "FREESHIP",
-      description: "Free shipping on orders over $100",
-      discount: 0,
-      type: "fixed amount",
-      usage: "30/100",
-      status: "Active",
-      expiry: "2025-11-30T23:59:59Z",
-      action: "Edit"
-    },
-    {
-      code: "NEWUSER20",
-      description: "20% off for first-time buyers",
-      discount: 20,
-      type: "percentage",
-      usage: "100/500",
-      status: "Inactive",
-      expiry: "2025-10-15T23:59:59Z",
-      action: "Edit"
-    }
-  ];
-  
-  
-  
-  
   const tabs = [
     {
       label: "All",
@@ -193,14 +179,24 @@ const index = () => {
                 <th>Description</th>
                 <th>Discount</th>
                 <th>Type</th>
-                <th>Usage</th>
+                <th>Usage Limit</th>
                 <th>Status</th>
                 <th>Expiry</th>
                 <th>Action</th>
               </tr>
               </thead>
               <tbody>
-                {entries
+                {loading && (
+                  <tr>
+                    <td className="py-15" colSpan={8}>Loading...</td>
+                  </tr>
+                )}
+                {error && !loading && (
+                  <tr>
+                    <td className="py-15 text-red-1" colSpan={8}>{error}</td>
+                  </tr>
+                )}
+                {!loading && !error && entries
                   // .filter((item) => {
                   //   return activeTab === "all"
                   //     ? true
@@ -221,7 +217,7 @@ const index = () => {
                         {entry.type}
                       </td>
                       <td className="align-middle text-12 lh-16 fw-500">  
-                        {entry.usage}
+                        {entry.usageLimit ?? "-"}
                       </td>
                       <td className="align-middle">
                         <span
@@ -236,12 +232,51 @@ const index = () => {
                       </td>
                       <td className="align-middle">
                         <div className="d-flex items-center gap-1 text-12 lh-16 fw-500">
-                          {new Date(entry.expiry).toLocaleString()}
+                          {entry.expiry ? new Date(entry.expiry).toLocaleDateString() : "-"}
                         </div>
                       </td>
-                      <td className="align-middle">
-                        <Ellipsis size={16} />
-                      </td>
+                     <td className="align-middle">
+                       <div className="position-relative">
+                         <button
+                           className="border-0 bg-transparent cursor-pointer p-5"
+                           onClick={(e) => handleMenuOpen(e, entry.id)}
+                         >
+                           <MoreVertical size={16} />
+                         </button>
+                         <Menu
+                           anchorEl={menuAnchor[entry.id]}
+                           open={Boolean(menuAnchor[entry.id])}
+                           onClose={() => handleMenuClose(entry.id)}
+                         >
+                           <MenuItem onClick={() => {
+                             setSelected(entry);
+                             setShowEditModal(true);
+                             handleMenuClose(entry.id);
+                           }}>
+                             Edit
+                           </MenuItem>
+                           <MenuItem onClick={async () => {
+                             try {
+                               const nextActive = entry.status !== "Active";
+                               await updateAdminCoupon(entry.id, { is_active: nextActive });
+                               setEntries((prev) => prev.map((e) => e.id === entry.id ? { ...e, status: nextActive ? "Active" : "Inactive" } : e));
+                             } catch (_) {}
+                             handleMenuClose(entry.id);
+                           }}>
+                             {entry.status === "Active" ? "Deactivate" : "Activate"}
+                           </MenuItem>
+                           <MenuItem onClick={async () => {
+                             try {
+                               await deleteAdminCoupon(entry.id);
+                               setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+                             } catch (_) {}
+                             handleMenuClose(entry.id);
+                           }} className="text-red-2">
+                             Delete
+                           </MenuItem>
+                         </Menu>
+                       </div>
+                     </td>
                     </tr>
                   ))}
               </tbody>
@@ -256,7 +291,10 @@ const index = () => {
         aria-describedby="alert-dialog-title"
       >
         <div className="px-20 py-20 w-500 sm:w-full">
-          <ModalContent />
+          <ModalContent onCreated={(newItem) => {
+            // Refresh list after creation
+            setEntries((prev) => [newItem, ...prev]);
+          }} />
           <div className="d-flex justify-end gap-2 mt-10">
             <button
               className="text-14 border-light rounded-8 px-10 py-5"
@@ -264,24 +302,46 @@ const index = () => {
             >
               Cancel
             </button>
-            <button
-              className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
-              onClick={() => {
-                setShowModal(false);
-              }}
-            >
-              Create Coupon
-            </button>
           </div>
+        </div>
+      </Dialog>
+      <Dialog
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        aria-labelledby="edit-dialog-title"
+        aria-describedby="edit-dialog-title"
+      >
+        <div className="px-20 py-20 w-500 sm:w-full">
+          {selected && (
+            <EditCouponModal
+              data={selected}
+              onClose={() => setShowEditModal(false)}
+              onSaved={(updated) => {
+                setEntries((prev) => prev.map((e) => e.id === updated.id ? updated : e));
+                setShowEditModal(false);
+              }}
+            />
+          )}
         </div>
       </Dialog>
     </AdminDashboardLayout>
   );
 };
 
-const ModalContent = () => {
+const ModalContent = ({ onCreated }) => {
   const [startDate, setStartDate] = useState(new DateObject());
   const [endDate, setEndDate] = useState(new DateObject());
+  const [form, setForm] = useState({
+    code: "",
+    description: "",
+    discount_type: "percent",
+    discount_value: "",
+    usage_limit: "",
+    min_spend: "",
+    status: "active",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const status = [
     {
@@ -297,14 +357,56 @@ const ModalContent = () => {
   const discountType = [
     {
       label: "Percentage",
-      value: "percentage",
+      value: "percent",
     },
     {
       label: "Fixed Amount",
-      value: "fixed amount",
+      value: "fixed",
     },
   ];
   
+  const handleChange = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError("");
+    try {
+      const payload = {
+        code: form.code.trim(),
+        description: form.description || undefined,
+        discount_type: form.discount_type,
+        discount_value: Number(form.discount_value),
+        date_from: startDate?.format?.("YYYY-MM-DD"),
+        date_to: endDate?.format?.("YYYY-MM-DD"),
+        usage_limit: form.usage_limit ? Number(form.usage_limit) : undefined,
+        min_spend: form.min_spend ? Number(form.min_spend) : undefined,
+        is_active: form.status === "active",
+      };
+      const res = await createAdminCoupon(payload);
+      const created = res?.data?.coupon || res?.coupon || res;
+      if (onCreated && created) {
+        onCreated({
+          id: created.id,
+          code: created.code,
+          description: created.description,
+          discount: Number(created.discount_value),
+          type: created.discount_type === "percent" ? "percentage" : "fixed",
+          usageLimit: created.usage_limit,
+          status: created.is_active ? "Active" : "Inactive",
+          expiry: created.date_to,
+        });
+      }
+      // close dialog by simulating Escape; parent controls open state
+      const event = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(event);
+    } catch (e) {
+      setError(e?.toString?.() || "Failed to create coupon");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="row x-gap-10 y-gap-10 items-center">
@@ -319,6 +421,8 @@ const ModalContent = () => {
         type="text"
         placeholder="SUMMER2025"
         gridClass="col-12 mt-5"
+        value={form.code}
+        onChange={(e) => handleChange("code", e.target.value)}
       />
 
       <FormInput
@@ -326,6 +430,8 @@ const ModalContent = () => {
         type="textarea"
         placeholder="Enter coupon description"
         gridClass="col-12 mt-5"
+        value={form.description}
+        onChange={(e) => handleChange("description", e.target.value)}
       />
 
       <FormInput
@@ -334,6 +440,8 @@ const ModalContent = () => {
         gridClass="col-12 mt-5"
         defaultValue={discountType[0].value}
         options={discountType}
+        value={form.discount_type}
+        onChange={(e) => handleChange("discount_type", e.target.value)}
       />
 
       <FormInput
@@ -341,6 +449,8 @@ const ModalContent = () => {
         type="number"
         placeholder="10"
         gridClass="col-12"
+        value={form.discount_value}
+        onChange={(e) => handleChange("discount_value", e.target.value)}
       />
 
       <div className="col-sm-6">
@@ -382,6 +492,17 @@ const ModalContent = () => {
         type="number"
         placeholder="100(Leave empty for unlimited)"
         gridClass="col-12"
+        value={form.usage_limit}
+        onChange={(e) => handleChange("usage_limit", e.target.value)}
+      />
+
+      <FormInput
+        label="Minimum Spend"
+        type="number"
+        placeholder="Optional minimum spend"
+        gridClass="col-12"
+        value={form.min_spend}
+        onChange={(e) => handleChange("min_spend", e.target.value)}
       />
 
       <FormInput
@@ -390,10 +511,110 @@ const ModalContent = () => {
         gridClass="col-12 mt-5"
         defaultValue={status[0].value}
         options={status}
+        value={form.status}
+        onChange={(e) => handleChange("status", e.target.value)}
       />
-  
+  {error && (
+        <div className="col-12 text-red-1 text-12">{error}</div>
+      )}
+      <div className="col-12 d-flex justify-end gap-2 mt-10">
+        <button
+          className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
+          onClick={handleSubmit}
+          disabled={submitting}
+        >
+          {submitting ? "Creating..." : "Create Coupon"}
+        </button>
+      </div>
     </div>
   );
 };
 
 export default index;
+
+const EditCouponModal = ({ data, onSaved, onClose }) => {
+  const [form, setForm] = useState({
+    description: data.description || "",
+    discount_type: data.type === "percentage" ? "percent" : "fixed",
+    discount_value: String(data.discount ?? ""),
+    usage_limit: data.usageLimit ? String(data.usageLimit) : "",
+    min_spend: "",
+    status: data.status === "Active" ? "active" : "inactive",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const discountType = [
+    { label: "Percentage", value: "percent" },
+    { label: "Fixed Amount", value: "fixed" },
+  ];
+  const status = [
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" },
+  ];
+
+  const handleChange = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    setSubmitting(true);
+    setError("");
+    try {
+      const payload = {
+        description: form.description || undefined,
+        discount_type: form.discount_type,
+        discount_value: form.discount_value ? Number(form.discount_value) : undefined,
+        usage_limit: form.usage_limit ? Number(form.usage_limit) : undefined,
+        min_spend: form.min_spend ? Number(form.min_spend) : undefined,
+        is_active: form.status === "active",
+      };
+      const res = await updateAdminCoupon(data.id, payload);
+      const updated = res?.data?.coupon || res?.coupon || {};
+      const mapped = {
+        id: updated.id || data.id,
+        code: updated.code || data.code,
+        description: updated.description ?? form.description,
+        discount: Number(updated.discount_value ?? form.discount_value ?? 0),
+        type: (updated.discount_type || form.discount_type) === "percent" ? "percentage" : "fixed",
+        usageLimit: updated.usage_limit ?? (form.usage_limit ? Number(form.usage_limit) : undefined),
+        status: (typeof updated.is_active === 'boolean' ? updated.is_active : form.status === "active") ? "Active" : "Inactive",
+        expiry: updated.date_to || data.expiry || null,
+      };
+      onSaved && onSaved(mapped);
+    } catch (e) {
+      setError(e?.toString?.() || "Failed to save coupon");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="row x-gap-10 y-gap-10 items-center">
+      <h1 className="text-20 lh-14 fw-500">Edit Coupon</h1>
+      <div className="text-12 text-light-1 lh-14 mb-15">Update coupon details</div>
+
+      <FormInput label="Coupon Code" type="text" gridClass="col-12" value={data.code} readOnly />
+
+      <FormInput label="Description" type="textarea" gridClass="col-12" value={form.description} onChange={(e) => handleChange("description", e.target.value)} />
+
+      <FormInput label="Discount Type" type="select" gridClass="col-12" options={discountType} value={form.discount_type} onChange={(e) => handleChange("discount_type", e.target.value)} />
+
+      <FormInput label="Discount Value" type="number" gridClass="col-12" value={form.discount_value} onChange={(e) => handleChange("discount_value", e.target.value)} />
+
+      <FormInput label="Usage Limit" type="number" gridClass="col-12" value={form.usage_limit} onChange={(e) => handleChange("usage_limit", e.target.value)} />
+
+      <FormInput label="Minimum Spend" type="number" gridClass="col-12" value={form.min_spend} onChange={(e) => handleChange("min_spend", e.target.value)} />
+
+      <FormInput label="Status" type="select" gridClass="col-12" options={status} value={form.status} onChange={(e) => handleChange("status", e.target.value)} />
+
+      {error && <div className="col-12 text-red-1 text-12">{error}</div>}
+      <div className="col-12 d-flex justify-end gap-2 mt-10">
+        <button className="text-14 border-light rounded-8 px-10 py-5" onClick={onClose}>Close</button>
+        <button className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5" onClick={handleSave} disabled={submitting}>
+          {submitting ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
+    </div>
+  );
+};

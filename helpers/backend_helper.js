@@ -4,6 +4,7 @@ import {
   ListingAPIClient,
   BookingAPIClient,
   CommunicationAPIClient,
+  PricingAPIClient,
   setAuthorization,
   clearAuthorization
 } from "./api_helper";
@@ -258,21 +259,21 @@ export const rejectVendor = (id, data) => api.update(`${url.REJECT_VENDOR}/${id}
 // Get vendor analytics
 export const getVendorAnalytics = (params) => api.get(url.GET_VENDOR_ANALYTICS, params);
 
-// COUPON & PROMOTION MANAGEMENT
-// Get all coupons (admin)
-export const getAdminCoupons = (params) => api.get(url.GET_ADMIN_COUPONS, params);
+// COUPON & PROMOTION MANAGEMENT (Pricing Service)
+// Use PricingAPIClient because coupons are served by Pricing & Loyalty service
+export const getAdminCoupons = (params) => PricingAPIClient.get(url.GET_ADMIN_COUPONS, params);
 
 // Create coupon
-export const createAdminCoupon = (data) => api.create(url.CREATE_ADMIN_COUPON, data);
+export const createAdminCoupon = (data) => PricingAPIClient.create(url.CREATE_ADMIN_COUPON, data);
 
 // Update coupon
-export const updateAdminCoupon = (id, data) => api.update(`${url.UPDATE_ADMIN_COUPON}/${id}`, data);
+export const updateAdminCoupon = (id, data) => PricingAPIClient.update(`${url.UPDATE_ADMIN_COUPON}/${id}`, data);
 
 // Delete coupon
-export const deleteAdminCoupon = (id) => api.delete(`${url.DELETE_ADMIN_COUPON}/${id}`);
+export const deleteAdminCoupon = (id) => PricingAPIClient.delete(`${url.DELETE_ADMIN_COUPON}/${id}`);
 
 // Get coupon analytics
-export const getCouponAnalytics = (params) => api.get(url.GET_COUPON_ANALYTICS, params);
+export const getCouponAnalytics = (params) => PricingAPIClient.get(url.GET_COUPON_ANALYTICS, params);
 
 // CONTENT MANAGEMENT
 // Get all content (admin)
