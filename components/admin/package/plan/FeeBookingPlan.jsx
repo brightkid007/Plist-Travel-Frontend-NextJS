@@ -22,7 +22,17 @@ const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDel
           ) : (
             <div className="row y-gap-20 mt-20 w-100">
               {plans.map((p) => {
-                const features = isArray(p.features) ? p.features : typeof (p.features) === 'string' ? JSON.parse(p.features || '[]') : [];
+                const features = isArray(p.features) 
+                  ? p.features 
+                  : typeof (p.features) === 'string' 
+                    ? (() => { 
+                        try { 
+                          return JSON.parse(p.features || '[]'); 
+                        } catch (e) { 
+                          return []; 
+                        } 
+                      })() 
+                    : [];
                 return <div className="col-md-4" key={p.id}>
                   <div className="bg-light-2 px-15 py-15 rounded-8 h-100 d-flex flex-column justify-between">
                     <div>

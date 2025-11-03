@@ -16,7 +16,17 @@ const BothPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = 
     ),
     commission_percent: p.commission_percent || 0,
     price: p.price || 0,
-    services: isArray(p.features) ? p.features : typeof (p.features) === 'string' ? JSON.parse(p.features || '[]') : [],
+    services: isArray(p.features) 
+      ? p.features 
+      : typeof (p.features) === 'string' 
+        ? (() => { 
+            try { 
+              return JSON.parse(p.features || '[]'); 
+            } catch (e) { 
+              return []; 
+            } 
+          })() 
+        : [],
     isPopular: !!p.is_popular,
     status: p.status || "Active",
   })) : [
