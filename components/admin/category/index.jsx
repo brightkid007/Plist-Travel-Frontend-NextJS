@@ -7,6 +7,7 @@ import { Dialog } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { ListingAPIClient } from "@/helpers/api_helper";
 import { toast } from "react-toastify";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const [activeTab, setActiveTab] = useState("category");
@@ -15,6 +16,11 @@ const index = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   
   // Form states
   const [formData, setFormData] = useState({
@@ -164,27 +170,40 @@ const index = () => {
   };
 
   // Handle delete
-  const handleDelete = async (id) => {
-    if (!window.confirm(`Are you sure you want to delete this ${activeTab}?`)) {
-      return;
-    }
+  const handleDeleteClick = (id, name) => {
+    setItemToDelete({ id, name, type: activeTab });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
 
     try {
+      setDeleting(true);
       await ListingAPIClient.delete(
-        `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}/${id}`
+        `/${itemToDelete.type === "category" ? "listing-categories" : "listing-subcategories"}/${itemToDelete.id}`
       );
-      toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} deleted successfully`);
+      toast.success(`${itemToDelete.type === "category" ? "Category" : "Subcategory"} deleted successfully`);
       
       // Refresh data
-      if (activeTab === "category") {
+      if (itemToDelete.type === "category") {
         await fetchCategories();
       } else {
         await fetchSubcategories();
       }
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
     } catch (error) {
       console.error("Error deleting:", error);
-      toast.error(error?.message || `Failed to delete ${activeTab}`);
+      toast.error(error?.message || `Failed to delete ${itemToDelete.type}`);
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setItemToDelete(null);
   };
 
   // Handle form change
@@ -358,7 +377,7 @@ const index = () => {
                           </span>
                           <span 
                             className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => handleDeleteClick(item.id, item.name)}
                           >
                             Delete
                           </span>
@@ -405,7 +424,7 @@ const index = () => {
                           </span>
                           <span 
                             className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => handleDeleteClick(item.id, item.name)}
                           >
                             Delete
                           </span>
@@ -450,6 +469,16 @@ const index = () => {
           </div>
         </div>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title={`Delete ${itemToDelete?.type === "category" ? "Category" : "Subcategory"}`}
+        message={`Are you sure you want to delete ${itemToDelete?.type === "category" ? "the category" : "the subcategory"} "${itemToDelete?.name}"?`}
+        itemName={itemToDelete?.name}
+        loading={deleting}
+      />
     </AdminDashboardLayout>
   );
 };

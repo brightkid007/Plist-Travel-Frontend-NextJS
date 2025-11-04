@@ -3,13 +3,18 @@
 import AgentDashboardLayout from "../../common/layout";
 import { Copy, Eye } from "lucide-react";
 import { Telegram } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
 import { Dialog } from "@mui/material";
-import { createEmailTemplate } from "@/helpers/backend_helper";
+import { createEmailTemplate, updateEmailTemplate, getEmailTemplateById } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 
 const index = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEditMode = !!editId;
+
   const dynamicFields = [
     { value: "{{client_name}}", label: "Client's full name" },
     { value: "{{booking_id}}", label: "Booking reference number" },
@@ -20,7 +25,6 @@ const index = () => {
     { value: "{{total_amount}}", label: "Total amount" },
   ];
 
-  const router = useRouter();
   const contentTextareaRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -31,9 +35,40 @@ const index = () => {
   });
 
   const [type, setType] = useState("text"); // "text" or "html"
+  const [status, setStatus] = useState("Active");
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [testEmail, setTestEmail] = useState("");
+
+  // Load template data when in edit mode
+  useEffect(() => {
+    const loadTemplateData = async () => {
+      if (!isEditMode || !editId) return;
+
+      try {
+        setLoadingData(true);
+        const res = await getEmailTemplateById(editId);
+        const template = res?.email_template || res?.data?.email_template || res?.data || res || {};
+
+        setFormData({
+          name: template.name || "",
+          category: template.category || "Booking",
+          subject: template.subject || "",
+          content: template.content || template.body || "",
+        });
+        setType(template.type || "text");
+        setStatus(template.status || "Active");
+      } catch (error) {
+        toast.error(error?.message || "Failed to load template");
+        router.push("/admin/email-template");
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadTemplateData();
+  }, [isEditMode, editId, router]);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({
@@ -107,14 +142,19 @@ const index = () => {
         body: formData.content.trim(),
         content: formData.content.trim(),
         type: type,
-        status: "Active",
+        status: status,
       };
 
-      await createEmailTemplate(payload);
-      toast.success("Email template created successfully!");
+      if (isEditMode && editId) {
+        await updateEmailTemplate(editId, payload);
+        toast.success("Email template updated successfully!");
+      } else {
+        await createEmailTemplate(payload);
+        toast.success("Email template created successfully!");
+      }
       router.push("/admin/email-template");
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to create email template");
+      toast.error(error?.response?.data?.message || error?.message || `Failed to ${isEditMode ? "update" : "create"} email template`);
     } finally {
       setLoading(false);
     }
@@ -151,10 +191,13 @@ const index = () => {
       <div className="row y-gap-10 x-gap-10 mt-10">
         <div className="col-sm-6">
           <div className="bg-white rounded-8 border-light px-20 py-15 h-100">
-            <h1 className="text-24 lh-14 fw-500">Create New Template</h1>
+            <h1 className="text-24 lh-14 fw-500">{isEditMode ? "Edit Template" : "Create New Template"}</h1>
             <div className="text-14 lh-14 text-light-1">
-              Create a new email template for client communications
+              {isEditMode ? "Update email template for client communications" : "Create a new email template for client communications"}
             </div>
+            {loadingData && (
+              <div className="text-14 text-light-1 mt-10">Loading template data...</div>
+            )}
             <div className="row y-gap-10 x-gap-10 mt-10">
               <div className="col-sm-6">
                 <h1 className="text-14 lh-14 fw-500">
@@ -200,7 +243,7 @@ const index = () => {
                 />
               </div>
 
-              <div className="col-12">
+              <div className="col-sm-6">
                 <h1 className="text-14 lh-14 fw-500">
                   Template Type<span className="text-red-1">*</span>
                 </h1>
@@ -211,6 +254,20 @@ const index = () => {
                 >
                   <option value="text">Text</option>
                   <option value="html">HTML</option>
+                </select>
+              </div>
+
+              <div className="col-sm-6">
+                <h1 className="text-14 lh-14 fw-500">
+                  Status<span className="text-red-1">*</span>
+                </h1>
+                <select
+                  className="form-select rounded-8 border-light h-45 px-15 w-100 mt-5"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
               </div>
 
@@ -251,9 +308,9 @@ const index = () => {
                   <button
                     className="text-14 bg-blue-1 text-white rounded-8 px-15 py-5 fw-400"
                     onClick={handleSave}
-                    disabled={loading}
+                    disabled={loading || loadingData}
                   >
-                    {loading ? "Saving..." : "Save Template"}
+                    {loading ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update Template" : "Save Template")}
                   </button>
                 </div>
               </div>

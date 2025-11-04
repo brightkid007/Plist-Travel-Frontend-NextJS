@@ -10,12 +10,18 @@ import BothPlan from "./BothPlan";
 import { useEffect, useState } from "react";
 import { getPackagePlans, deletePackagePlan } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const [selectedModel, setSelectedModel] = useState("subscription");
   const router = useRouter();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const reloadPlans = async () => {
     try {
@@ -31,14 +37,31 @@ const index = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (id, name) => {
+    setPlanToDelete({ id, name });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!planToDelete) return;
+
     try {
-      await deletePackagePlan(id);
+      setDeleting(true);
+      await deletePackagePlan(planToDelete.id);
       toast.success("Plan deleted");
       await reloadPlans();
+      setDeleteModalOpen(false);
+      setPlanToDelete(null);
     } catch (e) {
       toast.error(e?.response?.data?.message || e?.message || "Failed to delete plan");
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setPlanToDelete(null);
   };
 
   const handleEdit = (id) => {
@@ -55,7 +78,10 @@ const index = () => {
           {svgIcon.subscription_plan}
         </div>
       ),
-      content: <SubscriptionPlan plans={plans.filter(p => p.model === "subscription")} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />,
+      content: <SubscriptionPlan plans={plans.filter(p => p.model === "subscription")} loading={loading} onEdit={handleEdit} onDelete={(id) => {
+        const plan = plans.find(p => p.id === id);
+        handleDeleteClick(id, plan?.name || `Plan #${id}`);
+      }} />,
     },
     {
       title: "Fee Per Booking",
@@ -66,7 +92,10 @@ const index = () => {
           {svgIcon.fee_model}
         </div>
       ),
-      content: <FeeBookingPlan plans={plans.filter(p => p.model === "fee-per-booking")} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />,
+      content: <FeeBookingPlan plans={plans.filter(p => p.model === "fee-per-booking")} loading={loading} onEdit={handleEdit} onDelete={(id) => {
+        const plan = plans.find(p => p.id === id);
+        handleDeleteClick(id, plan?.name || `Plan #${id}`);
+      }} />,
     },
     {
       title: "Both",
@@ -77,7 +106,10 @@ const index = () => {
           {svgIcon.subscription_plan} + {svgIcon.fee_model}
         </div>
       ),
-      content: <BothPlan plans={plans.filter(p => p.model === "both")} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />,
+      content: <BothPlan plans={plans.filter(p => p.model === "both")} loading={loading} onEdit={handleEdit} onDelete={(id) => {
+        const plan = plans.find(p => p.id === id);
+        handleDeleteClick(id, plan?.name || `Plan #${id}`);
+      }} />,
     },
   ];
 
@@ -129,6 +161,16 @@ const index = () => {
         ))}
         {paymentModel.find((item) => item.value === selectedModel)["content"]}
       </div>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Package Plan"
+        message={`Are you sure you want to delete the plan "${planToDelete?.name}"?`}
+        itemName={planToDelete?.name}
+        loading={deleting}
+      />
     </AdminDashboardLayout>
   );
 };

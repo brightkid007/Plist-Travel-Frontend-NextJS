@@ -1,6 +1,21 @@
 import { useMemo } from "react";
+import { MoreVertical, Trash2, CheckCircle2, XCircle, ReceiptRefund } from "lucide-react";
+import { Menu, MenuItem } from "@mui/material";
+import { useState } from "react";
 
-const BookingList = ({ bookings = [] }) => {
+const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, actionLoading = false }) => {
+  const [menuAnchor, setMenuAnchor] = useState({});
+  const [actionOpenIndex, setActionOpenIndex] = useState(null);
+
+  const handleMenuOpen = (event, id) => {
+    setMenuAnchor({ [id]: event.currentTarget });
+    setActionOpenIndex(id);
+  };
+
+  const handleMenuClose = (id) => {
+    setMenuAnchor({ [id]: null });
+    setActionOpenIndex(null);
+  };
   const rows = useMemo(() => {
     const list = Array.isArray(bookings) ? bookings : [];
     return list.map((b, i) => {
@@ -30,6 +45,8 @@ const BookingList = ({ bookings = [] }) => {
             : b.amount || b.price || 0,
         paid: b.payment_status != null ? b.payment_status : 'unpaid',
         status: (b.status || b.bookingStatus || "pending").replace(/^./, (c) => c.toUpperCase()),
+        originalStatus: b.status || b.bookingStatus || "pending",
+        transactionId: b.transaction_id || b.transactionId || b.payment_id || b.paymentId,
       };
     });
   }, [bookings]);
@@ -110,7 +127,72 @@ const BookingList = ({ bookings = [] }) => {
                   </span>
                 </td>
                 <td className="align-middle">
-                  <span className="material-symbols-outlined">more_horiz</span>
+                  <div className="position-relative">
+                    <button
+                      className="border-0 bg-transparent cursor-pointer p-5"
+                      onClick={(e) => handleMenuOpen(e, row.id)}
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                    <Menu
+                      anchorEl={menuAnchor[row.id]}
+                      open={Boolean(menuAnchor[row.id])}
+                      onClose={() => handleMenuClose(row.id)}
+                    >
+                      {onAccept && row.originalStatus === "pending" && (
+                        <MenuItem
+                          onClick={() => {
+                            onAccept(row.id, row.name);
+                            handleMenuClose(row.id);
+                          }}
+                          disabled={actionLoading}
+                          className="text-green-1"
+                        >
+                          <CheckCircle2 size={16} className="mr-10" />
+                          Accept
+                        </MenuItem>
+                      )}
+                      {onReject && (row.originalStatus === "pending" || row.originalStatus === "confirmed") && (
+                        <MenuItem
+                          onClick={() => {
+                            onReject(row.id, row.name);
+                            handleMenuClose(row.id);
+                          }}
+                          disabled={actionLoading}
+                          className="text-yellow-3"
+                        >
+                          <XCircle size={16} className="mr-10" />
+                          Reject
+                        </MenuItem>
+                      )}
+                      {onRefund && row.transactionId && (row.originalStatus === "confirmed" || row.originalStatus === "cancelled") && (
+                        <MenuItem
+                          onClick={() => {
+                            onRefund(row.id, row.name, row.transactionId);
+                            handleMenuClose(row.id);
+                          }}
+                          disabled={actionLoading || row.paid === "refunded"}
+                          className="text-blue-1"
+                        >
+                          <ReceiptRefund size={16} className="mr-10" />
+                          Refund
+                        </MenuItem>
+                      )}
+                      {onDelete && (
+                        <MenuItem
+                          onClick={() => {
+                            onDelete(row.id, row.name);
+                            handleMenuClose(row.id);
+                          }}
+                          disabled={actionLoading}
+                          className="text-red-2"
+                        >
+                          <Trash2 size={16} className="mr-10" />
+                          Delete
+                        </MenuItem>
+                      )}
+                    </Menu>
+                  </div>
                 </td>
               </tr>
             ))

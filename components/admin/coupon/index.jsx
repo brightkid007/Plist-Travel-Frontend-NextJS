@@ -10,6 +10,7 @@ import DatePicker, { DateObject } from "react-multi-date-picker";
 import FormInput from "@/components/common/form/FormInput";
 import Filter from "../common/Filter";
 import { createAdminCoupon, getAdminCoupons, updateAdminCoupon, deleteAdminCoupon } from "@/helpers/backend_helper";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const router = useRouter();
@@ -22,6 +23,11 @@ const index = () => {
   const [menuAnchor, setMenuAnchor] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [selected, setSelected] = useState(null);
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [couponToDelete, setCouponToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleMenuOpen = (event, id) => {
     setMenuAnchor({ [id]: event.currentTarget });
@@ -30,6 +36,28 @@ const index = () => {
   const handleMenuClose = (id) => {
     setMenuAnchor({ [id]: null });
     setActionOpenIndex(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!couponToDelete) return;
+
+    try {
+      setDeleting(true);
+      await deleteAdminCoupon(couponToDelete.id);
+      setEntries((prev) => prev.filter((e) => e.id !== couponToDelete.id));
+      setDeleteModalOpen(false);
+      setCouponToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete coupon:", error);
+      setError(error?.message || "Failed to delete coupon");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setCouponToDelete(null);
   };
 
   const handleClose = () => {
@@ -131,8 +159,8 @@ const index = () => {
       value: "refunded",
     }
   ];
-  
-  
+
+
 
   return (
     <AdminDashboardLayout>
@@ -144,12 +172,12 @@ const index = () => {
           </div>
         </div>
         <div className="col-auto ms-auto">
-          <button className="button border-blue-1 text-blue-1 px-15 py-10 rounded-8">
+          {/* <button className="button border-blue-1 text-blue-1 px-15 py-10 rounded-8">
             Export Data
-          </button>
+          </button> */}
         </div>
         <div className="col-auto">
-          <button 
+          <button
             className="button bg-blue-1 text-white px-15 py-10 rounded-8"
             onClick={() => setShowModal(true)}
           >
@@ -189,16 +217,16 @@ const index = () => {
           <div className="overflow-scroll scroll-bar-1">
             <table className="table-3 -border-bottom col-12">
               <thead className="bg-light-2">
-              <tr>
-                <th>Code</th>
-                <th>Description</th>
-                <th>Discount</th>
-                <th>Type</th>
-                <th>Usage Limit</th>
-                <th>Status</th>
-                <th>Expiry</th>
-                <th>Action</th>
-              </tr>
+                <tr>
+                  <th>Code</th>
+                  <th>Description</th>
+                  <th>Discount</th>
+                  <th>Type</th>
+                  <th>Usage Limit</th>
+                  <th>Status</th>
+                  <th>Expiry</th>
+                  <th>Action</th>
+                </tr>
               </thead>
               <tbody>
                 {loading && (
@@ -225,22 +253,21 @@ const index = () => {
                       <td className="align-middle">
                         {entry.description}
                       </td>
-                      <td className="align-middle text-12 lh-16 fw-500">  
+                      <td className="align-middle text-12 lh-16 fw-500">
                         {entry.discount}
                       </td>
-                      <td className="align-middle text-12 lh-16 fw-500">  
+                      <td className="align-middle text-12 lh-16 fw-500">
                         {entry.type}
                       </td>
-                      <td className="align-middle text-12 lh-16 fw-500">  
+                      <td className="align-middle text-12 lh-16 fw-500">
                         {entry.usageLimit ?? "-"}
                       </td>
                       <td className="align-middle">
                         <span
-                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                            entry.status === "Active"
-                              ? "bg-green-1 text-green-2"
-                              : "bg-light-2 text-dark-1"
-                          }`}
+                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${entry.status === "Active"
+                            ? "bg-green-1 text-green-2"
+                            : "bg-light-2 text-dark-1"
+                            }`}
                         >
                           {entry.status}
                         </span>
@@ -250,48 +277,46 @@ const index = () => {
                           {entry.expiry ? new Date(entry.expiry).toLocaleDateString() : "-"}
                         </div>
                       </td>
-                     <td className="align-middle">
-                       <div className="position-relative">
-                         <button
-                           className="border-0 bg-transparent cursor-pointer p-5"
-                           onClick={(e) => handleMenuOpen(e, entry.id)}
-                         >
-                           <MoreVertical size={16} />
-                         </button>
-                         <Menu
-                           anchorEl={menuAnchor[entry.id]}
-                           open={Boolean(menuAnchor[entry.id])}
-                           onClose={() => handleMenuClose(entry.id)}
-                         >
-                           <MenuItem onClick={() => {
-                             setSelected(entry);
-                             setShowEditModal(true);
-                             handleMenuClose(entry.id);
-                           }}>
-                             Edit
-                           </MenuItem>
-                           <MenuItem onClick={async () => {
-                             try {
-                               const nextActive = entry.status !== "Active";
-                               await updateAdminCoupon(entry.id, { is_active: nextActive });
-                               setEntries((prev) => prev.map((e) => e.id === entry.id ? { ...e, status: nextActive ? "Active" : "Inactive" } : e));
-                             } catch (_) {}
-                             handleMenuClose(entry.id);
-                           }}>
-                             {entry.status === "Active" ? "Deactivate" : "Activate"}
-                           </MenuItem>
-                           <MenuItem onClick={async () => {
-                             try {
-                               await deleteAdminCoupon(entry.id);
-                               setEntries((prev) => prev.filter((e) => e.id !== entry.id));
-                             } catch (_) {}
-                             handleMenuClose(entry.id);
-                           }} className="text-red-2">
-                             Delete
-                           </MenuItem>
-                         </Menu>
-                       </div>
-                     </td>
+                      <td className="align-middle">
+                        <div className="position-relative">
+                          <button
+                            className="border-0 bg-transparent cursor-pointer p-5"
+                            onClick={(e) => handleMenuOpen(e, entry.id)}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          <Menu
+                            anchorEl={menuAnchor[entry.id]}
+                            open={Boolean(menuAnchor[entry.id])}
+                            onClose={() => handleMenuClose(entry.id)}
+                          >
+                            <MenuItem onClick={() => {
+                              setSelected(entry);
+                              setShowEditModal(true);
+                              handleMenuClose(entry.id);
+                            }}>
+                              Edit
+                            </MenuItem>
+                            <MenuItem onClick={async () => {
+                              try {
+                                const nextActive = entry.status !== "Active";
+                                await updateAdminCoupon(entry.id, { is_active: nextActive });
+                                setEntries((prev) => prev.map((e) => e.id === entry.id ? { ...e, status: nextActive ? "Active" : "Inactive" } : e));
+                              } catch (_) { }
+                              handleMenuClose(entry.id);
+                            }}>
+                              {entry.status === "Active" ? "Deactivate" : "Activate"}
+                            </MenuItem>
+                            <MenuItem onClick={() => {
+                              setCouponToDelete({ id: entry.id, code: entry.code });
+                              setDeleteModalOpen(true);
+                              handleMenuClose(entry.id);
+                            }} className="text-red-2">
+                              Delete
+                            </MenuItem>
+                          </Menu>
+                        </div>
+                      </td>
                     </tr>
                   ))}
               </tbody>
@@ -310,14 +335,6 @@ const index = () => {
             // Refresh list after creation
             setEntries((prev) => [newItem, ...prev]);
           }} />
-          <div className="d-flex justify-end gap-2 mt-10">
-            <button
-              className="text-14 border-light rounded-8 px-10 py-5"
-              onClick={handleClose}
-            >
-              Cancel
-            </button>
-          </div>
         </div>
       </Dialog>
       <Dialog
@@ -339,6 +356,16 @@ const index = () => {
           )}
         </div>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Coupon"
+        message={`Are you sure you want to delete the coupon "${couponToDelete?.code}"?`}
+        itemName={couponToDelete?.code}
+        loading={deleting}
+      />
     </AdminDashboardLayout>
   );
 };
@@ -379,7 +406,7 @@ const ModalContent = ({ onCreated, onClose }) => {
       value: "fixed",
     },
   ];
-  
+
   const handleChange = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -527,10 +554,16 @@ const ModalContent = ({ onCreated, onClose }) => {
         value={form.status}
         onChange={(e) => handleChange("status", e.target.value)}
       />
-  {error && (
+      {error && (
         <div className="col-12 text-red-1 text-12">{error}</div>
       )}
       <div className="col-12 d-flex justify-end gap-2 mt-10">
+        <button
+          className="text-14 border-light rounded-8 px-10 py-5"
+          onClick={onClose}
+        >
+          Cancel
+        </button>
         <button
           className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
           onClick={handleSubmit}

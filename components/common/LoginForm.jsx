@@ -44,10 +44,10 @@ const LoginForm = () => {
           router.push("/admin/dashboard");
           break;
         case "vendor":
-          router.push("/vendor");
+          router.push("/vendor/dashboard");
           break;
         case "agent":
-          router.push("/agent");
+          router.push("/agent/dashboard");
           break;
         case "customer":
         default:

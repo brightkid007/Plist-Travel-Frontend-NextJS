@@ -34,21 +34,21 @@ const config = {
   SERVICES: {
     AUTH: {
       baseURL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL,
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     LISTING: {
       baseURL: process.env.NEXT_PUBLIC_LISTING_SERVICE_URL,
-      timeout: 15000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     BOOKING: {
       baseURL: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL,
-      timeout: 20000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }
@@ -62,21 +62,21 @@ const config = {
      },
     COMMUNICATION: {
       baseURL: process.env.NEXT_PUBLIC_COMMUNICATION_SERVICE_URL,
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     REVIEW: {
       baseURL: process.env.NEXT_PUBLIC_REVIEW_SERVICE_URL,
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }
     },
     PRICING: {
       baseURL: process.env.NEXT_PUBLIC_PRICING_SERVICE_URL,
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       }

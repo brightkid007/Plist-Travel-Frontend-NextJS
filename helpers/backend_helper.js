@@ -99,6 +99,12 @@ export const getAdminUsers = (params) => {
   return AuthAPIClient.get("/users", params);
 };
 
+// Get current user profile
+export const getCurrentUser = () => AuthAPIClient.get("/users/me");
+
+// Update current user profile
+export const updateCurrentUser = (data) => AuthAPIClient.update("/users/me", data);
+
 // Get user by ID
 export const getAdminUserById = (id) => AuthAPIClient.get(`/users/${id}`);
 
@@ -154,8 +160,11 @@ export const getAdminBookings = (params) => BookingAPIClient.get(url.GET_ADMIN_B
 // Get booking by ID
 export const getAdminBookingById = (id) => BookingAPIClient.get(`${url.GET_ADMIN_BOOKING_BY_ID}/${id}`);
 
-// Update booking status
-export const updateBookingStatus = (id, data) => BookingAPIClient.update(`${url.UPDATE_BOOKING_STATUS}/${id}/status`, data);
+// Update booking status (PATCH /bookings/:id/status)
+export const updateBookingStatus = (id, data) => BookingAPIClient.patch(`/bookings/${id}/status`, data);
+
+// Delete booking
+export const deleteBooking = (id) => BookingAPIClient.delete(`/bookings/${id}`);
 
 // Force booking status (admin override)
 export const forceBookingStatus = (id, status) => BookingAPIClient.update(`${url.FORCE_BOOKING_STATUS}/${id}/${status}`);

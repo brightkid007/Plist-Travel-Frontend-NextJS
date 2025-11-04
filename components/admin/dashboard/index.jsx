@@ -170,7 +170,7 @@ const index = () => {
           </button>
         </div> */}
         <div className="col-12 text-16 fw-500">
-          Welcome {(user?.first_name + ' ' + user?.last_name) || 'Super Admin'}!
+          Welcome {user?.first_name || ''} {user?.last_name || ''}!
         </div>
         {/* <div className="col-12 text-14 text-light-1">Sales Summary</div> */}
       </div>

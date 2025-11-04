@@ -4,10 +4,11 @@ import AgentDashboardLayout from "../common/layout";
 import { useState, useEffect, useMemo } from "react";
 import { Dialog, Drawer } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
+import { Eye, Edit, Trash2 } from "lucide-react";
 import { MailOutline } from "@mui/icons-material";
-import { getEmailTemplates } from "@/helpers/backend_helper";
+import { getEmailTemplates, deleteEmailTemplate } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const [openFilter, setOpenFilter] = useState(false);
@@ -26,6 +27,11 @@ const index = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
+
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const router = useRouter();
 
@@ -83,6 +89,33 @@ const index = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteClick = (id, name) => {
+    setItemToDelete({ id, name });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setDeleting(true);
+      await deleteEmailTemplate(itemToDelete.id);
+      toast.success("Email template deleted successfully");
+      loadEmailTemplates(); // Refresh the list
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message || "Failed to delete email template");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setItemToDelete(null);
   };
 
   const filteredTemplates = email_templates.filter((t) => {
@@ -277,7 +310,7 @@ const index = () => {
                     <th>Subject</th>
                     <th>Last Used</th>
                     <th>Status</th>
-                    <th>Preview</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -302,14 +335,31 @@ const index = () => {
                           </span>
                         </td>
                         <td className="align-middle">
-                          <Eye
-                            size={18}
-                            className="cursor-pointer"
-                            onClick={() => {
-                              setPreview(row);
-                              handleOpenModal();
-                            }}
-                          />
+                          <div className="d-flex items-center justify-end">
+                            <Eye
+                              size={18}
+                              className="cursor-pointer mr-5"
+                              onClick={() => {
+                                setPreview(row);
+                                handleOpenModal();
+                              }}
+                              title="Preview template"
+                            />
+                            <Edit
+                              size={18}
+                              className="cursor-pointer text-blue-1 mr-5"
+                              onClick={() => {
+                                router.push(`/admin/email-template/add?edit=${row.id}`);
+                              }}
+                              title="Edit template"
+                            />
+                            <Trash2
+                              size={18}
+                              className="cursor-pointer text-red-1"
+                              onClick={() => handleDeleteClick(row.id, row.name)}
+                              title="Delete template"
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -339,6 +389,16 @@ const index = () => {
           )}
         </div>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Email Template"
+        message={`Are you sure you want to delete the template "${itemToDelete?.name}"?`}
+        itemName={itemToDelete?.name}
+        loading={deleting}
+      />
     </AgentDashboardLayout>
   );
 };

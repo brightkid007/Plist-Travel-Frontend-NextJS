@@ -31,65 +31,7 @@ const BothPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = 
     duration_value: p.duration_value || 1,
     isPopular: !!p.is_popular,
     status: p.status || "Active",
-  })) : [
-    {
-      id: 1,
-      title: "Basic",
-      value: "basic",
-      description: "For new vendors",
-      icon: (
-        <div className="size-40 flex-center rounded-full bg-light-2 text-dark-1">
-          <CreditCard />
-        </div>
-      ),
-      commission_percent: 12,
-      price: 19.99,
-      services: ["Up to 5 listings", "Standard support", "Basic analytics"],
-      status: "Active",
-    },
-    {
-      id: 2,
-      title: "Professional",
-      value: "professional",
-      description: "For established vendors",
-      icon: (
-        <div className="size-40 flex-center rounded-full bg-blue-2 text-blue-1">
-          <Star />
-        </div>
-      ),
-      commission_percent: 12,
-      price: 49.99,
-      services: [
-        "Up to 25 listings",
-        "Priority support",
-        "Advanced analytics",
-        "Custom branding",
-      ],
-      isPopular: true,
-      status: "Active",
-    },
-    {
-      id: 3,
-      title: "Premium",
-      value: "premium",
-      description: "For power vendors",
-      icon: (
-        <div className="size-40 flex-center rounded-full bg-purple-2 text-purple-1">
-          <ElectricBoltIcon />
-        </div>
-      ),
-      services: [
-        "Unlimited listings",
-        "24/7 premium support",
-        "Advanced analytics & reports",
-        "Featured listings",
-        "Priority search placement",
-      ],
-      commission_percent: 12,
-      price: 99.99,
-      status: "Active",
-    },
-  ];
+  })) : [];
 
   return (
     <>

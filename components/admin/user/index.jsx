@@ -16,6 +16,7 @@ import {
   assignUserRole,
   isAuthenticated
 } from "@/helpers/backend_helper";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const router = useRouter();
@@ -43,6 +44,11 @@ const index = () => {
   });
   const [menuAnchor, setMenuAnchor] = useState({});
   const menuRef = useRef({});
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleClose = () => {
     setShowModal(false);
@@ -215,19 +221,33 @@ const index = () => {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) {
-      return;
-    }
+  const handleDeleteUserClick = (userId, userName) => {
+    setUserToDelete({ id: userId, name: userName });
+    setDeleteModalOpen(true);
+    setMenuAnchor({ [userId]: null });
+  };
+
+  const handleDeleteUserConfirm = async () => {
+    if (!userToDelete) return;
+
     try {
+      setDeleting(true);
       setError(null);
-      await deleteAdminUser(userId);
-      setUsers(prev => prev.filter(user => user.id !== userId));
-      setMenuAnchor({ [userId]: null });
+      await deleteAdminUser(userToDelete.id);
+      setUsers(prev => prev.filter(user => user.id !== userToDelete.id));
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
     } catch (err) {
       console.error("Failed to delete user:", err);
       setError(err.message || "Failed to delete user");
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handleDeleteUserCancel = () => {
+    setDeleteModalOpen(false);
+    setUserToDelete(null);
   };
 
   const handleUpdateUserStatus = async (userId, currentStatus) => {
@@ -439,7 +459,7 @@ const index = () => {
                               {user.status === "Active" ? "Deactivate" : "Activate"}
                             </MenuItem>
                             <MenuItem onClick={() => {
-                              handleDeleteUser(user.id);
+                              handleDeleteUserClick(user.id, user.name);
                             }} className="text-red-2">
                               Delete
                             </MenuItem>
@@ -521,6 +541,16 @@ const index = () => {
           </div>
         </div>
       </Dialog>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteUserCancel}
+        onConfirm={handleDeleteUserConfirm}
+        title="Delete User"
+        message={`Are you sure you want to delete the user "${userToDelete?.name || userToDelete?.id}"?`}
+        itemName={userToDelete?.name || `User #${userToDelete?.id}`}
+        loading={deleting}
+      />
     </AdminDashboardLayout>
   );
 };
