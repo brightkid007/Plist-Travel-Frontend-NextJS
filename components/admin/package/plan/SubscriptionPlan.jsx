@@ -15,17 +15,19 @@ const SubscriptionPlan = ({ plans = [], loading = false, onEdit = () => { }, onD
       </div>
     ),
     price: p.price || 0,
-    services: Array.isArray(p.features) 
-      ? p.features 
-      : typeof (p.features) === 'string' 
-        ? (() => { 
-            try { 
-              return JSON.parse(p.features || '[]'); 
-            } catch (e) { 
-              return []; 
-            } 
-          })() 
+    services: Array.isArray(p.features)
+      ? p.features
+      : typeof (p.features) === 'string'
+        ? (() => {
+          try {
+            return JSON.parse(p.features || '[]');
+          } catch (e) {
+            return [];
+          }
+        })()
         : [],
+    duration_unit: p.duration_unit || "months",
+    duration_value: p.duration_value || 1,
     isPopular: !!p.is_popular,
     status: p.status || "Active",
   })) : [

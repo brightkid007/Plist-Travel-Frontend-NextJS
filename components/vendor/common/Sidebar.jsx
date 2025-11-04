@@ -1,7 +1,9 @@
+import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 
 const Sidebar = () => {
+  const { logout } = useAuth();
   const sidebarData = [
     {
       icon: "/img/dashboard/sidebar/compass.svg",
@@ -85,7 +87,9 @@ const Sidebar = () => {
     {
       icon: "/img/dashboard/sidebar/log-out.svg",
       title: "Logout",
-      href: "/vendor",
+      onClick: () => {
+        logout();
+      },
     },
   ];
 
@@ -135,7 +139,8 @@ const Sidebar = () => {
               </div>
             ) : (
               <Link
-                href={item.href}
+                onClick={item.onClick}
+                href={ item.onClick ? '' : item.href }
                 className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
               >
                 <Image

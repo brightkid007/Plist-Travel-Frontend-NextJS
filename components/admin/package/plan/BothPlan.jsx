@@ -16,17 +16,19 @@ const BothPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = 
     ),
     commission_percent: p.commission_percent || 0,
     price: p.price || 0,
-    services: Array.isArray(p.features) 
-      ? p.features 
-      : typeof (p.features) === 'string' 
-        ? (() => { 
-            try { 
-              return JSON.parse(p.features || '[]'); 
-            } catch (e) { 
-              return []; 
-            } 
-          })() 
+    services: Array.isArray(p.features)
+      ? p.features
+      : typeof (p.features) === 'string'
+        ? (() => {
+          try {
+            return JSON.parse(p.features || '[]');
+          } catch (e) {
+            return [];
+          }
+        })()
         : [],
+    duration_unit: p.duration_unit || "months",
+    duration_value: p.duration_value || 1,
     isPopular: !!p.is_popular,
     status: p.status || "Active",
   })) : [
@@ -121,7 +123,7 @@ const BothPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = 
                 </div>
                 <div className="d-flex items-end mt-20">
                   <h1 className="text-30 fw-600 mr-5">${item.price} </h1>
-                  <div className="text-14 text-light-1 mb-5">/ month</div>
+                  <div className="text-14 text-light-1 mb-5">/ {item.duration_value} {item.duration_unit}</div>
                 </div>
                 <div className="text-14 text-green-3 mb-5">
                   {item.commission_percent}% <span className="text-12">commission per booking</span>

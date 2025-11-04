@@ -405,6 +405,7 @@ export const getMessagesByConversation = (conversationId) => CommunicationAPICli
 // ===========================================
 
 export const getPackagePlans = (params) => PricingAPIClient.get(url.GET_PACKAGE_PLANS, params);
+export const getPackagePlanById = (id) => PricingAPIClient.get(`${url.GET_PACKAGE_PLANS}/${id}`);
 export const createPackagePlan = (data) => PricingAPIClient.create(url.CREATE_PACKAGE_PLAN, data);
 export const updatePackagePlan = (id, data) => PricingAPIClient.update(`${url.UPDATE_PACKAGE_PLAN}/${id}`, data);
 export const deletePackagePlan = (id) => PricingAPIClient.delete(`${url.DELETE_PACKAGE_PLAN}/${id}`);

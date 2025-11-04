@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -7,7 +8,8 @@ import { isActiveLink } from "@/utils/linkActiveChecker";
 import { usePathname } from "next/navigation";
 
 const Sidebar = () => {
-const pathname = usePathname()
+  const { logout } = useAuth();
+  const pathname = usePathname()
 
   const sidebarContent = [
     // {
@@ -50,7 +52,9 @@ const pathname = usePathname()
       id: 6,
       icon: "/img/dashboard/sidebar/log-out.svg",
       name: " Logout",
-      routePath: "/",
+      onClick: () => {
+        logout();
+      },
     },
   ];
   return (
@@ -59,11 +63,12 @@ const pathname = usePathname()
         <div className="sidebar__item" key={item.id}>
           <div
             className={`${
-              isActiveLink(item.routePath, pathname) ? "-is-active" : ""
+              item.routePath && isActiveLink(item.routePath, pathname) ? "-is-active" : ""
             } sidebar__button `}
           >
             <Link
-              href={item.routePath}
+              onClick={item.onClick}
+              href={ item.onClick ? '' : item.routePath }
               className="d-flex items-center text-15 lh-1 fw-500"
             >
               <Image

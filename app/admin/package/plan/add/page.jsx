@@ -1,13 +1,15 @@
-import dynamic from "next/dynamic";
-import PackagePlan from "@/components/admin/package/plan/AddPackage";
+"use client";
 
-export const metadata = {
-  title: "Admin Dashboard || Plist Travel",
-  description: "Admin Dashboard for Plist Travel",
-};
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import AddPackage from "@/components/admin/package/plan/AddPackage";
 
 const index = () => {
-  return <PackagePlan />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddPackage />
+    </Suspense>
+  );
 };
 
 export default dynamic(() => Promise.resolve(index), {

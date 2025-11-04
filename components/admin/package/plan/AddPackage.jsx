@@ -6,13 +6,19 @@ import { Checkbox } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { green, red } from "@mui/material/colors";
-import { useState } from "react";
-import { createPackagePlan } from "@/helpers/backend_helper";
+import { useState, useEffect } from "react";
+import { createPackagePlan, updatePackagePlan, getPackagePlanById } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const index = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEditMode = !!editId;
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [planType, setPlanType] = useState("subscription");
   const [features, setFeatures] = useState([]);
@@ -26,6 +32,7 @@ const index = () => {
   const [sortOrder, setSortOrder] = useState("");
   const [hoverFeatureIdx, setHoverFeatureIdx] = useState(-1);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const addFeature = () => {
     const value = (newFeature || "").trim();
@@ -40,11 +47,54 @@ const index = () => {
     setHoverFeatureIdx(-1);
   };
 
+  useEffect(() => {
+    // Load plan data when in edit mode
+    const loadPlanData = async () => {
+      if (!isEditMode || !editId) return;
+
+      try {
+        setLoading(true);
+        const res = await getPackagePlanById(editId);
+        const plan = res?.plan || res?.data?.plan || res?.data || res || {};
+
+        // Populate form fields
+        setName(plan.name || "");
+        setDescription(plan.description || "");
+        setPlanType(plan.model || plan.plan_type || "subscription");
+        setIsActive(plan.status === "Active" || plan.status === "active" || plan.is_active !== false);
+        setIsPopular(plan.is_popular || false);
+        setSortOrder(plan.sort_order ? String(plan.sort_order) : "");
+        setFeatures(Array.isArray(plan.features) ? plan.features : []);
+
+        if (plan.price !== undefined && plan.price !== null) {
+          setPrice(String(plan.price));
+        }
+        if (plan.commission_percent !== undefined && plan.commission_percent !== null) {
+          setCommissionPercent(String(plan.commission_percent));
+        }
+        if (plan.duration_unit) {
+          setDurationUnit(plan.duration_unit);
+        }
+        if (plan.duration_value !== undefined && plan.duration_value !== null) {
+          setDurationValue(String(plan.duration_value));
+        }
+        if (plan.trial_days !== undefined && plan.trial_days !== null) {
+          setTrialDays(String(plan.trial_days));
+        }
+      } catch (e) {
+        toast.error(e?.response?.data?.message || e?.message || "Failed to load plan");
+        router.push("/admin/package/plan");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlanData();
+  }, [isEditMode, editId, router]);
+
   const handleSave = async () => {
     try {
       setSaving(true);
-      const name = document.querySelector('input[placeholder="Enter package name"]').value || "";
-      const description = document.querySelector('input[placeholder="Enter package description"]').value || "";
       const payload = {
         name,
         description,
@@ -120,8 +170,13 @@ const index = () => {
           return;
         }
       }
-      await createPackagePlan(payload);
-      toast.success("Plan created");
+      if (isEditMode) {
+        await updatePackagePlan(editId, payload);
+        toast.success("Plan updated");
+      } else {
+        await createPackagePlan(payload);
+        toast.success("Plan created");
+      }
       router.push("/admin/package/plan");
     } catch (e) {
       toast.error(e?.response?.data?.message || e?.message || "Failed to create plan");
@@ -142,18 +197,25 @@ const index = () => {
       </div>
 
       <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100 mt-20">
-        <h1 className="text-22 lh-14 fw-600">Add New Package</h1>
+        <h1 className="text-22 lh-14 fw-600">{isEditMode ? "Edit Package" : "Add New Package"}</h1>
+        {loading && (
+          <div className="text-14 text-light-1 mb-10">Loading plan data...</div>
+        )}
         <div className="row y-gap-15 x-gap-15">
           <FormInput
             label="Package Name"
             placeholder="Enter package name"
             gridClass="col-sm-6"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
 
           <FormInput
             label="Package Description"
             placeholder="Enter package description"
             gridClass="col-sm-6"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
 
 
@@ -179,6 +241,7 @@ const index = () => {
                 tooltip="Package price currency is set from System Setting"
                 placeholder="Enter price"
                 gridClass="col-sm-6"
+                value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
 
@@ -211,6 +274,7 @@ const index = () => {
                 label="Trial Days"
                 placeholder="Enter trial days"
                 gridClass="col-sm-6"
+                value={trialDays}
                 onChange={(e) => setTrialDays(e.target.value)}
               />
             </>
@@ -223,6 +287,7 @@ const index = () => {
               label="Commission Percent (%)"
               placeholder="Enter commission percent"
               gridClass="col-sm-6"
+              value={commissionPercent}
               onChange={(e) => setCommissionPercent(e.target.value)}
             />
           )}
@@ -232,6 +297,7 @@ const index = () => {
             step="1"
             label="Sort Order"
             placeholder="i.e. 1"
+            value={sortOrder}
             gridClass="col-sm-6"
             onChange={(e) => setSortOrder(e.target.value)}
           />
@@ -313,9 +379,9 @@ const index = () => {
             <button
               className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-15 py-5"
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || loading}
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update" : "Save")}
             </button>
           </div>
         </div>
