@@ -33,13 +33,18 @@ const createServiceInstance = (serviceConfig) => {
     function (error) {
       let message;
       const status = error.response?.status || error.status;
-      
+
       switch (status) {
         case 500:
           message = "Internal Server Error";
           break;
         case 401:
           message = error.response?.data?.message || "Invalid credentials or unauthorized access";
+          if (error.response?.data?.message == "Token expired. Please login again.") {
+            clearAuthorization();
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("authUser");
+          }
           break;
         case 403:
           message = error.response?.data?.message || "Access forbidden. Insufficient permissions";
@@ -84,7 +89,7 @@ axios.interceptors.response.use(
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     let message;
     const status = error.response?.status || error.status;
-    
+
     switch (status) {
       case 500:
         message = "Internal Server Error";
@@ -116,13 +121,6 @@ axios.interceptors.response.use(
  */
 const setAuthorization = (token) => {
   axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-};
-
-/**
- * Sets the admin authorization header
- * @param {*} token
- */
-const setAdminAuthorization = (token) => {
   axios.defaults.headers.common["x-access-token"] = token;
 };
 
@@ -203,4 +201,4 @@ const getLoggedinUser = () => {
   }
 };
 
-export { APIClient, setAuthorization, setAdminAuthorization, clearAuthorization, getLoggedinUser };
+export { APIClient, setAuthorization, clearAuthorization, getLoggedinUser };

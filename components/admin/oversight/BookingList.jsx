@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { MoreVertical, Trash2, CheckCircle2, XCircle, ReceiptRefund } from "lucide-react";
+import { MoreVertical, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 
@@ -174,7 +174,6 @@ const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, ac
                           disabled={actionLoading || row.paid === "refunded"}
                           className="text-blue-1"
                         >
-                          <ReceiptRefund size={16} className="mr-10" />
                           Refund
                         </MenuItem>
                       )}
