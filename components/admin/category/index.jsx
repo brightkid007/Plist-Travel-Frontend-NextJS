@@ -16,6 +16,10 @@ const index = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  // Filters
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [parentCategoryFilter, setParentCategoryFilter] = useState("all");
   
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -78,10 +82,96 @@ const index = () => {
     if (activeTab === "category") {
       fetchCategories();
     } else {
+      // Ensure categories are available for subcategory parent names and filtering
       fetchSubcategories();
+      fetchCategories();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  // Derived filtered data
+  const filteredCategories = categories.filter((cat) => {
+    const statusOk =
+      statusFilter === "all" || (statusFilter === "active" ? cat.is_active !== false : cat.is_active === false);
+    const typeOk = typeFilter === "all" || (cat.type || "").toLowerCase() === typeFilter;
+    return statusOk && typeOk;
+  });
+
+  const filteredSubcategories = subcategories.filter((sub) => {
+    const statusOk =
+      statusFilter === "all" || (statusFilter === "active" ? sub.is_active !== false : sub.is_active === false);
+    const parentOk =
+      parentCategoryFilter === "all" || String(sub.category_id) === String(parentCategoryFilter);
+    return statusOk && parentOk;
+  });
+
+  // Actions
+  const handleViewAll = () => {
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setParentCategoryFilter("all");
+    // Reload data
+    if (activeTab === "category") {
+      fetchCategories();
+    } else {
+      fetchSubcategories();
+      fetchCategories();
+    }
+  };
+
+  const toCsv = (rows) => {
+    const escapeCell = (cell) => {
+      const value = cell == null ? "" : String(cell);
+      if (/[",\n]/.test(value)) {
+        return '"' + value.replace(/"/g, '""') + '"';
+      }
+      return value;
+    };
+    return rows.map((row) => row.map(escapeCell).join(",")).join("\n");
+  };
+
+  const handleExport = () => {
+    try {
+      const isCategory = activeTab === "category";
+      const data = isCategory ? filteredCategories : filteredSubcategories;
+      const headers = isCategory
+        ? ["Category", "Listing Type", "Status", "Description"]
+        : ["Subcategory", "Parent Category", "Status", "Description"];
+
+      const rows = data.map((item) => {
+        if (isCategory) {
+          return [
+            item.name || "-",
+            item.type || "-",
+            item.is_active !== false ? "Active" : "Inactive",
+            item.description || "-",
+          ];
+        }
+        const parentName = categories.find((c) => c.id === item.category_id)?.name || "-";
+        return [
+          item.name || "-",
+          parentName,
+          item.is_active !== false ? "Active" : "Inactive",
+          item.description || "-",
+        ];
+      });
+
+      const csv = toCsv([headers, ...rows]);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.href = url;
+      link.download = `${isCategory ? "categories" : "subcategories"}-${timestamp}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export failed", err);
+      toast.error("Failed to export listings");
+    }
+  };
 
   // Handle create/update
   const handleSubmit = async () => {
@@ -274,36 +364,61 @@ const index = () => {
         <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
           
           <div className="col-sm-auto">
-            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
+            <select
+              className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
           </div>
 
-          <div className="col-sm-auto">
-            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-              <option value="all">All Types</option>
-              <option value="property">Property</option>
-              <option value="activity">Activity</option>
-              <option value="tour">Tour</option>
-              <option value="event">Event</option>
-              <option value="flight">Flight</option>
-              <option value="ride">Ride</option>
-            </select>
-          </div>
+          {activeTab === "category" && (
+            <div className="col-sm-auto">
+              <select
+                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="all">All Types</option>
+                <option value="property">Property</option>
+                <option value="activity">Activity</option>
+                <option value="tour">Tour</option>
+                <option value="event">Event</option>
+                <option value="flight">Flight</option>
+                <option value="ride">Ride</option>
+              </select>
+            </div>
+          )}
 
-          <div className="col-sm-auto">
-            <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-              <option value="all">Category</option>
-            </select>
-          </div>
+          {activeTab === "subcategory" && (
+            <div className="col-sm-auto">
+              <select
+                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+                value={parentCategoryFilter}
+                onChange={(e) => setParentCategoryFilter(e.target.value)}
+              >
+                <option value="all">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           
           <div className="col-sm-auto ms-auto d-flex">
-            <button className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full me-2">
+            <button
+              className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full me-2"
+              onClick={handleExport}
+            >
               Export Listings
             </button>
-            <button className="button -md px-15 py-10 fw-400 text-14 text-white bg-blue-1 rounded-8 sm:w-full">
+            <button
+              className="button -md px-15 py-10 fw-400 text-14 text-white bg-blue-1 rounded-8 sm:w-full"
+              onClick={handleViewAll}
+            >
               View All
             </button>
           </div>
@@ -339,14 +454,14 @@ const index = () => {
                     </td>
                   </tr>
                 ) : activeTab == "category" ? (
-                  categories.length === 0 ? (
+                  filteredCategories.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="text-center py-20">
                         <div className="text-14 text-light-1">No categories found</div>
                       </td>
                     </tr>
                   ) : (
-                    categories.map((item, index) => (
+                    filteredCategories.map((item, index) => (
                       <tr key={item.id || index}>
                         <td className="align-middle text-12 lh-16 fw-500">
                           {item.name}
@@ -386,14 +501,14 @@ const index = () => {
                     ))
                   )
                 ) : (
-                  subcategories.length === 0 ? (
+                  filteredSubcategories.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="text-center py-20">
                         <div className="text-14 text-light-1">No subcategories found</div>
                       </td>
                     </tr>
                   ) : (
-                    subcategories.map((item, index) => (
+                    filteredSubcategories.map((item, index) => (
                       <tr key={item.id || index}>
                         <td className="align-middle text-12 lh-16 fw-500">
                           {item.name}
