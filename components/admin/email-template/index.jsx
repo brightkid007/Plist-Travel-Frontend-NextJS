@@ -2,9 +2,9 @@
 
 import AgentDashboardLayout from "../common/layout";
 import { useState, useEffect, useMemo } from "react";
-import { Dialog, Drawer } from "@mui/material";
+import { Dialog, Drawer, CircularProgress } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2, MailX } from "lucide-react";
 import { MailOutline } from "@mui/icons-material";
 import { getEmailTemplates, deleteEmailTemplate } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -296,78 +296,83 @@ const index = () => {
           </button> */}
         </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
-          {loading ? (
-            <div className="d-flex justify-center items-center py-40">
-              <div className="text-14 text-light-1">Loading email templates...</div>
-            </div>
-          ) : (
-            <div className="overflow-scroll scroll-bar-1">
-              <table className="table-2 col-12">
-                <thead>
-                  <tr className="text-light-1 fw-600">
-                    <th>Template Name</th>
-                    <th>Category</th>
-                    <th>Subject</th>
-                    <th>Last Used</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+          <div className="overflow-scroll scroll-bar-1">
+            <table className="table-2 col-12">
+              <thead>
+                <tr className="text-light-1 fw-600">
+                  <th>Template Name</th>
+                  <th>Category</th>
+                  <th>Subject</th>
+                  <th>Last Used</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && (
+                  <tr>
+                    <td colSpan={6} className="text-center py-20">
+                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <CircularProgress size={20} thickness={5} />
+                        <span>Loading email templates...</span>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredTemplates.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-40">
-                        <div className="text-14 text-light-1">
-                          {searchTerm ? "No templates found matching your search." : "No email templates found."}
+                )}
+                {!loading && filteredTemplates.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-40">
+                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <MailX size={18} />
+                        <span>{searchTerm ? "No templates found matching your search." : "No email templates found."}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  !loading && filteredTemplates.map((row) => (
+                    <tr key={row.id}>
+                      <td className="align-middle">{row.name}</td>
+                      <td className="align-middle">{row.category}</td>
+                      <td className="align-middle">{row.subject}</td>
+                      <td className="align-middle">{row.last_used || "—"}</td>
+                      <td className="align-middle">
+                        <span className="text-14 px-10 text-white bg-dark-blue rounded-100 fw-500">
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="align-middle">
+                        <div className="d-flex items-center justify-end">
+                          <Eye
+                            size={18}
+                            className="cursor-pointer mr-5"
+                            onClick={() => {
+                              setPreview(row);
+                              handleOpenModal();
+                            }}
+                            title="Preview template"
+                          />
+                          <Edit
+                            size={18}
+                            className="cursor-pointer text-blue-1 mr-5"
+                            onClick={() => {
+                              router.push(`/admin/email-template/add?edit=${row.id}`);
+                            }}
+                            title="Edit template"
+                          />
+                          <Trash2
+                            size={18}
+                            className="cursor-pointer text-red-1"
+                            onClick={() => handleDeleteClick(row.id, row.name)}
+                            title="Delete template"
+                          />
                         </div>
                       </td>
                     </tr>
-                  ) : (
-                    filteredTemplates.map((row) => (
-                      <tr key={row.id}>
-                        <td className="align-middle">{row.name}</td>
-                        <td className="align-middle">{row.category}</td>
-                        <td className="align-middle">{row.subject}</td>
-                        <td className="align-middle">{row.last_used || "—"}</td>
-                        <td className="align-middle">
-                          <span className="text-14 px-10 text-white bg-dark-blue rounded-100 fw-500">
-                            {row.status}
-                          </span>
-                        </td>
-                        <td className="align-middle">
-                          <div className="d-flex items-center justify-end">
-                            <Eye
-                              size={18}
-                              className="cursor-pointer mr-5"
-                              onClick={() => {
-                                setPreview(row);
-                                handleOpenModal();
-                              }}
-                              title="Preview template"
-                            />
-                            <Edit
-                              size={18}
-                              className="cursor-pointer text-blue-1 mr-5"
-                              onClick={() => {
-                                router.push(`/admin/email-template/add?edit=${row.id}`);
-                              }}
-                              title="Edit template"
-                            />
-                            <Trash2
-                              size={18}
-                              className="cursor-pointer text-red-1"
-                              onClick={() => handleDeleteClick(row.id, row.name)}
-                              title="Delete template"
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

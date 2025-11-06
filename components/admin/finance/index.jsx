@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import DashboardCard from "./components/DashboardCard";
 import { getTransactions, getPaymentAnalytics, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const router = useRouter();
@@ -28,6 +29,9 @@ const index = () => {
   const [entries, setEntries] = useState([]);
   const [menuOpenIdx, setMenuOpenIdx] = useState(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [entryToRefund, setEntryToRefund] = useState(null);
+  const [refunding, setRefunding] = useState(false);
   const exportFinanceCSV = () => {
     try {
       const cols = [
@@ -242,21 +246,45 @@ const index = () => {
           >
             <div
               className="text-14 px-10 py-5 cursor-pointer"
-              onClick={async () => {
-                try {
-                  await refundTransaction(entries[menuOpenIdx].id);
-                  setMenuOpenIdx(null);
-                  load();
-                  toast.success('Refunded successfully');
-                } catch (e) {
-                  toast.error(e?.response?.data?.message || e?.message || 'Failed to refund');
-                }
+              onClick={() => {
+                setEntryToRefund(entries[menuOpenIdx]);
+                setMenuOpenIdx(null);
+                setRefundModalOpen(true);
               }}
             >
               Refund
             </div>
           </div>
         )}
+
+        <DeleteConfirmationModal
+          open={refundModalOpen}
+          onClose={() => {
+            setRefundModalOpen(false);
+            setEntryToRefund(null);
+          }}
+          onConfirm={async () => {
+            if (!entryToRefund) return;
+            try {
+              setRefunding(true);
+              await refundTransaction(entryToRefund.id);
+              toast.success('Refund processed successfully');
+              setRefundModalOpen(false);
+              setEntryToRefund(null);
+              load();
+            } catch (e) {
+              toast.error(e?.response?.data?.message || e?.message || 'Failed to refund');
+            } finally {
+              setRefunding(false);
+            }
+          }}
+          title="Refund Transaction"
+          message={`Are you sure you want to refund ${entryToRefund?.invoice ? `invoice "${entryToRefund.invoice}"` : 'this transaction'}? This action cannot be undone.`}
+          itemName={entryToRefund?.invoice || `Transaction #${entryToRefund?.id}`}
+          loading={refunding}
+          confirmLabel="Refund"
+          confirmingLabel="Refunding..."
+        />
       </div>
     </AdminDashboardLayout>
   );

@@ -2,10 +2,10 @@
 
 import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus, MoreVertical } from "lucide-react";
+import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus, MoreVertical, Tag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import DashboardCard from "./components/DashboardCard";
-import { Dialog, Menu, MenuItem } from "@mui/material";
+import { Dialog, Menu, MenuItem, CircularProgress } from "@mui/material";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import FormInput from "@/components/common/form/FormInput";
 import Filter from "../common/Filter";
@@ -231,7 +231,12 @@ const index = () => {
               <tbody>
                 {loading && (
                   <tr>
-                    <td className="py-15" colSpan={8}>Loading...</td>
+                    <td className="py-15 text-center" colSpan={8}>
+                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <CircularProgress size={18} thickness={5} />
+                        <span>Loading coupons...</span>
+                      </div>
+                    </td>
                   </tr>
                 )}
                 {error && !loading && (
@@ -239,12 +244,17 @@ const index = () => {
                     <td className="py-15 text-red-1" colSpan={8}>{error}</td>
                   </tr>
                 )}
+                {!loading && !error && entries.length === 0 && (
+                  <tr>
+                    <td className="py-15 text-center" colSpan={8}>
+                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <Tag size={18} />
+                        <span>No coupons found.</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {!loading && !error && entries
-                  // .filter((item) => {
-                  //   return activeTab === "all"
-                  //     ? true
-                  //     : item.status.toLowerCase() === activeTab;
-                  // })
                   .map((entry, index) => (
                     <tr key={index}>
                       <td className="align-middle text-12 lh-16 fw-500">

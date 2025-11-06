@@ -2,9 +2,9 @@
 
 import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
-import { Ellipsis, Mail, MapPin, Phone, Plus, MoreVertical } from "lucide-react";
+import { Ellipsis, Mail, MapPin, Phone, Plus, MoreVertical, UserX } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { Dialog, Menu, MenuItem } from "@mui/material";
+import { Dialog, Menu, MenuItem, CircularProgress } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { 
   getAdminUsers, 
@@ -106,7 +106,7 @@ const index = () => {
         }
 
         const [usersData, rolesData] = await Promise.all([
-          getAdminUsers({ role: activeTab === "all" ? undefined : activeTab }),
+          getAdminUsers({ role: activeTab === "all" ? undefined : activeTab, includeDisabled: true }),
           getUserRoles()
         ]);
 
@@ -370,7 +370,10 @@ const index = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="6" className="text-center py-20">
-                      <div className="text-16 text-light-1">Loading users...</div>
+                      <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                        <CircularProgress size={20} thickness={5} />
+                        <span>Loading users...</span>
+                      </div>
                     </td>
                   </tr>
                 ) : error && users.length === 0 ? (
@@ -382,7 +385,10 @@ const index = () => {
                 ) : users.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center py-20">
-                      <div className="text-16 text-light-1">No users found</div>
+                      <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                        <UserX size={18} />
+                        <span>No users found</span>
+                      </div>
                       {error && (
                         <div className="text-14 text-red-1 mt-10">Error: {error}</div>
                       )}

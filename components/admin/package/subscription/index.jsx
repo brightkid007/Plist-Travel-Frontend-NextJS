@@ -1,8 +1,8 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Receipt } from "lucide-react";
 import AdminDashboardLayout from "../../common/layout";
-import { Dialog, Checkbox } from "@mui/material";
+import { Dialog, Checkbox, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getPackageSubscriptions, exportPackageSubscriptionsPdf } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -374,6 +374,24 @@ const SubscriptionList = () => {
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={12} className="text-center text-14 text-light-1 py-10">
+                  <CircularProgress size={22} thickness={5} />
+                  <span>Loading subscriptions...</span>
+                </td>
+              </tr>
+            )}
+            {!loading && filteredRows.length === 0 && (
+              <tr>
+                <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="text-center text-14 text-light-1 py-20">
+                  <div className="d-inline-flex items-center justify-center gap-2">
+                    <Receipt size={18} />
+                    <span>No subscriptions found.</span>
+                  </div>
+                </td>
+              </tr>
+            )}
             {filteredRows.map((row, index) => (
               <tr key={index} className="text-12">
                 {visibleColumns.business_name && (<td className="align-middle text-12">{row.business_name}</td>)}

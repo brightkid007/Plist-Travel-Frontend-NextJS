@@ -2,6 +2,7 @@ import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import CheckIcon from "@mui/icons-material/Check";
 import { green } from "@mui/material/colors";
 import { CreditCard, Edit, Star, Trash } from "lucide-react";
+import { CircularProgress } from "@mui/material";
 
 const SubscriptionPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = () => { } }) => {
   const subscriptionPlans = plans.length > 0 ? plans.map(p => ({
@@ -36,6 +37,12 @@ const SubscriptionPlan = ({ plans = [], loading = false, onEdit = () => { }, onD
     <>
       <div className="text-20 fw-600 col-auto">Subscription Plan</div>
       <div className="row y-gap-20">
+        {loading && (
+          <div className="col-12 d-flex items-center justify-center gap-2 text-14 text-light-1">
+            <CircularProgress size={20} thickness={5} />
+            <span>Loading plans...</span>
+          </div>
+        )}
         {subscriptionPlans.map((item, index) => (
           <div className="col-md-4" key={index}>
             <div

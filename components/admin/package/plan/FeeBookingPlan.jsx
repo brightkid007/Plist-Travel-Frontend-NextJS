@@ -2,6 +2,7 @@ import svgIcon from "@/components/data/svgIcon";
 import CheckIcon from "@mui/icons-material/Check";
 import { green } from "@mui/material/colors";
 import { Edit, Trash } from "lucide-react";
+import { CircularProgress } from "@mui/material";
 
 const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = () => { } }) => {
   return (
@@ -15,7 +16,13 @@ const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDel
           <div className="text-16 text-light-1">
             Pay only when you make a booking. No monthly fees, no commitments.
           </div>
-          {plans.length === 0 ? (
+          {loading && (
+            <div className="text-14 text-light-1 mt-20 d-flex items-center justify-center gap-2">
+              <CircularProgress size={20} thickness={5} />
+              <span>Loading plans...</span>
+            </div>
+          )}
+          {!loading && plans.length === 0 ? (
             <>
               <div className="text-14 text-light-1 mt-20">No fee plans found.</div>
             </>

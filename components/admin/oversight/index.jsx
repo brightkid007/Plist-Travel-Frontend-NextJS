@@ -212,6 +212,8 @@ const index = () => {
         message={`Are you sure you want to delete the booking "${bookingToDelete?.name || `#${bookingToDelete?.id}`}"?`}
         itemName={bookingToDelete?.name || `Booking #${bookingToDelete?.id}`}
         loading={deleting}
+        confirmLabel="Delete"
+        confirmingLabel="Deleting..."
       />
 
       <DeleteConfirmationModal
@@ -222,6 +224,8 @@ const index = () => {
         message={`Are you sure you want to reject the booking "${bookingToReject?.name || `#${bookingToReject?.id}`}"? This will cancel the booking.`}
         itemName={bookingToReject?.name || `Booking #${bookingToReject?.id}`}
         loading={rejecting}
+        confirmLabel="Reject"
+        confirmingLabel="Rejecting..."
       />
 
       <DeleteConfirmationModal
@@ -232,6 +236,8 @@ const index = () => {
         message={`Are you sure you want to process a refund for the booking "${bookingToRefund?.name || `#${bookingToRefund?.id}`}"? This action cannot be undone.`}
         itemName={bookingToRefund?.name || `Booking #${bookingToRefund?.id}`}
         loading={refunding}
+        confirmLabel="Refund"
+        confirmingLabel="Refunding..."
       />
     </AdminDashboardLayout>
   );
