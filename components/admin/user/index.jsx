@@ -37,9 +37,6 @@ const index = () => {
     is_active: true,
     first_name: "",
     last_name: "",
-    phone: "",
-    address: "",
-    avatar_url: "",
     role_level: "support"
   });
   const [menuAnchor, setMenuAnchor] = useState({});
@@ -61,9 +58,6 @@ const index = () => {
       is_active: true,
       first_name: "",
       last_name: "",
-      phone: "",
-      address: "",
-      avatar_url: "",
       role_level: "support"
     });
   };
@@ -148,9 +142,6 @@ const index = () => {
         is_active: formData.is_active,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        phone: formData.phone,
-        address: formData.address,
-        avatar_url: formData.avatar_url,
         ...(formData.role === "admin" && { role_level: formData.role_level || "support" })
       };
 
@@ -177,9 +168,6 @@ const index = () => {
       is_active: user.is_active !== false,
       first_name: user.first_name || "",
       last_name: user.last_name || "",
-      phone: user.phone || "",
-      address: user.address || "",
-      avatar_url: user.avatar_url || "",
       role_level: user.role_level || "support"
     });
     setShowEditModal(true);
@@ -196,9 +184,6 @@ const index = () => {
         is_active: formData.is_active,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        phone: formData.phone,
-        address: formData.address,
-        avatar_url: formData.avatar_url,
         ...(formData.role === "admin" && { role_level: formData.role_level })
       };
 
@@ -359,7 +344,6 @@ const index = () => {
               <thead className="bg-light-2">
                 <tr>
                   <th>User</th>
-                  <th>Location</th>
                   <th>Role</th>
                   <th>Status</th>
                   <th className="text-nowrap">Created At</th>
@@ -378,7 +362,7 @@ const index = () => {
                   </tr>
                 ) : error && users.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-20">
+                    <td colSpan="5" className="text-center py-20">
                       <div className="text-16 text-red-1">Error: {error}</div>
                     </td>
                   </tr>
@@ -415,9 +399,6 @@ const index = () => {
                             </div>
                           </div>
                         </div>
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {user.location}
                       </td>
                       <td className="align-middle text-12 lh-16 fw-500">
                         <span className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${getRoleColor(user.role)}`}>
@@ -633,21 +614,6 @@ const ModalContent = ({ roles = [], formData, setFormData, title, description, i
       />
 
       <FormInput
-        label="Phone"
-        type="text"
-        placeholder="Enter Phone Number"
-        gridClass="col-12 mt-5"
-        value={formData.phone}
-        onChange={(e) => handleChange("phone", e.target.value)}
-      />
-
-      <FormInput
-        label="Address"
-        type="text"
-        placeholder="Enter Address"
-        gridClass="col-12 mt-5"
-        value={formData.address}
-        onChange={(e) => handleChange("address", e.target.value)}
       />
 
       <FormInput
@@ -681,15 +647,7 @@ const ModalContent = ({ roles = [], formData, setFormData, title, description, i
         defaultValue={String(formData.is_active)}
         onChange={(e) => handleChange("is_active", e.target.value === "true")}
       />
-
-      <FormInput
-        label="Avatar URL"
-        type="text"
-        placeholder="Enter Avatar URL"
-        gridClass="col-12 mt-5"
-        value={formData.avatar_url}
-        onChange={(e) => handleChange("avatar_url", e.target.value)}
-      />
+      
     </div>
   );
 };
