@@ -253,9 +253,9 @@ const index = ({ filters = {} }) => {
             }}
           ></i>
         </div>
-        <button className="button border-light px-20 py-10 rounded-8">
+        {/* <button className="button border-light px-20 py-10 rounded-8">
           <Bell size={18} className="mr-10" /> View System Notifications
-        </button>
+        </button> */}
       </div>
       <table className="table-2 col-12">
         <thead>
