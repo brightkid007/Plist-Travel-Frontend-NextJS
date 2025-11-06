@@ -67,50 +67,51 @@ const Localization = () => {
     }
   }, [enabledLanguageCodes, defaultLanguageCode, enabledLanguages]);
 
+  const load = async () => {
+    try {
+      const response = await getSystemSettings();
+      const data = response?.settings || response?.data?.settings || {};
+
+      const enabledArray = normalizeList(
+        data.enabledLanguages?.value ?? data.enabled_languages?.value ?? data.enabledLanguages ?? data.enabled_languages ?? ["en"]
+      );
+
+      const defLang =
+        data.defaultLanguage?.value ||
+        data.default_language?.value ||
+        data.defaultLanguage ||
+        data.default_language ||
+        "en";
+
+      const auto =
+        data.autoDetectLanguage?.value === "true" ||
+        data.auto_detect_language?.value === "true" ||
+        data.autoDetectLanguage === true ||
+        data.auto_detect_language === true ||
+        false;
+
+      const tz =
+        data.timezone?.value || data.defaultTimezone?.value || data.timezone || data.defaultTimezone || "utc";
+
+      const curr =
+        data.defaultCurrency?.value ||
+        data.default_currency?.value ||
+        data.defaultCurrency ||
+        data.default_currency ||
+        "usd";
+
+      // Apply
+      setEnabledLanguageCodes(new Set(enabledArray.length ? enabledArray : ["en"]));
+      setDefaultLanguageCode(defLang || "en");
+      setAutoDetect(!!auto);
+      setTimezone((tz || "utc").toLowerCase());
+      setDefaultCurrency((curr || "usd").toLowerCase());
+    } catch (e) {
+      // Keep defaults
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const response = await getSystemSettings();
-        const data = response?.settings || response?.data?.settings || {};
-
-        const enabledArray = normalizeList(
-          data.enabledLanguages?.value ?? data.enabled_languages?.value ?? data.enabledLanguages ?? data.enabled_languages ?? ["en"]
-        );
-
-        const defLang =
-          data.defaultLanguage?.value ||
-          data.default_language?.value ||
-          data.defaultLanguage ||
-          data.default_language ||
-          "en";
-
-        const auto =
-          data.autoDetectLanguage?.value === "true" ||
-          data.auto_detect_language?.value === "true" ||
-          data.autoDetectLanguage === true ||
-          data.auto_detect_language === true ||
-          false;
-
-        const tz =
-          data.timezone?.value || data.defaultTimezone?.value || data.timezone || data.defaultTimezone || "utc";
-
-        const curr =
-          data.defaultCurrency?.value ||
-          data.default_currency?.value ||
-          data.defaultCurrency ||
-          data.default_currency ||
-          "usd";
-
-        // Apply
-        setEnabledLanguageCodes(new Set(enabledArray.length ? enabledArray : ["en"]));
-        setDefaultLanguageCode(defLang || "en");
-        setAutoDetect(!!auto);
-        setTimezone((tz || "utc").toLowerCase());
-        setDefaultCurrency((curr || "usd").toLowerCase());
-      } catch (e) {
-        // Keep defaults
-      }
-    };
     load();
   }, []);
 

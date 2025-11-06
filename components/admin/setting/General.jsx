@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import FormInput from "@/components/common/form/FormInput";
-import { Switch } from "@mui/material";
+import { Switch, CircularProgress } from "@mui/material";
 import { Settings } from "lucide-react";
 import { getSystemSettings, updateSystemSettings } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -29,7 +29,7 @@ const General = () => {
     try {
       const response = await getSystemSettings();
       const data = response?.settings || response?.data?.settings || {};
-      
+
       setSettings({
         siteName: data.siteName?.value || data.site_name?.value || "",
         siteUrl: data.siteUrl?.value || data.site_url?.value || "",
@@ -77,14 +77,6 @@ const General = () => {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="d-flex justify-center items-center py-40">
-        <div className="text-16 text-light-1">Loading settings...</div>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit}>

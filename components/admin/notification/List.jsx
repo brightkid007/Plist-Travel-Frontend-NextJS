@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Bell, MoreVertical, Edit, Trash2, Send } from "lucide-react";
 import { getNotifications, deleteNotification, sendNotification, getNotificationById, updateNotification } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import { Dialog, Checkbox } from "@mui/material";
+import { Dialog, Checkbox, CircularProgress } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -233,14 +233,6 @@ const index = ({ filters = {} }) => {
     return true;
   });
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-center items-center py-40">
-        <div className="text-14 text-light-1">Loading notifications...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-scroll scroll-bar-1">
       <div className="d-flex items-center justify-between mb-10 mt-5">
@@ -278,7 +270,17 @@ const index = ({ filters = {} }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredNotifications.length === 0 ? (
+          {loading && (
+            <tr>
+              <td colSpan={7} className="text-center py-20">
+                <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                  <CircularProgress size={18} thickness={5} />
+                  <span>Loading notifications...</span>
+                </div>
+              </td>
+            </tr>
+          )}
+          {!loading && filteredNotifications.length === 0 ? (
             <tr>
               <td colSpan={7} className="text-center py-40">
                 <div className="d-flex flex-column items-center gap-10">
@@ -291,7 +293,7 @@ const index = ({ filters = {} }) => {
               </td>
             </tr>
           ) : (
-            filteredNotifications.map((row) => (
+            !loading && filteredNotifications.map((row) => (
               <tr key={row.id}>
                 <td className="align-middle">{row.title}</td>
                 <td className="align-middle">{row.audience}</td>

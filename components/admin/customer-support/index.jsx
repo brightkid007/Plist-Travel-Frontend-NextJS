@@ -409,7 +409,16 @@ const index = () => {
             }} 
           />
         ) : (
-          <Conversation ticketId={selectedTicketId} />
+          <Conversation 
+            ticketId={selectedTicketId}
+            onStatusUpdated={(newStatus) => {
+              setTickets((prev) => prev.map((t) => 
+                t.conversation_id === selectedTicketId 
+                  ? { ...t, status: newStatus, last_updated: new Date().toISOString() } 
+                  : t
+              ));
+            }}
+          />
         )}
       </div>
 

@@ -1,4 +1,5 @@
 import { User, Inbox, ChevronRight } from "lucide-react";
+import { CircularProgress } from "@mui/material";
 
 const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelectTicket }) => {
   const formatDateTime = (dateString) => {
@@ -43,14 +44,6 @@ const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelec
     ? tickets.filter((t) => t.ticket_type?.toLowerCase().includes(filterType.toLowerCase()))
     : tickets;
 
-  if (loading) {
-    return (
-      <div className="overflow-scroll scroll-bar-1 pt-0 d-flex justify-center items-center py-40">
-        <div className="text-16 text-light-1">Loading tickets...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
       <table className="table-2 col-12">
@@ -67,7 +60,17 @@ const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelec
           </tr>
         </thead>
         <tbody>
-          {filteredTickets.length === 0 ? (
+          {loading && (
+            <tr>
+              <td colSpan={8} className="text-center py-20">
+                <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                  <CircularProgress size={20} thickness={5} />
+                  <span>Loading tickets...</span>
+                </div>
+              </td>
+            </tr>
+          )}
+          {!loading && filteredTickets.length === 0 ? (
             <tr>
               <td colSpan={8} className="text-center py-40">
                 <div className="d-flex flex-column items-center gap-10">
@@ -80,7 +83,7 @@ const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelec
               </td>
             </tr>
           ) : (
-            filteredTickets.map((row, index) => (
+            !loading && filteredTickets.map((row, index) => (
             <tr 
               key={index}
               onClick={() => onSelectTicket?.(row.conversation_id)}

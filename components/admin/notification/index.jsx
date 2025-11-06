@@ -172,7 +172,7 @@ const index = () => {
             )}
           </button>
           <Drawer anchor="right" open={openFilter} onClose={handleClose}>
-            <div className="w-400 rounded-left rounded-8 bg-white px-20 py-20 h-100 d-flex flex-column justify-between">
+            <div className="w-300 rounded-left rounded-8 bg-white px-20 py-20 h-100 d-flex flex-column justify-between">
               <div className="overflow-y-auto flex-grow-1">
                 <h2 className="text-20 fw-600 mb-20">Filter Notifications</h2>
                 <NotificationFilter filters={filters} onFilterChange={handleFilterChange} />
@@ -196,10 +196,10 @@ const index = () => {
         </div>
         <div className="col-auto">
           <button
-            className="button bg-dark-blue text-white px-20 py-10 rounded-8"
+            className="button bg-dark-blue text-white px-10 pr-15 py-10 rounded-8"
             onClick={() => setActiveTab("add")}
           >
-            <Add className="text-18 mr-10" /> Create New Notification
+            <Add className="text-18 mr-5" /> Create New Notification
           </button>
         </div>
       </div>
