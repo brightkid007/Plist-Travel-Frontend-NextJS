@@ -15,7 +15,7 @@ function Tenth() {
       }}
       className="relative w-[100%] mt-10 flex justify-center items-center"
     >
-      <div className="lg:p-10 sm:p-5 px-2 py-5 mt-6 w-[95%] lg:w-[73%] lg:mx-auto">
+      <div className="lg:p-10 sm: px-5 py-5 px-2 py-5 mt-6 w-[95%] lg:w-[73%] lg:mx-auto">
         <div>
           <h3 className="border border-blue-700 bg-gradient-to-r font-Ubuntu from-[#245BAA] to-[#0CA4C4] rounded-full text-white w-fit px-3 flex justify-center py-1 text-sm sm:text-base">
             TOURS AND Attractions

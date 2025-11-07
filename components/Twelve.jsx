@@ -6,7 +6,7 @@ function Twelve() {
   return (
     <>
       <div
-        className="lg:h-[468px] lg:mt-64 mt-16 md:p-10 p-5 bg-cover bg-center bg-no-repeat"
+        className="lg:h-[468px] lg:mt-64 mt-16 md:p-10  px-5 py-5 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url("/Images/twelve-BG.png")` }}
       >
         <div className="flex justify-between lg:flex-row flex-col lg:w-[80%] lg:mx-auto">

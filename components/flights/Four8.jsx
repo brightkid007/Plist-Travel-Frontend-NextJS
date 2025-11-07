@@ -5,7 +5,7 @@ import Image from "next/image";
 function Four8() {
   return (
     <div className="flex justify-center lg:mt-32 mt-12 bg-[#17B8CA] w-full">
-      <div className="w-[70%] md:p-10 p-5 rounded-xl flex lg:justify-between text-center lg:text-start gap-5 lg:flex-row flex-col">
+      <div className="w-[70%] md:p-10  px-5 py-5 rounded-xl flex lg:justify-between text-center lg:text-start gap-5 lg:flex-row flex-col">
         <div className="">
           <div>
             <h1 className="text-xl font-bold md:mt-10 mt-2 font-Bricolage text-white">

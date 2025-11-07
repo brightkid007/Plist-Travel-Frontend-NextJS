@@ -370,7 +370,7 @@ const Home = () => {
                 </div>
                 <span className="mt-20">
                   <button className="button -md bg-white fw-500 text-blue-1 text-12 rounded-8 col-auto mt-10 px-20 py-10">
-                    Become a vender
+                    Become a vendor
                   </button>
                 </span>
               </div>

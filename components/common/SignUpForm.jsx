@@ -9,7 +9,7 @@ const SignUpForm = () => {
   const accountType = [
     {
       id: 1,
-      name: "Vender",
+      name: "Vendor",
       description: "List your properties, tours, or services",
       icon: (
         <svg
@@ -151,7 +151,7 @@ const SignUpForm = () => {
   const [formType, setFormType] = useState(0);
   const formContentList = [
     <BasicSignUpForm accountType={accountType} setFormType={setFormType} />,
-    <VenderSignUpForm setFormType={setFormType} />,
+    <VendorSignUpForm setFormType={setFormType} />,
     <AgentSignUpForm setFormType={setFormType} />,
     <CustomerSignUpForm setFormType={setFormType} />,
   ];
@@ -230,7 +230,7 @@ const BasicSignUpForm = ({ accountType, setFormType }) => {
   );
 };
 
-const VenderSignUpForm = ({ setFormType }) => {
+const VendorSignUpForm = ({ setFormType }) => {
   return (
     <div className="row bg-white y-gap-20 rounded-22 border-light-1 shadow-1 px-30 py-20 mt-0">
       <div className="col-12 d-flex items-center">
@@ -267,7 +267,7 @@ const VenderSignUpForm = ({ setFormType }) => {
         />
       </div>
       <div className="col-12">
-        <div className="text-14 lh-1 fw-500">Business Name</div>
+        <div className="text-14 lh-1 fw-500">Business Type</div>
         <select className="form-select rounded-8 border-light px-15 justify-between fw-400 py-10 w-full text-15 mt-15">
           <option defaultValue>Select Business Type</option>
           <option value="properties">Properties</option>

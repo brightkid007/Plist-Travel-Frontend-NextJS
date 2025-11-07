@@ -18,13 +18,13 @@ const PERMISSION_STRUCTURE = [
     id: "user_management",
     label: "User Management",
     description: "Manage all users across the platform",
-    actions: { view: true, create: false, update: false, delete: false },
+    actions: { view: true, create: true, update: true, delete: true },
   },
   {
     id: "role_management",
     label: "Role Management",
     description: "Manage all Roles across the platform",
-    actions: { view: true, create: false, update: false, delete: false },
+    actions: { view: true, create: true, update: true, delete: true },
   },
   {
     id: "vendor_listing_management",
@@ -310,7 +310,7 @@ const index = () => {
                        </td>
                       <td className="align-middle">
                         <button
-                          className="border-0 bg-transparent p-5 cursor-pointer"
+                          className="border-0 bg-transparent  px-5 py-5 cursor-pointer"
                           onClick={(e) => handleMenuOpen(e, role)}
                         >
                           <Ellipsis size={16} />

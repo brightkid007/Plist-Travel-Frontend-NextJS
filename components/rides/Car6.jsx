@@ -5,7 +5,7 @@ import Image from "next/image";
 function Car6() {
   return (
     <div className="flex justify-center lg:mt-44 mt-16">
-      <div className="bg-[#7964D8] lg:w-full w-[96%] text-center lg:text-start lg:h-[437px] h-auto md:p-10 p-5 rounded-xl flex lg:justify-center gap-5 lg:flex-row flex-col lg:items-start items-center">
+      <div className="bg-[#7964D8] lg:w-full w-[96%] text-center lg:text-start lg:h-[437px] h-auto md:p-10  px-5 py-5 rounded-xl flex lg:justify-center gap-5 lg:flex-row flex-col lg:items-start items-center">
         <div className="lg:w-auto w-full">
           <div>
             <h1 className="text-xl lg:text-[38px] font-bold md:mt-10 mt-2 font-Bricolage text-white">

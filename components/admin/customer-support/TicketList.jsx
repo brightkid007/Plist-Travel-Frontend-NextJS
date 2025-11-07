@@ -111,8 +111,8 @@ const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelec
                     {
                       open: "bg-red-4 text-red-1",
                       in_progress: "bg-dark-blue text-white",
-                      resolved: "bg-light-2 text-dark-1",
-                      closed: "bg-green-4 text-green-1",
+                      closed: "bg-light-2 text-dark-1",
+                      resolved: "bg-green-4 text-green-2",
                     }[row.status?.toLowerCase()] || "bg-gray-4 text-gray-3"
                   }`}
                   style={{ whiteSpace: "nowrap", display: "inline-block" }}

@@ -2,9 +2,9 @@
 
 import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
+import { BookOpen, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Menu, MenuItem } from "@mui/material";
 import DashboardCard from "./components/DashboardCard";
 import { getTransactions, getPaymentAnalytics, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -31,8 +31,7 @@ const index = () => {
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [menuOpenIdx, setMenuOpenIdx] = useState(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const [menuAnchor, setMenuAnchor] = useState({});
   const [refundModalOpen, setRefundModalOpen] = useState(false);
   const [entryToRefund, setEntryToRefund] = useState(null);
   const [refunding, setRefunding] = useState(false);
@@ -98,15 +97,14 @@ const index = () => {
     load();
   }, []);
 
-  useEffect(() => {
-    const onDocClick = (e) => {
-      if (!e.target.closest('.finance-action-menu') && !e.target.closest('.finance-action-trigger')) {
-        setMenuOpenIdx(null);
-      }
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, []);
+  const handleMenuOpen = (event, entryId) => {
+    event.stopPropagation();
+    setMenuAnchor({ ...menuAnchor, [entryId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (entryId) => {
+    setMenuAnchor({ ...menuAnchor, [entryId]: null });
+  };
 
 
 
@@ -249,18 +247,46 @@ const index = () => {
                           {new Date(entry.date).toLocaleString()}
                         </div>
                       </td>
-                      <td className="align-middle position-relative">
-                        <span
-                          className="cursor-pointer finance-action-trigger"
-                          onClick={(e) => {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            setMenuPos({ top: rect.bottom + window.scrollY + 4, left: rect.right + window.scrollX - 150 });
-                            setMenuOpenIdx(menuOpenIdx === index ? null : index);
-                          }}
-                        >
-                          <Ellipsis size={16} />
-                        </span>
-                        {/* Dropdown rendered globally to avoid overflow/row hit issues */}
+                      <td className="align-middle">
+                        <div className="position-relative">
+                          <button
+                            className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                            onClick={(e) => handleMenuOpen(e, entry.id || index)}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          <Menu
+                            anchorEl={menuAnchor[entry.id || index]}
+                            open={Boolean(menuAnchor[entry.id || index])}
+                            onClose={() => handleMenuClose(entry.id || index)}
+                          >
+                            <MenuItem
+                              onClick={() => {
+                                const canRefund = hasPermission("financial_management", "update") && 
+                                                 entry?.status !== "Overdue" && 
+                                                 entry?.status !== "Refunded";
+                                if (!canRefund) {
+                                  if (!hasPermission("financial_management", "update")) {
+                                    toast.error("You don't have permission to refund transactions");
+                                  } else if (entry?.status === "Overdue" || entry?.status === "Refunded") {
+                                    toast.error(`Cannot refund ${entry?.status.toLowerCase()} transactions`);
+                                  }
+                                  handleMenuClose(entry.id || index);
+                                  return;
+                                }
+                                setEntryToRefund(entry);
+                                handleMenuClose(entry.id || index);
+                                setRefundModalOpen(true);
+                              }}
+                              disabled={!hasPermission("financial_management", "update") || 
+                                      entry?.status === "Overdue" || 
+                                      entry?.status === "Refunded"}
+                              className="text-blue-1"
+                            >
+                              Refund
+                            </MenuItem>
+                          </Menu>
+                        </div>
                       </td>
                     </tr>
                   ));
@@ -269,38 +295,6 @@ const index = () => {
             </table>
           </div>
         </div>
-        {menuOpenIdx !== null && (() => {
-          const currentEntry = entries[menuOpenIdx];
-          const canRefund = hasPermission("financial_management", "update") && 
-                           currentEntry?.status !== "Overdue" && 
-                           currentEntry?.status !== "Refunded";
-          return (
-            <div
-              className="position-fixed bg-white border-light rounded-8 shadow-3 finance-action-menu"
-              style={{ top: menuPos.top, left: menuPos.left, minWidth: 140, zIndex: 9999 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div
-                className={`text-14 px-10 py-5 ${canRefund ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
-                onClick={() => {
-                  if (!canRefund) {
-                    if (!hasPermission("financial_management", "update")) {
-                      toast.error("You don't have permission to refund transactions");
-                    } else if (currentEntry?.status === "Overdue" || currentEntry?.status === "Refunded") {
-                      toast.error(`Cannot refund ${currentEntry?.status.toLowerCase()} transactions`);
-                    }
-                    return;
-                  }
-                  setEntryToRefund(currentEntry);
-                  setMenuOpenIdx(null);
-                  setRefundModalOpen(true);
-                }}
-              >
-                Refund
-              </div>
-            </div>
-          );
-        })()}
 
         <DeleteConfirmationModal
           open={refundModalOpen}

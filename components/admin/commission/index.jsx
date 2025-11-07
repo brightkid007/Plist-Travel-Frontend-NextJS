@@ -205,7 +205,7 @@ const index = () => {
                   <th>Total Revenue</th>
                   <th>Total Commission</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  {/* <th>Action</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -276,10 +276,10 @@ const index = () => {
                           {entry.status}
                         </span>
                       </td>
-                      <td className="align-middle">
+                      {/* <td className="align-middle">
                         <div className="position-relative">
                           <button
-                            className="border-0 bg-transparent cursor-pointer p-5"
+                            className="border-0 bg-transparent cursor-pointer  px-5 py-5"
                             onClick={(e) => handleMenuOpen(e, entry.id)}
                           >
                             <MoreVertical size={16} />
@@ -312,7 +312,7 @@ const index = () => {
                             </MenuItem>
                           </MuiMenu>
                         </div>
-                      </td>
+                      </td> */}
                     </tr>
                     ))
                 )}

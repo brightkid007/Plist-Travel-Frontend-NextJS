@@ -5,7 +5,7 @@ import Image from "next/image";
 function Third7() {
   return (
     <div className="flex justify-center mt-14 lg:w-[82%] lg:mx-auto">
-      <div className="bg-[#DAECF0] lg:w-[82%] w-[90%] md:p-10 p-5 rounded-xl text-center lg:text-start flex lg:justify-between gap-5 lg:flex-row flex-col">
+      <div className="bg-[#DAECF0] lg:w-[82%] w-[90%] md:p-10  px-5 py-5 rounded-xl text-center lg:text-start flex lg:justify-between gap-5 lg:flex-row flex-col">
         <div>
           <div>
             <h1 className="text-xl font-bold md:mt-10 mt-2 font-Bricolage">

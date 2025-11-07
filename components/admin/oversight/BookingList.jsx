@@ -141,7 +141,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
                 <td className="align-middle">
                   <div className="position-relative">
                     <button
-                      className="border-0 bg-transparent cursor-pointer p-5"
+                      className="border-0 bg-transparent cursor-pointer  px-5 py-5"
                       onClick={(e) => handleMenuOpen(e, row.id)}
                     >
                       <MoreVertical size={16} />
