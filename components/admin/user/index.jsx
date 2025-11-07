@@ -479,7 +479,7 @@ const index = () => {
                       <td className="align-middle">
                         <div className="position-relative">
                           <button
-                            className="border-0 bg-transparent cursor-pointer  px-5 py-5"
+                            className="border-0 bg-transparent cursor-pointer px-5 py-5"
                             onClick={(e) => handleMenuOpen(e, user.id)}
                           >
                             <MoreVertical size={16} />

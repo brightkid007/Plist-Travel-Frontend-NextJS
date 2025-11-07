@@ -1,7 +1,7 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { Ellipsis, Plus, Edit2, Trash2, Menu, Eye } from "lucide-react";
+import { Ellipsis, Plus, Edit2, Trash2, Menu, Eye, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, Menu as MuiMenu, MenuItem, CircularProgress } from "@mui/material";
 import { Checkbox } from "@mui/material";
@@ -125,7 +125,7 @@ const index = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
   const [viewingRole, setViewingRole] = useState(null);
-  
+
   // Check if current user is Super Admin
   const isSuperAdmin = () => {
     if (!currentUser || currentUser.role !== "admin") return false;
@@ -287,13 +287,22 @@ const index = () => {
                         <div className="text-12 fw-500">{role.id}</div>
                       </td>
                       <td className="align-middle">
-                        {role.name}
-                        {role.is_system && (
-                          <span className="text-10 bg-blue-1 text-white px-10 py-5 mt-5 mb-5 rounded-16">System</span>
-                        )}
-                        <div className="text-light-1 text-12 mt-10">
-                          {role.description}
+                        <div className="mb-2">
+                          <div className="d-flex align-items-center gap-2 flex-wrap">
+                            <strong className="text-dark">{role.name}</strong>
+                            {role.is_system && (
+                              <span className="badge bg-primary d-inline-flex align-items-center gap-1">
+                                <Lock size={10} />
+                                System
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        {role.description && (
+                          <small className="text-muted d-block ps-2 border-start border-warning border-3">
+                            {role.description}
+                          </small>
+                        )}
                       </td>
                       <td className="align-middle">
                         <div className="text-14 fw-500 text-center">
@@ -303,14 +312,14 @@ const index = () => {
                       <td className="align-middle">
                         <div className="text-14 text-center">{role.user_count || 0}</div>
                       </td>
-                       <td className="align-middle">
-                         <div className="text-14 fw-500 text-center">
-                           {formatDateTime(role.created_at || role.createdAt)}
-                         </div>
-                       </td>
+                      <td className="align-middle">
+                        <div className="text-14 fw-500 text-center">
+                          {formatDateTime(role.created_at || role.createdAt)}
+                        </div>
+                      </td>
                       <td className="align-middle">
                         <button
-                          className="border-0 bg-transparent  px-5 py-5 cursor-pointer"
+                          className="border-0 bg-transparent px-5 py-5 cursor-pointer"
                           onClick={(e) => handleMenuOpen(e, role)}
                         >
                           <Ellipsis size={16} />
@@ -330,7 +339,7 @@ const index = () => {
         open={Boolean(menuAnchor)}
         onClose={handleMenuClose}
       >
-        <MenuItem 
+        <MenuItem
           disabled={!hasPermission("role_management", "view")}
           onClick={() => {
             if (hasPermission("role_management", "view")) {
@@ -340,7 +349,7 @@ const index = () => {
         >
           <Eye size={16} className="mr-10" /> View Permissions
         </MenuItem>
-        <MenuItem 
+        <MenuItem
           disabled={!hasPermission("role_management", "update") || (selectedRole && selectedRole.is_system)}
           onClick={() => {
             if (hasPermission("role_management", "update") && selectedRole && !selectedRole.is_system) {
@@ -350,7 +359,7 @@ const index = () => {
         >
           <Edit2 size={16} className="mr-10" /> Edit
         </MenuItem>
-        <MenuItem 
+        <MenuItem
           disabled={!hasPermission("role_management", "delete") || (selectedRole && selectedRole.is_system)}
           onClick={() => {
             if (hasPermission("role_management", "delete") && selectedRole && !selectedRole.is_system) {
@@ -402,8 +411,8 @@ const index = () => {
         fullWidth
       >
         <div className="px-20 py-20">
-          <PermissionsViewModal 
-            role={viewingRole} 
+          <PermissionsViewModal
+            role={viewingRole}
             onClose={() => {
               setPermissionsModalOpen(false);
               setViewingRole(null);
