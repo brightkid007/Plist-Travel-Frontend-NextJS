@@ -29,8 +29,8 @@ const index = () => {
   const [endDate, setEndDate] = useState(new DateObject());
   const [showFilters, setShowFilters] = useState(false);
   const [reportsFilter, setReportsFilter] = useState("category");
-  const [categoryFilter, setCategoryFilter] = useState("category");
-  const [subcategoryFilter, setSubcategoryFilter] = useState("subcategory");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [subcategoryFilter, setSubcategoryFilter] = useState("all");
   const [vendorFilter, setVendorFilter] = useState("all");
   const [agentFilter, setAgentFilter] = useState("all");
   const [customerTypeFilter, setCustomerTypeFilter] = useState("all");
@@ -54,25 +54,41 @@ const index = () => {
       try {
         setLoading(true);
 
+        // Map frontend filter values to backend enum values
+        const mapTypeToBackend = (type) => {
+          if (!type || type === "all") return undefined;
+          // Map property types to "property"
+          if (["hotel", "vacation", "venue", "spaces"].includes(type)) {
+            return "property";
+          }
+          // Map non-property types
+          if (["tour", "activity", "event"].includes(type)) {
+            return type;
+          }
+          // For other types like "ride", "flight", "travel-packages", return undefined
+          return undefined;
+        };
+
         const params = {
           startDate: startDate?.format?.("YYYY-MM-DD"),
           endDate: endDate?.format?.("YYYY-MM-DD"),
-          type: option,
+          type: mapTypeToBackend(option),
         };
 
         const filters = {
           limit: 10,
-          status: 'all',
-          type: option,
+          type: mapTypeToBackend(option),
           start_date: startDate?.format?.('YYYY-MM-DD'),
           end_date: endDate?.format?.('YYYY-MM-DD'),
-          category: categoryFilter,
-          subcategory: subcategoryFilter,
-          vendor: vendorFilter,
-          agent: agentFilter,
-          customer_type: customerTypeFilter,
-          channel: channelFilter,
+          category: categoryFilter !== "all" ? categoryFilter : undefined,
+          subcategory: subcategoryFilter !== "all" ? subcategoryFilter : undefined,
+          vendor: vendorFilter !== "all" ? vendorFilter : undefined,
+          agent: agentFilter !== "all" ? agentFilter : undefined,
+          customer_type: customerTypeFilter !== "all" ? customerTypeFilter : undefined,
+          channel: channelFilter !== "all" ? channelFilter : undefined,
         };
+        // Remove undefined values
+        Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
         const [paymentAn, bookingsRes] = await Promise.all([
           getPaymentAnalytics(),
           getAdminBookings(filters)
@@ -128,10 +144,25 @@ const index = () => {
   // Handle export data
   const handleExportData = async () => {
     try {
+      // Map frontend filter values to backend enum values
+      const mapTypeToBackend = (type) => {
+        if (!type || type === "all") return undefined;
+        // Map property types to "property"
+        if (["hotel", "vacation", "venue", "spaces"].includes(type)) {
+          return "property";
+        }
+        // Map non-property types
+        if (["tour", "activity", "event"].includes(type)) {
+          return type;
+        }
+        // For other types like "ride", "flight", "travel-packages", return undefined
+        return undefined;
+      };
+
       const params = {
         startDate: startDate.format("YYYY-MM-DD"),
         endDate: endDate.format("YYYY-MM-DD"),
-        type: option,
+        type: mapTypeToBackend(option),
         format: 'csv'
       };
 
@@ -301,13 +332,13 @@ const index = () => {
             <div className="col-sm-6">
               <label className="text-12 fw-500">Category</label>
               <select className="form-select rounded-4 border-light justify-between text-14 h-50 w-full text-14 mt-5" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-                <option value="category">Select Category</option>
+                <option value="all">All Categories</option>
               </select>
             </div>
             <div className="col-sm-6">
               <label className="text-12 fw-500">Subcategory</label>
               <select className="form-select rounded-4 border-light justify-between text-14 h-50 w-full text-14 mt-5" value={subcategoryFilter} onChange={(e) => setSubcategoryFilter(e.target.value)}>
-                <option value="subcategory">Select Subcategory</option>
+                <option value="all">All Subcategories</option>
               </select>
             </div>
             <div className="col-sm-6">

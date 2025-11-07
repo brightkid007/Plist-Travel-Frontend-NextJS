@@ -19,11 +19,26 @@ const Filter = ({ onFilterChange }) => {
 
       // Set new timer for debouncing
       debounceTimer.current = setTimeout(() => {
+        // Map frontend filter values to backend enum values
+        const mapTypeToBackend = (type) => {
+          if (!type || type === "all") return undefined;
+          // Map property types to "property"
+          if (["hotel", "vacation", "venue", "spaces"].includes(type)) {
+            return "property";
+          }
+          // Map non-property types
+          if (["tour", "activity", "event"].includes(type)) {
+            return type;
+          }
+          // For other types like "ride", "flight", "travel-packages", return undefined or handle as needed
+          return undefined;
+        };
+
         const filters = {
           status: status !== "all" ? status : undefined,
-          category: category !== "all" ? category : undefined,
-          subcategory: subcategory !== "all" ? subcategory : undefined,
-          type: type !== "all" ? type : undefined,
+          category: category !== "all" && !isNaN(parseInt(category, 10)) ? parseInt(category, 10) : undefined,
+          subcategory: subcategory !== "all" && !isNaN(parseInt(subcategory, 10)) ? parseInt(subcategory, 10) : undefined,
+          type: mapTypeToBackend(type),
           date_from: startDate ? startDate.format("YYYY-MM-DD") : undefined,
           date_to: endDate ? endDate.format("YYYY-MM-DD") : undefined,
         };
