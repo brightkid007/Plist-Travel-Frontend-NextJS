@@ -40,11 +40,9 @@ const createServiceInstance = (serviceConfig) => {
           break;
         case 401:
           message = error.response?.data || "Invalid credentials or unauthorized access";
-          if (error.response?.data?.message == "Token expired. Please login again.") {
-            clearAuthorization();
-            localStorage.removeItem("authToken");
-            localStorage.removeItem("authUser");
-          }
+          clearAuthorization();
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("authUser");
           break;
         case 403:
           message = error.response?.data || "Access forbidden. Insufficient permissions";
