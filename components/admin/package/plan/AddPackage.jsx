@@ -82,7 +82,7 @@ const index = () => {
           setTrialDays(String(plan.trial_days));
         }
       } catch (e) {
-        toast.error(e?.response?.data?.message || e?.message || "Failed to load plan");
+        toast.error(e?.message || "Failed to load plan");
         router.push("/admin/package/plan");
       } finally {
         setLoading(false);
@@ -179,7 +179,7 @@ const index = () => {
       }
       router.push("/admin/package/plan");
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to create plan");
+      toast.error(e?.message || "Failed to create plan");
     } finally {
       setSaving(false);
     }

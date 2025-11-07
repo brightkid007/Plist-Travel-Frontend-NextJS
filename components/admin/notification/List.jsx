@@ -7,10 +7,12 @@ import FormInput from "@/components/common/form/FormInput";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const index = ({ filters = {} }) => {
+  const { hasPermission } = usePermissions();
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [notificationToDelete, setNotificationToDelete] = useState(null);
@@ -47,7 +49,7 @@ const index = ({ filters = {} }) => {
       }));
       setNotifications(mapped);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load notifications");
+      toast.error(error?.message || "Failed to load notifications");
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -55,6 +57,10 @@ const index = ({ filters = {} }) => {
   };
 
   const handleDeleteClick = (id) => {
+    if (!hasPermission("notification_management", "delete")) {
+      toast.error("You don't have permission to delete notifications");
+      return;
+    }
     setNotificationToDelete(id);
     setDeleteDialogOpen(true);
   };
@@ -69,7 +75,7 @@ const index = ({ filters = {} }) => {
       setDeleteDialogOpen(false);
       setNotificationToDelete(null);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to delete notification");
+      toast.error(error?.message || "Failed to delete notification");
     }
   };
 
@@ -79,6 +85,10 @@ const index = ({ filters = {} }) => {
   };
 
   const handleEditClick = async (id) => {
+    if (!hasPermission("notification_management", "update")) {
+      toast.error("You don't have permission to edit notifications");
+      return;
+    }
     try {
       const response = await getNotificationById(id);
       const notificationData = response?.notification || response?.data?.notification || response?.data || response || {};
@@ -96,7 +106,7 @@ const index = ({ filters = {} }) => {
       setScheduleLater(hasScheduledDate);
       setEditDialogOpen(true);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load notification");
+      toast.error(error?.message || "Failed to load notification");
     }
   };
 
@@ -138,13 +148,17 @@ const index = ({ filters = {} }) => {
       handleEditCancel();
       loadNotifications();
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to update notification");
+      toast.error(error?.message || "Failed to update notification");
     } finally {
       setSaving(false);
     }
   };
 
   const handleSend = async (id) => {
+    if (!hasPermission("notification_management", "update")) {
+      toast.error("You don't have permission to send notifications");
+      return;
+    }
     try {
       // Find the notification in the current list to validate it
       const notification = notifications.find(n => n.id === id);
@@ -171,7 +185,7 @@ const index = ({ filters = {} }) => {
       toast.success(message);
       loadNotifications();
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to send notification");
+      toast.error(error?.message || "Failed to send notification");
     }
   };
 
@@ -318,23 +332,38 @@ const index = ({ filters = {} }) => {
                     {row.status?.toLowerCase() === "draft" && (
                       <button
                         onClick={() => handleSend(row.id)}
-                        className="border-light rounded-8 px-10 py-10 cursor-pointer mr-5"
+                        className={`border-light rounded-8 px-10 py-10 mr-5 ${
+                          hasPermission("notification_management", "update")
+                            ? "cursor-pointer"
+                            : "cursor-not-allowed opacity-50"
+                        }`}
                         title="Send notification"
+                        disabled={!hasPermission("notification_management", "update")}
                       >
                         <Send size={14} className="text-dark-1" />
                       </button>
                     )}
                     <button
                       onClick={() => handleEditClick(row.id)}
-                      className="border-light rounded-8 px-10 py-10 cursor-pointer mr-5"
+                      className={`border-light rounded-8 px-10 py-10 mr-5 ${
+                        hasPermission("notification_management", "update")
+                          ? "cursor-pointer"
+                          : "cursor-not-allowed opacity-50"
+                      }`}
                       title="Edit notification"
+                      disabled={!hasPermission("notification_management", "update")}
                     >
                       <Edit size={14} className="text-dark-1" />
                     </button>
                     <button
                       onClick={() => handleDeleteClick(row.id)}
-                      className="border-light rounded-8 px-10 py-10 cursor-pointer"
+                      className={`border-light rounded-8 px-10 py-10 ${
+                        hasPermission("notification_management", "delete")
+                          ? "cursor-pointer"
+                          : "cursor-not-allowed opacity-50"
+                      }`}
                       title="Delete notification"
+                      disabled={!hasPermission("notification_management", "delete")}
                     >
                       <Trash2 size={14} className="text-red-1" />
                     </button>

@@ -13,6 +13,7 @@ import { getConversations, createConversation, getAdminUsers } from "@/helpers/b
 import { toast } from "react-toastify";
 import FormInput from "@/components/common/form/FormInput";
 import DatePicker, { DateObject } from "react-multi-date-picker";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // Ticket Filter Component
 const TicketFilter = ({ filters, onFilterChange }) => {
@@ -115,12 +116,13 @@ const TicketFilter = ({ filters, onFilterChange }) => {
 };
 
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [openFilter, setOpenFilter] = useState(false);
   const [openNewTicket, setOpenNewTicket] = useState(false);
   const [cards, setCards] = useState(data);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [tickets, setTickets] = useState([]);
-  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [loadingTickets, setLoadingTickets] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingTicket, setLoadingTicket] = useState(false);
@@ -208,7 +210,8 @@ const index = () => {
         data[2],
         { ...data[3], amount: resolved > 0 ? `${Math.round((resolved / total) * 100)}%` : "0%" },
       ]);
-    } catch (_) {
+    } catch (error) {
+      toast.error(error?.message || "Failed to load conversations");
       setTickets([]);
       // keep defaults for cards
     } finally {
@@ -230,7 +233,7 @@ const index = () => {
           const users = res?.users || res?.data?.users || res?.data || res || [];
           setCustomers(users);
         } catch (error) {
-          toast.error("Failed to load customers");
+          toast.error(error?.message || "Failed to load customers");
         } finally {
           setLoadingCustomers(false);
         }
@@ -240,6 +243,10 @@ const index = () => {
   }, [openNewTicket]);
 
   const handleCreateTicket = async () => {
+    if (!hasPermission("customer_support", "create")) {
+      toast.error("You don't have permission to create tickets");
+      return;
+    }
     if (!formData.user_list) {
       toast.error("Please select a customer");
       return;
@@ -264,7 +271,7 @@ const index = () => {
       // Refresh conversations and tickets
       await loadConversations();
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to create ticket");
+      toast.error(error?.message || "Failed to create ticket");
     } finally {
       setLoadingTicket(false);
     }
@@ -376,6 +383,11 @@ const index = () => {
           <button 
             className="button bg-dark-blue text-white px-20 py-10 rounded-8"
             onClick={() => setOpenNewTicket(true)}
+            disabled={!hasPermission("customer_support", "create")}
+            style={{
+              opacity: !hasPermission("customer_support", "create") ? 0.5 : 1,
+              cursor: !hasPermission("customer_support", "create") ? "not-allowed" : "pointer",
+            }}
           >
             <ChatBubbleOutline className="mr-10 text-18" /> New Ticket
           </button>

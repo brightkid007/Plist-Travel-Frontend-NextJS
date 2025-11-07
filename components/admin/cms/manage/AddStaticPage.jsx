@@ -59,7 +59,7 @@ const index = () => {
       toast.success("Page created");
       router.push("/admin/cms");
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to create page");
+      toast.error(error?.message || "Failed to create page");
     } finally {
       setSaving(false);
     }

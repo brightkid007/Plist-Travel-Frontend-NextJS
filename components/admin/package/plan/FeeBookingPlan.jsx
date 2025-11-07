@@ -1,10 +1,10 @@
 import svgIcon from "@/components/data/svgIcon";
 import CheckIcon from "@mui/icons-material/Check";
 import { green } from "@mui/material/colors";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Package } from "lucide-react";
 import { CircularProgress } from "@mui/material";
 
-const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDelete = () => { } }) => {
+const FeeBookingPlan = ({ plans = [], loading = false, hasPermission = () => false, onEdit = () => { }, onDelete = () => { } }) => {
   return (
     <div className="bg-white rounded-8 border-light shadow-4 py-30 px-20">
       <div className="row y-gap-20 x-gap-20">
@@ -23,9 +23,10 @@ const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDel
             </div>
           )}
           {!loading && plans.length === 0 ? (
-            <>
-              <div className="text-14 text-light-1 mt-20">No fee plans found.</div>
-            </>
+            <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1 mt-20 py-30">
+              <Package size={32} className="text-light-1 mb-5" />
+              <span>No fee plans found</span>
+            </div>
           ) : (
             <div className="row y-gap-20 mt-20 w-100">
               {plans.map((p) => {
@@ -55,8 +56,24 @@ const FeeBookingPlan = ({ plans = [], loading = false, onEdit = () => { }, onDel
                     </div>
                     <div className="d-flex items-center justify-end gap-2 mt-10">
                       <span className="text-12 fw-500 text-white bg-green-3 rounded-100 px-10">{p.status || 'Active'}</span>
-                      <Edit size={16} className="text-light-1 cursor-pointer" onClick={() => onEdit(p.id)} />
-                      <Trash size={16} className="text-light-1 cursor-pointer" onClick={() => onDelete(p.id)} />
+                      <Edit 
+                        size={16} 
+                        className={`${hasPermission("package_management", "update") ? "text-light-1 cursor-pointer" : "text-light-1 cursor-not-allowed opacity-50"}`}
+                        onClick={() => {
+                          if (hasPermission("package_management", "update")) {
+                            onEdit(p.id);
+                          }
+                        }}
+                      />
+                      <Trash 
+                        size={16} 
+                        className={`${hasPermission("package_management", "delete") ? "text-light-1 cursor-pointer" : "text-light-1 cursor-not-allowed opacity-50"}`}
+                        onClick={() => {
+                          if (hasPermission("package_management", "delete")) {
+                            onDelete(p.id);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
                 </div>

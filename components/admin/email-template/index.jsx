@@ -9,11 +9,13 @@ import { MailOutline } from "@mui/icons-material";
 import { getEmailTemplates, deleteEmailTemplate } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [openFilter, setOpenFilter] = useState(false);
   const [email_templates, setEmail_templates] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const handleClose = () => {
     setOpenFilter(false);
@@ -84,7 +86,7 @@ const index = () => {
       }));
       setEmail_templates(mapped);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load email templates");
+      toast.error(error?.message || "Failed to load email templates");
       setEmail_templates([]);
     } finally {
       setLoading(false);
@@ -92,6 +94,10 @@ const index = () => {
   };
 
   const handleDeleteClick = (id, name) => {
+    if (!hasPermission("email_template", "delete")) {
+      toast.error("You don't have permission to delete email templates");
+      return;
+    }
     setItemToDelete({ id, name });
     setDeleteModalOpen(true);
   };
@@ -107,7 +113,7 @@ const index = () => {
       setDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to delete email template");
+      toast.error(error?.message || "Failed to delete email template");
     } finally {
       setDeleting(false);
     }
@@ -266,6 +272,11 @@ const index = () => {
           <button
             className="button bg-blue-1 text-white px-15 fw-400 py-10 rounded-8"
             onClick={() => router.push("/admin/email-template/add")}
+            disabled={!hasPermission("email_template", "create")}
+            style={{
+              opacity: !hasPermission("email_template", "create") ? 0.5 : 1,
+              cursor: !hasPermission("email_template", "create") ? "not-allowed" : "pointer",
+            }}
           >
             New Email Template
           </button>
@@ -322,9 +333,12 @@ const index = () => {
                 {!loading && filteredTemplates.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-40">
-                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
-                        <MailX size={18} />
-                        <span>{searchTerm ? "No templates found matching your search." : "No email templates found."}</span>
+                      <div className="d-flex flex-column items-center justify-center gap-10">
+                        <MailX size={32} className="text-light-1 mb-5" />
+                        <div className="text-16 text-light-1 fw-500">No email templates found</div>
+                        <div className="text-14 text-light-1">
+                          {searchTerm ? "Try a different search term." : "Create your first email template to get started."}
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -344,24 +358,32 @@ const index = () => {
                         <div className="d-flex items-center justify-end">
                           <Eye
                             size={18}
-                            className="cursor-pointer mr-5"
+                            className={`mr-5 ${hasPermission("email_template", "view") ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
                             onClick={() => {
-                              setPreview(row);
-                              handleOpenModal();
+                              if (hasPermission("email_template", "view")) {
+                                setPreview(row);
+                                handleOpenModal();
+                              } else {
+                                toast.error("You don't have permission to view email templates");
+                              }
                             }}
                             title="Preview template"
                           />
                           <Edit
                             size={18}
-                            className="cursor-pointer text-blue-1 mr-5"
+                            className={`mr-5 ${hasPermission("email_template", "update") ? "cursor-pointer text-blue-1" : "cursor-not-allowed opacity-50 text-light-1"}`}
                             onClick={() => {
-                              router.push(`/admin/email-template/add?edit=${row.id}`);
+                              if (hasPermission("email_template", "update")) {
+                                router.push(`/admin/email-template/add?edit=${row.id}`);
+                              } else {
+                                toast.error("You don't have permission to edit email templates");
+                              }
                             }}
                             title="Edit template"
                           />
                           <Trash2
                             size={18}
-                            className="cursor-pointer text-red-1"
+                            className={`${hasPermission("email_template", "delete") ? "cursor-pointer text-red-1" : "cursor-not-allowed opacity-50 text-light-1"}`}
                             onClick={() => handleDeleteClick(row.id, row.name)}
                             title="Delete template"
                           />

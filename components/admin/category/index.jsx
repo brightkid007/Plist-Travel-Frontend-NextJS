@@ -7,9 +7,11 @@ import { Dialog } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { ListingAPIClient } from "@/helpers/api_helper";
 import { toast } from "react-toastify";
+import { usePermissions } from "@/hooks/usePermissions";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("category");
   const [showModal, setShowModal] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -169,7 +171,7 @@ const index = () => {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Export failed", err);
-      toast.error("Failed to export listings");
+      toast.error(err?.message || "Failed to export listings");
     }
   };
 
@@ -347,8 +349,17 @@ const index = () => {
 
         <div className="col-auto ms-auto">
           <button
-            className="button bg-blue-1 text-white px-15 fw-400 py-10 rounded-8"
-            onClick={() => setShowModal(true)}
+            className={`button px-15 fw-400 py-10 rounded-8 ${
+              hasPermission("category_management", "create")
+                ? "bg-blue-1 text-white"
+                : "bg-light-2 text-light-1 cursor-not-allowed opacity-50"
+            }`}
+            onClick={() => {
+              if (hasPermission("category_management", "create")) {
+                setShowModal(true);
+              }
+            }}
+            disabled={!hasPermission("category_management", "create")}
           >
             <Plus size={20} /> Add
           </button>
@@ -485,14 +496,30 @@ const index = () => {
                         </td>
                         <td className="align-middle">
                           <span 
-                            className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" 
-                            onClick={() => handleEdit(item)}
+                            className={`text-12 border border-primary fw-500 rounded-4 px-10 ${
+                              hasPermission("category_management", "update")
+                                ? "text-blue-1 cursor-pointer"
+                                : "text-light-1 cursor-not-allowed opacity-50"
+                            }`}
+                            onClick={() => {
+                              if (hasPermission("category_management", "update")) {
+                                handleEdit(item);
+                              }
+                            }}
                           >
                             Edit
                           </span>
                           <span 
-                            className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
-                            onClick={() => handleDeleteClick(item.id, item.name)}
+                            className={`text-12 border border-danger fw-500 rounded-4 px-10 mx-1 ${
+                              hasPermission("category_management", "delete")
+                                ? "text-red-2 cursor-pointer"
+                                : "text-light-1 cursor-not-allowed opacity-50"
+                            }`}
+                            onClick={() => {
+                              if (hasPermission("category_management", "delete")) {
+                                handleDeleteClick(item.id, item.name);
+                              }
+                            }}
                           >
                             Delete
                           </span>
@@ -532,14 +559,30 @@ const index = () => {
                         </td>
                         <td className="align-middle">
                           <span 
-                            className="text-12 border border-primary text-blue-1 fw-500 rounded-4 px-10 cursor-pointer" 
-                            onClick={() => handleEdit(item)}
+                            className={`text-12 border border-primary fw-500 rounded-4 px-10 ${
+                              hasPermission("category_management", "update")
+                                ? "text-blue-1 cursor-pointer"
+                                : "text-light-1 cursor-not-allowed opacity-50"
+                            }`}
+                            onClick={() => {
+                              if (hasPermission("category_management", "update")) {
+                                handleEdit(item);
+                              }
+                            }}
                           >
                             Edit
                           </span>
                           <span 
-                            className="text-12 border border-danger text-red-2 fw-500 rounded-4 px-10 cursor-pointer mx-1"
-                            onClick={() => handleDeleteClick(item.id, item.name)}
+                            className={`text-12 border border-danger fw-500 rounded-4 px-10 mx-1 ${
+                              hasPermission("category_management", "delete")
+                                ? "text-red-2 cursor-pointer"
+                                : "text-light-1 cursor-not-allowed opacity-50"
+                            }`}
+                            onClick={() => {
+                              if (hasPermission("category_management", "delete")) {
+                                handleDeleteClick(item.id, item.name);
+                              }
+                            }}
                           >
                             Delete
                           </span>

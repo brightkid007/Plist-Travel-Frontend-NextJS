@@ -154,7 +154,7 @@ const index = () => {
       }
       router.push("/admin/email-template");
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || `Failed to ${isEditMode ? "update" : "create"} email template`);
+      toast.error(error?.message || `Failed to ${isEditMode ? "update" : "create"} email template`);
     } finally {
       setLoading(false);
     }

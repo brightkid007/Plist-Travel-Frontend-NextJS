@@ -39,7 +39,7 @@ const createServiceInstance = (serviceConfig) => {
           message = "Internal Server Error";
           break;
         case 401:
-          message = error.response?.data?.message || "Invalid credentials or unauthorized access";
+          message = error.response?.data || "Invalid credentials or unauthorized access";
           if (error.response?.data?.message == "Token expired. Please login again.") {
             clearAuthorization();
             localStorage.removeItem("authToken");
@@ -47,19 +47,19 @@ const createServiceInstance = (serviceConfig) => {
           }
           break;
         case 403:
-          message = error.response?.data?.message || "Access forbidden. Insufficient permissions";
+          message = error.response?.data || "Access forbidden. Insufficient permissions";
           break;
         case 404:
-          message = error.response?.data?.message || "Sorry! the data you are looking for could not be found";
+          message = error.response?.data || "Sorry! the data you are looking for could not be found";
           break;
         case 422:
-          message = error.response?.data?.message || "Validation error";
+          message = error.response?.data || "Validation error";
           break;
         case 429:
-          message = error.response?.data?.message || "Too many requests. Please try again later";
+          message = error.response?.data || "Too many requests. Please try again later";
           break;
         default:
-          message = error.response?.data?.message || error.message || "An error occurred";
+          message = error.response?.data || error.message || "An error occurred";
       }
       return Promise.reject(message);
     }

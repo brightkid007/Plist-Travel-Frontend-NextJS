@@ -4,13 +4,16 @@ import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
 import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
 import DashboardCard from "./components/DashboardCard";
 import { getTransactions, getPaymentAnalytics, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
   const router = useRouter();
+  const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("all");
   const [showModal, setShowModal] = useState(false);
 
@@ -27,6 +30,7 @@ const index = () => {
 
 
   const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [menuOpenIdx, setMenuOpenIdx] = useState(null);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
   const [refundModalOpen, setRefundModalOpen] = useState(false);
@@ -57,15 +61,16 @@ const index = () => {
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error('Failed to export data');
+      toast.error(e?.message || 'Failed to export data');
     }
   };
 
   const load = async () => {
     try {
+      setLoading(true);
       const [txRes, anRes] = await Promise.all([getTransactions(), getPaymentAnalytics()]);
       const an = anRes?.data || anRes || {};
-      const list = txRes?.transactions || txRes?.data?.transactions || txRes?.data || res || [];
+      const list = txRes?.transactions || txRes?.data?.transactions || txRes?.data || [];
       const mapped = list.map((t) => ({
         id: t.id,
         invoice: t.invoice_number || t.reference_id || '-', 'customer': t.customer_name || '-',
@@ -82,8 +87,10 @@ const index = () => {
         { title: 'Agent Wallet Balance', amount: `$${Number(an.agent_wallet_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, improve: '', icon: '/img/dashboard/icons/4.svg', description: 'Total wallet balance of all agents' },
       ]);
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || 'Failed to load transactions');
+      toast.error(e?.message || 'Failed to load transactions');
       setEntries([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -184,13 +191,36 @@ const index = () => {
                 </tr>
               </thead>
               <tbody>
-                {entries
-                  .filter((item) => {
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-20">
+                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <CircularProgress size={24} />
+                        <span>Loading transactions...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (() => {
+                  const filteredEntries = entries.filter((item) => {
                     return activeTab === "all"
                       ? true
                       : item.status.toLowerCase() === activeTab;
-                  })
-                  .map((entry, index) => (
+                  });
+                  
+                  if (filteredEntries.length === 0) {
+                    return (
+                      <tr>
+                        <td colSpan="6" className="text-center py-20">
+                          <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                            <BookOpen size={32} className="text-light-1 mb-5" />
+                            <span>No transactions found</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+                  
+                  return filteredEntries.map((entry, index) => (
                     <tr key={index}>
                       <td className="align-middle text-12 lh-16 fw-500">
                         {entry.invoice}
@@ -233,29 +263,44 @@ const index = () => {
                         {/* Dropdown rendered globally to avoid overflow/row hit issues */}
                       </td>
                     </tr>
-                  ))}
+                  ));
+                })()}
               </tbody>
             </table>
           </div>
         </div>
-        {menuOpenIdx !== null && (
-          <div
-            className="position-fixed bg-white border-light rounded-8 shadow-3 finance-action-menu"
-            style={{ top: menuPos.top, left: menuPos.left, minWidth: 140, zIndex: 9999 }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        {menuOpenIdx !== null && (() => {
+          const currentEntry = entries[menuOpenIdx];
+          const canRefund = hasPermission("financial_management", "update") && 
+                           currentEntry?.status !== "Overdue" && 
+                           currentEntry?.status !== "Refunded";
+          return (
             <div
-              className="text-14 px-10 py-5 cursor-pointer"
-              onClick={() => {
-                setEntryToRefund(entries[menuOpenIdx]);
-                setMenuOpenIdx(null);
-                setRefundModalOpen(true);
-              }}
+              className="position-fixed bg-white border-light rounded-8 shadow-3 finance-action-menu"
+              style={{ top: menuPos.top, left: menuPos.left, minWidth: 140, zIndex: 9999 }}
+              onClick={(e) => e.stopPropagation()}
             >
-              Refund
+              <div
+                className={`text-14 px-10 py-5 ${canRefund ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                onClick={() => {
+                  if (!canRefund) {
+                    if (!hasPermission("financial_management", "update")) {
+                      toast.error("You don't have permission to refund transactions");
+                    } else if (currentEntry?.status === "Overdue" || currentEntry?.status === "Refunded") {
+                      toast.error(`Cannot refund ${currentEntry?.status.toLowerCase()} transactions`);
+                    }
+                    return;
+                  }
+                  setEntryToRefund(currentEntry);
+                  setMenuOpenIdx(null);
+                  setRefundModalOpen(true);
+                }}
+              >
+                Refund
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         <DeleteConfirmationModal
           open={refundModalOpen}
@@ -273,7 +318,7 @@ const index = () => {
               setEntryToRefund(null);
               load();
             } catch (e) {
-              toast.error(e?.response?.data?.message || e?.message || 'Failed to refund');
+              toast.error(e?.message || 'Failed to refund');
             } finally {
               setRefunding(false);
             }

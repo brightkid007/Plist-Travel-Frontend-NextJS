@@ -153,6 +153,22 @@ export const getUserRoles = () => {
 // Assign role to user
 export const assignUserRole = (id, data) => AuthAPIClient.update(`/users/${id}`, { role: data.role });
 
+// ROLE MANAGEMENT
+// Get all admin roles
+export const getAdminRoles = (params) => AuthAPIClient.get("/admin/roles", params);
+
+// Get role by ID
+export const getAdminRoleById = (id) => AuthAPIClient.get(`/admin/roles/${id}`);
+
+// Create new role
+export const createAdminRole = (data) => AuthAPIClient.create("/admin/roles", data);
+
+// Update role
+export const updateAdminRole = (id, data) => AuthAPIClient.update(`/admin/roles/${id}`, data);
+
+// Delete role
+export const deleteAdminRole = (id) => AuthAPIClient.delete(`/admin/roles/${id}`);
+
 // BOOKING MANAGEMENT
 // Get all bookings (admin) - using BookingAPIClient
 export const getAdminBookings = (params) => BookingAPIClient.get(url.GET_ADMIN_BOOKINGS, params);
@@ -225,14 +241,23 @@ export const updateAdminCategory = (id, data) => api.update(`${url.UPDATE_ADMIN_
 export const deleteAdminCategory = (id) => api.delete(`${url.DELETE_ADMIN_CATEGORY}/${id}`);
 
 // COMMISSION MANAGEMENT
-// Get commission settings
-export const getAdminCommissions = (params) => api.get(url.GET_ADMIN_COMMISSIONS, params);
+// Get all commissions
+export const getAdminCommissions = (params) => PricingAPIClient.get(url.GET_ADMIN_COMMISSIONS, params);
 
-// Update commission rate
-export const updateCommissionRate = (id, data) => api.update(`${url.UPDATE_COMMISSION_RATE}/${id}`, data);
+// Get commission by ID
+export const getAdminCommissionById = (id) => PricingAPIClient.get(`${url.GET_ADMIN_COMMISSIONS}/${id}`);
 
-// Get commission analytics
-export const getCommissionAnalytics = (params) => api.get(url.GET_COMMISSION_ANALYTICS, params);
+// Create commission
+export const createAdminCommission = (data) => PricingAPIClient.post(url.GET_ADMIN_COMMISSIONS, data);
+
+// Update commission
+export const updateAdminCommission = (id, data) => PricingAPIClient.put(`${url.GET_ADMIN_COMMISSIONS}/${id}`, data);
+
+// Delete commission
+export const deleteAdminCommission = (id) => PricingAPIClient.delete(`${url.GET_ADMIN_COMMISSIONS}/${id}`);
+
+// Update commission status (activate/deactivate)
+export const updateCommissionStatus = (id, is_active) => PricingAPIClient.patch(`${url.GET_ADMIN_COMMISSIONS}/${id}/status`, { is_active });
 
 // FINANCIAL MANAGEMENT
 // Get all transactions (admin)

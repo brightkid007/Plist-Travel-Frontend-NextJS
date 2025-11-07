@@ -64,7 +64,7 @@ const NotificationComposer = ({ onSuccess }) => {
       setScheduleLater(false);
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to save notification");
+      toast.error(error?.message || "Failed to save notification");
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,7 @@ const NotificationComposer = ({ onSuccess }) => {
       setScheduleLater(false);
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to send notification");
+      toast.error(error?.message || "Failed to send notification");
     } finally {
       setLoading(false);
     }

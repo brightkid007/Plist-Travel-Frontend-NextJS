@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { MoreVertical, Trash2, CheckCircle2, XCircle } from "lucide-react";
-import { Menu, MenuItem } from "@mui/material";
+import { MoreVertical, Trash2, CheckCircle2, XCircle, Calendar } from "lucide-react";
+import { Menu, MenuItem, CircularProgress } from "@mui/material";
 import { useState } from "react";
 
-const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, actionLoading = false }) => {
+const BookingList = ({ bookings = [], loading = false, hasPermission = () => false, onDelete, onAccept, onReject, onRefund, actionLoading = false }) => {
   const [menuAnchor, setMenuAnchor] = useState({});
   const [actionOpenIndex, setActionOpenIndex] = useState(null);
 
@@ -70,10 +70,22 @@ const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, ac
           </tr>
         </thead>
         <tbody>
-          {rows.length === 0 ? (
+          {loading ? (
             <tr>
-              <td colSpan={11} className="text-center py-40">
-                <div className="text-16 text-light-1">No Booking is existing.</div>
+              <td colSpan={11} className="text-center py-20">
+                <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                  <CircularProgress size={24} />
+                  <span>Loading bookings...</span>
+                </div>
+              </td>
+            </tr>
+          ) : rows.length === 0 ? (
+            <tr>
+              <td colSpan={11} className="text-center py-20">
+                <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                  <Calendar size={32} className="text-light-1 mb-5" />
+                  <span>No bookings found</span>
+                </div>
               </td>
             </tr>
           ) : (
@@ -142,10 +154,12 @@ const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, ac
                       {onAccept && row.originalStatus === "pending" && (
                         <MenuItem
                           onClick={() => {
-                            onAccept(row.id, row.name);
-                            handleMenuClose(row.id);
+                            if (hasPermission("booking_oversight", "update")) {
+                              onAccept(row.id, row.name);
+                              handleMenuClose(row.id);
+                            }
                           }}
-                          disabled={actionLoading}
+                          disabled={actionLoading || !hasPermission("booking_oversight", "update")}
                           className="text-green-1"
                         >
                           <CheckCircle2 size={16} className="mr-10" />
@@ -155,10 +169,12 @@ const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, ac
                       {onReject && (row.originalStatus === "pending" || row.originalStatus === "confirmed") && (
                         <MenuItem
                           onClick={() => {
-                            onReject(row.id, row.name);
-                            handleMenuClose(row.id);
+                            if (hasPermission("booking_oversight", "update")) {
+                              onReject(row.id, row.name);
+                              handleMenuClose(row.id);
+                            }
                           }}
-                          disabled={actionLoading}
+                          disabled={actionLoading || !hasPermission("booking_oversight", "update")}
                           className="text-yellow-3"
                         >
                           <XCircle size={16} className="mr-10" />
@@ -168,10 +184,12 @@ const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, ac
                       {onRefund && row.transactionId && (row.originalStatus === "confirmed" || row.originalStatus === "cancelled") && (
                         <MenuItem
                           onClick={() => {
-                            onRefund(row.id, row.name, row.transactionId);
-                            handleMenuClose(row.id);
+                            if (hasPermission("booking_oversight", "update")) {
+                              onRefund(row.id, row.name, row.transactionId);
+                              handleMenuClose(row.id);
+                            }
                           }}
-                          disabled={actionLoading || row.paid === "refunded"}
+                          disabled={actionLoading || row.paid === "refunded" || !hasPermission("booking_oversight", "update")}
                           className="text-blue-1"
                         >
                           Refund
@@ -180,10 +198,12 @@ const BookingList = ({ bookings = [], onDelete, onAccept, onReject, onRefund, ac
                       {onDelete && (
                         <MenuItem
                           onClick={() => {
-                            onDelete(row.id, row.name);
-                            handleMenuClose(row.id);
+                            if (hasPermission("booking_oversight", "delete")) {
+                              onDelete(row.id, row.name);
+                              handleMenuClose(row.id);
+                            }
                           }}
-                          disabled={actionLoading}
+                          disabled={actionLoading || !hasPermission("booking_oversight", "delete")}
                           className="text-red-2"
                         >
                           <Trash2 size={16} className="mr-10" />

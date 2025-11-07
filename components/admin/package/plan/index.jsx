@@ -12,12 +12,14 @@ import { getPackagePlans, deletePackagePlan } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import { CircularProgress } from "@mui/material";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [selectedModel, setSelectedModel] = useState("subscription");
   const router = useRouter();
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -31,7 +33,7 @@ const index = () => {
       const list = res?.plans || res?.data?.plans || res?.data || res || [];
       setPlans(list);
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to load plans");
+      toast.error(e?.message || "Failed to load plans");
       setPlans([]);
     } finally {
       setLoading(false);
@@ -39,6 +41,10 @@ const index = () => {
   };
 
   const handleDeleteClick = (id, name) => {
+    if (!hasPermission("package_management", "delete")) {
+      toast.error("You don't have permission to delete plans");
+      return;
+    }
     setPlanToDelete({ id, name });
     setDeleteModalOpen(true);
   };
@@ -54,7 +60,7 @@ const index = () => {
       setDeleteModalOpen(false);
       setPlanToDelete(null);
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to delete plan");
+      toast.error(e?.message || "Failed to delete plan");
     } finally {
       setDeleting(false);
     }
@@ -66,6 +72,10 @@ const index = () => {
   };
 
   const handleEdit = (id) => {
+    if (!hasPermission("package_management", "update")) {
+      toast.error("You don't have permission to edit plans");
+      return;
+    }
     router.push(`/admin/package/plan/add?edit=${id}`);
   };
 
@@ -79,7 +89,7 @@ const index = () => {
           {svgIcon.subscription_plan}
         </div>
       ),
-      content: <SubscriptionPlan plans={plans.filter(p => p.model === "subscription")} loading={loading} onEdit={handleEdit} onDelete={(id) => {
+      content: <SubscriptionPlan plans={plans.filter(p => p.model === "subscription")} loading={loading} hasPermission={hasPermission} onEdit={handleEdit} onDelete={(id) => {
         const plan = plans.find(p => p.id === id);
         handleDeleteClick(id, plan?.name || `Plan #${id}`);
       }} />,
@@ -93,7 +103,7 @@ const index = () => {
           {svgIcon.fee_model}
         </div>
       ),
-      content: <FeeBookingPlan plans={plans.filter(p => p.model === "fee-per-booking")} loading={loading} onEdit={handleEdit} onDelete={(id) => {
+      content: <FeeBookingPlan plans={plans.filter(p => p.model === "fee-per-booking")} loading={loading} hasPermission={hasPermission} onEdit={handleEdit} onDelete={(id) => {
         const plan = plans.find(p => p.id === id);
         handleDeleteClick(id, plan?.name || `Plan #${id}`);
       }} />,
@@ -107,7 +117,7 @@ const index = () => {
           {svgIcon.subscription_plan} + {svgIcon.fee_model}
         </div>
       ),
-      content: <BothPlan plans={plans.filter(p => p.model === "both")} loading={loading} onEdit={handleEdit} onDelete={(id) => {
+      content: <BothPlan plans={plans.filter(p => p.model === "both")} loading={loading} hasPermission={hasPermission} onEdit={handleEdit} onDelete={(id) => {
         const plan = plans.find(p => p.id === id);
         handleDeleteClick(id, plan?.name || `Plan #${id}`);
       }} />,
@@ -130,7 +140,18 @@ const index = () => {
         <div className="col-auto ms-auto">
           <button
             className="button bg-dark-blue text-white px-20 py-10 rounded-8"
-            onClick={() => router.push("/admin/package/plan/add")}
+            onClick={() => {
+              if (!hasPermission("package_management", "create")) {
+                toast.error("You don't have permission to create plans");
+                return;
+              }
+              router.push("/admin/package/plan/add");
+            }}
+            disabled={!hasPermission("package_management", "create")}
+            style={{ 
+              opacity: !hasPermission("package_management", "create") ? 0.5 : 1,
+              cursor: !hasPermission("package_management", "create") ? "not-allowed" : "pointer"
+            }}
           >
             <Plus size={18} className="mr-10" /> Create New Plan
           </button>

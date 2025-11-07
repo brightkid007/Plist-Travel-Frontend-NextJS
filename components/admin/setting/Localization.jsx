@@ -140,7 +140,7 @@ const Localization = () => {
       await updateSystemSettings(payload);
       toast.success("Localization settings saved");
     } catch (e) {
-      toast.error(typeof e === "string" ? e : "Failed to save settings");
+      toast.error(e?.message || "Failed to save settings");
     }
   };
 

@@ -73,7 +73,7 @@ const index = () => {
         setItems(mapped);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load data");
+      toast.error(error?.message || "Failed to load data");
       setItems([]);
     } finally {
       setLoading(false);
@@ -96,7 +96,7 @@ const index = () => {
       toast.success("Deleted successfully");
       loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Delete failed");
+      toast.error(error?.message || "Delete failed");
     }
   };
 

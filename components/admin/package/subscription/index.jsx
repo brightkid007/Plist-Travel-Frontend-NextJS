@@ -1,11 +1,12 @@
 "use client";
 
-import { Plus, Receipt } from "lucide-react";
+import { Plus, Receipt, Package } from "lucide-react";
 import AdminDashboardLayout from "../../common/layout";
 import { Dialog, Checkbox, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getPackageSubscriptions, exportPackageSubscriptionsPdf } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import { usePermissions } from "@/hooks/usePermissions";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateRangePicker } from "@mui/x-date-pickers-pro";
@@ -36,6 +37,7 @@ const index = () => {
 };
 
 const SubscriptionList = () => {
+  const { hasPermission } = usePermissions();
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [activeRow, setActiveRow] = useState(null);
@@ -45,7 +47,7 @@ const SubscriptionList = () => {
   const [editEnd, setEditEnd] = useState(null);
   const [editTrialEnd, setEditTrialEnd] = useState(null);
   const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [packages, setPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -88,7 +90,7 @@ const SubscriptionList = () => {
       const uniquePkgs = Array.from(new Set(list.map((r) => r.package_name).filter(Boolean)));
       setPackages(uniquePkgs);
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to load subscriptions");
+      toast.error(e?.message || "Failed to load subscriptions");
       setRows([]);
       setPackages([]);
     } finally {
@@ -228,7 +230,7 @@ const SubscriptionList = () => {
       setPdfUrl(url);
       setShowPdfModal(true);
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || 'Failed to export PDF');
+      toast.error(e?.message || 'Failed to export PDF');
     }
   };
 
@@ -374,25 +376,26 @@ const SubscriptionList = () => {
             </tr>
           </thead>
           <tbody>
-            {loading && (
+            {loading ? (
               <tr>
-                <td colSpan={12} className="text-center text-14 text-light-1 py-10">
-                  <CircularProgress size={22} thickness={5} />
-                  <span>Loading subscriptions...</span>
-                </td>
-              </tr>
-            )}
-            {!loading && filteredRows.length === 0 && (
-              <tr>
-                <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="text-center text-14 text-light-1 py-20">
-                  <div className="d-inline-flex items-center justify-center gap-2">
-                    <Receipt size={18} />
-                    <span>No subscriptions found.</span>
+                <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="text-center py-20">
+                  <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                    <CircularProgress size={24} />
+                    <span>Loading subscriptions...</span>
                   </div>
                 </td>
               </tr>
-            )}
-            {filteredRows.map((row, index) => (
+            ) : filteredRows.length === 0 ? (
+              <tr>
+                <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="text-center py-20">
+                  <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                    <Package size={32} className="text-light-1 mb-5" />
+                    <span>No subscriptions found</span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredRows.map((row, index) => (
               <tr key={index} className="text-12">
                 {visibleColumns.business_name && (<td className="align-middle text-12">{row.business_name}</td>)}
                 {visibleColumns.package_name && (<td className="align-middle text-12">{row.package_name}</td>)}
@@ -419,14 +422,35 @@ const SubscriptionList = () => {
                 {visibleColumns.transaction_id && (<td className="align-middle text-12">{row.transaction_id}</td>)}
                 {visibleColumns.actions && (<td className="align-middle d-flex items-center gap-1">
                   <span
-                    className="border-blue-1 text-blue-1 rounded-8 px-10 text-center text-12 fw-500 cursor-pointer"
-                    onClick={() => { setActiveRow(row); setStatusValue(row.status || 'Pending'); setTxnId(row.transaction_id || ''); setShowStatusModal(true); }}
+                    className={`rounded-8 px-10 text-center text-12 fw-500 ${
+                      hasPermission("package_management", "update")
+                        ? "border-blue-1 text-blue-1 cursor-pointer"
+                        : "border-light-2 text-light-1 cursor-not-allowed opacity-50"
+                    }`}
+                    onClick={() => {
+                      if (!hasPermission("package_management", "update")) {
+                        toast.error("You don't have permission to update subscription status");
+                        return;
+                      }
+                      setActiveRow(row);
+                      setStatusValue(row.status || 'Pending');
+                      setTxnId(row.transaction_id || '');
+                      setShowStatusModal(true);
+                    }}
                   >
                     Status
                   </span>
                   <span
-                    className="border-green-2 text-green-2 rounded-8 px-10 text-center text-12 fw-500 cursor-pointer"
+                    className={`rounded-8 px-10 text-center text-12 fw-500 ${
+                      hasPermission("package_management", "update")
+                        ? "border-green-2 text-green-2 cursor-pointer"
+                        : "border-light-2 text-light-1 cursor-not-allowed opacity-50"
+                    }`}
                     onClick={() => {
+                      if (!hasPermission("package_management", "update")) {
+                        toast.error("You don't have permission to edit subscriptions");
+                        return;
+                      }
                       const parse = (s) => {
                         if (!s) return null;
                         const d = dayjs(s, ["YYYY-MM-DD", "DD/MM/YYYY"], true);
@@ -443,7 +467,8 @@ const SubscriptionList = () => {
                   </span>
                 </td>)}
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
         <StatusModal
@@ -462,7 +487,7 @@ const SubscriptionList = () => {
               onStatusModalClose();
               reload();
             } catch (e) {
-              toast.error(e?.response?.data?.message || e?.message || 'Failed to update status');
+              toast.error(e?.message || 'Failed to update status');
             }
           }}
         />
@@ -488,7 +513,7 @@ const SubscriptionList = () => {
               onEditModalClose();
               reload();
             } catch (e) {
-              toast.error(e?.response?.data?.message || e?.message || 'Failed to update subscription');
+              toast.error(e?.message || 'Failed to update subscription');
             }
           }}
         />

@@ -41,7 +41,7 @@ const General = () => {
       });
     } catch (error) {
       console.error("Error loading settings:", error);
-      toast.error(typeof error === "string" ? error : error?.message || "Failed to load settings");
+      toast.error(error?.message || "Failed to load settings");
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ const General = () => {
       toast.success("Settings saved successfully!");
     } catch (error) {
       console.error("Error saving settings:", error);
-      toast.error(typeof error === "string" ? error : "Failed to save settings");
+      toast.error(error?.message || "Failed to save settings");
     } finally {
       setSaving(false);
     }

@@ -1,21 +1,26 @@
 'use client';
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import Image from "next/image";
 import Link from "next/link";
 
 const Sidebar = () => {
   const { logout } = useAuth();
+  const { hasPermission } = usePermissions();
+  
   const sidebarData = [
     {
       icon: "/img/dashboard/sidebar/compass.svg",
       title: "Dashboard",
       href: "/admin/dashboard",
+      permission: { resource: "dashboard", action: "view" },
     },
-    // {
-    //   icon: "/img/dashboard/sidebar/booking.svg",
-    //   title: "Permissions & Roles",
-    //   href: "/admin/roles",
-    // },
+    {
+      icon: "/img/dashboard/sidebar/booking.svg",
+      title: "Permissions & Roles",
+      href: "/admin/roles",
+      permission: { resource: "role_management", action: "view" },
+    },
     // {
     //   icon: "/img/dashboard/sidebar/house.svg",
     //   title: "Booking Management",
@@ -38,11 +43,13 @@ const Sidebar = () => {
       icon: "/img/dashboard/sidebar/map.svg",
       title: "User Management",
       href: "/admin/user",
+      permission: { resource: "user_management", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/taxi.svg",
       title: "Category Management",
       href: "/admin/category",
+      permission: { resource: "category_management", action: "view" },
     },
     // {
     //   icon: "/img/dashboard/sidebar/canoe.svg",
@@ -53,11 +60,13 @@ const Sidebar = () => {
       icon: "/img/dashboard/sidebar/booking.svg",
       title: "Commission Management",
       href: "/admin/commission",
+      permission: { resource: "commission_management", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/sneakers.svg",
       title: "Financial Management",
       href: "/admin/finance",
+      permission: { resource: "financial_management", action: "view" },
     },
     // // {
     // //   icon: "/img/dashboard/sidebar/taxi.svg",
@@ -68,15 +77,18 @@ const Sidebar = () => {
       icon: "/img/dashboard/sidebar/canoe.svg",
       title: "Vendor Listing Management",
       href: "/admin/vendor-listing",
+      permission: { resource: "vendor_listing_management", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/booking.svg",
       title: "Coupon & Promotion Management",
       href: "/admin/coupon",
+      permission: { resource: "coupon_promotion_management", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/canoe.svg",
       title: "Package Management",
+      permission: { resource: "package_management", action: "view" },
       links: [
         { title: "Package Plans", href: "/admin/package/plan" },
         {
@@ -94,11 +106,13 @@ const Sidebar = () => {
       icon: "/img/dashboard/sidebar/taxi.svg",
       title: "Email Template",
       href: "/admin/email-template",
+      permission: { resource: "email_template", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/sneakers.svg",
       title: "Notification",
       href: "/admin/notification",
+      permission: { resource: "notification_management", action: "view" },
     },
     // {
     //   icon: "/img/dashboard/sidebar/canoe.svg",
@@ -109,16 +123,19 @@ const Sidebar = () => {
       icon: "/img/dashboard/sidebar/airplane.svg",
       title: "Customer Support",
       href: "/admin/customer-support",
+      permission: { resource: "customer_support", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/house.svg",
       title: "Booking Oversight",
       href: "/admin/oversight",
+      permission: { resource: "booking_oversight", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/canoe.svg",
       title: "System Settings",
       href: "/admin/setting",
+      permission: { resource: "system_settings", action: "view" },
     },
     {
       icon: "/img/dashboard/sidebar/log-out.svg",
@@ -132,7 +149,13 @@ const Sidebar = () => {
   return (
     <>
       <div className="sidebar -dashboard" id="agentSidebarMenu">
-        {sidebarData.map((item, index) => (
+        {sidebarData.map((item, index) => {
+          // Check permission if specified
+          if (item.permission && !hasPermission(item.permission.resource, item.permission.action)) {
+            return null;
+          }
+          
+          return (
           <div className="sidebar__item" key={index}>
             {item.links ? (
               <div className="accordion -db-sidebar js-accordion">
@@ -191,7 +214,8 @@ const Sidebar = () => {
               </Link>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );

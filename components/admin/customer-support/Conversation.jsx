@@ -93,7 +93,7 @@ const Conversation = ({ ticketId, onStatusUpdated }) => {
       const res = await getConversationById(ticketId);
       setConversation(res?.conversation || res?.data?.conversation || res);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load conversation");
+      toast.error(error?.message || "Failed to load conversation");
     }
   };
 
@@ -126,7 +126,7 @@ const Conversation = ({ ticketId, onStatusUpdated }) => {
       });
       setMessages(mapped);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load messages");
+      toast.error(error?.message || "Failed to load messages");
       setMessages([]);
     } finally {
       setLoadingMessages(false);
@@ -145,7 +145,7 @@ const Conversation = ({ ticketId, onStatusUpdated }) => {
         onStatusUpdated(value);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to update status");
+      toast.error(error?.message || "Failed to update status");
     } finally {
       setSavingStatus(false);
     }
@@ -161,7 +161,7 @@ const Conversation = ({ ticketId, onStatusUpdated }) => {
       await loadMessages();
       toast.success("Note added");
     } catch (e) {
-      toast.error(e?.response?.data?.message || e?.message || "Failed to add note");
+      toast.error(e?.message || "Failed to add note");
     } finally {
       setLoading(false);
     }
@@ -244,7 +244,7 @@ const Conversation = ({ ticketId, onStatusUpdated }) => {
       await loadMessages();
       toast.success("Message sent");
     } catch (e) {
-      toast.error(typeof e === "string" ? e : "Failed to send message");
+      toast.error(e?.message || "Failed to send message");
     } finally {
       setLoading(false);
     }

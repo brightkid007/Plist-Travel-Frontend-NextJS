@@ -7,14 +7,17 @@ import DashboardCard from "../common/DashboardCard";
 import data from "./data";
 import Filter from "../common/Filter";
 import BookingList from "./BookingList";
-import { getAdminBookings, exportAdminData, deleteBooking, updateBookingStatus, refundTransaction } from "@/helpers/backend_helper";
+import { getAdminBookings, deleteBooking, updateBookingStatus, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [cards, setCards] = useState(data);
   const [filters, setFilters] = useState({});
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -43,17 +46,102 @@ const index = () => {
     setFilters(newFilters);
   }, []);
 
-  const handleExport = async () => {
+  const handleExport = () => {
     try {
-      await exportAdminData({ scope: "bookings", ...filters });
-      toast.success("Export started");
+      if (bookings.length === 0) {
+        toast.error("No bookings to export");
+        return;
+      }
+
+      // Define CSV columns
+      const cols = [
+        { key: 'id', label: 'Booking ID' },
+        { key: 'name', label: 'Listing Name' },
+        { key: 'type', label: 'Listing Type' },
+        { key: 'category', label: 'Category' },
+        { key: 'subcategory', label: 'Subcategory' },
+        { key: 'orderDate', label: 'Order Date' },
+        { key: 'exeTime', label: 'Execution Time' },
+        { key: 'totalPrice', label: 'Total Price' },
+        { key: 'currency', label: 'Currency' },
+        { key: 'paid', label: 'Payment Status' },
+        { key: 'status', label: 'Booking Status' },
+        { key: 'guestName', label: 'Guest Name' },
+        { key: 'guestEmail', label: 'Guest Email' },
+        { key: 'guestCount', label: 'Guest Count' },
+      ];
+
+      // Process bookings data similar to BookingList component
+      const processedBookings = bookings.map((b) => {
+        const start = b.start_date || b.startDate;
+        const end = b.end_date || b.endDate;
+        const listing = b.listing || {};
+        const category = listing.category || {};
+        const subcategory = listing.subcategory || {};
+        const user = b.user || {};
+        const userProfile = user.user_profile || {};
+
+        return {
+          id: b.id ?? b._id ?? '',
+          name: listing.title || b.title || b.name || b.listingName || '',
+          type: listing.type || b.type || b.listingType || b.category_type || '',
+          category: category.name || b.category || b.listingCategory || '',
+          subcategory: subcategory.name || b.subcategory || b.listingSubcategory || '',
+          orderDate: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : b.orderDate || '',
+          exeTime: start && end
+            ? `${new Date(start).toLocaleDateString()} ~ ${new Date(end).toLocaleDateString()}`
+            : b.exeTime || '',
+          totalPrice: b.total_price != null
+            ? Number(b.total_price)
+            : b.totalPrice != null
+            ? Number(b.totalPrice)
+            : b.amount || b.price || 0,
+          currency: b.currency || 'USD',
+          paid: (b.payment_status || 'unpaid').replace(/^./, (c) => c.toUpperCase()),
+          status: (b.status || b.bookingStatus || "pending").replace(/^./, (c) => c.toUpperCase()),
+          guestName: userProfile.first_name && userProfile.last_name
+            ? `${userProfile.first_name} ${userProfile.last_name}`
+            : user.email || '',
+          guestEmail: user.email || '',
+          guestCount: b.guest_count || b.guestCount || '',
+        };
+      });
+
+      // Create CSV header
+      const header = cols.map(c => '"' + c.label.replace(/"/g, '""') + '"').join(',');
+
+      // Create CSV rows
+      const lines = processedBookings.map((r) => 
+        cols.map(c => {
+          const v = r[c.key];
+          return '"' + (v instanceof Date ? v.toISOString() : (v ?? '')).toString().replace(/"/g, '""') + '"';
+        }).join(',')
+      );
+
+      // Combine header and rows
+      const csv = [header, ...lines].join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.download = `bookings_export_${dateStr}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${bookings.length} booking(s) to CSV`);
     } catch (e) {
-      toast.error(typeof e === "string" ? e : "Export failed");
+      toast.error(e?.message || "Export failed");
     }
   };
 
   const loadBookings = async () => {
     try {
+      setLoading(true);
       const res = await getAdminBookings(filters);
       const summary = res?.summary || res?.data?.summary;
       const bookingsList = res?.bookings || res?.data?.bookings || [];
@@ -69,12 +157,19 @@ const index = () => {
         { ...cards[2], amount: String(pending) },
         { ...cards[3], amount: String(canceled) },
       ]);
-    } catch (_) {
+    } catch (error) {
+      toast.error(error?.message || "Failed to load bookings");
       setBookings([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteClick = (id, name) => {
+    if (!hasPermission("booking_oversight", "delete")) {
+      toast.error("You don't have permission to delete bookings");
+      return;
+    }
     setBookingToDelete({ id, name });
     setDeleteModalOpen(true);
   };
@@ -103,6 +198,10 @@ const index = () => {
 
   // Handle accept booking
   const handleAcceptBooking = async (id, name) => {
+    if (!hasPermission("booking_oversight", "update")) {
+      toast.error("You don't have permission to accept bookings");
+      return;
+    }
     try {
       setActionLoading(true);
       await updateBookingStatus(id, { status: "confirmed" });
@@ -117,6 +216,10 @@ const index = () => {
 
   // Handle reject booking
   const handleRejectClick = (id, name) => {
+    if (!hasPermission("booking_oversight", "update")) {
+      toast.error("You don't have permission to reject bookings");
+      return;
+    }
     setBookingToReject({ id, name });
     setRejectModalOpen(true);
   };
@@ -145,6 +248,10 @@ const index = () => {
 
   // Handle refund booking
   const handleRefundClick = (id, name, transactionId) => {
+    if (!hasPermission("booking_oversight", "update")) {
+      toast.error("You don't have permission to process refunds");
+      return;
+    }
     setBookingToRefund({ id, name, transactionId });
     setRefundModalOpen(true);
   };
@@ -196,6 +303,8 @@ const index = () => {
       <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100 mt-20">
         <BookingList 
           bookings={bookings} 
+          loading={loading}
+          hasPermission={hasPermission}
           onDelete={handleDeleteClick}
           onAccept={handleAcceptBooking}
           onReject={handleRejectClick}

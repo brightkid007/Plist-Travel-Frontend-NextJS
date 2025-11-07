@@ -1,69 +1,67 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { useRouter } from "next/navigation";
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
-import { useState } from "react";
-const index = () => {
-  const [activeTab, setActiveTab] = useState("all");
+import { MoreVertical } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu as MuiMenu, MenuItem, CircularProgress } from "@mui/material";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "react-toastify";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { 
+  getAdminCommissions, 
+  deleteAdminCommission, 
+  updateCommissionStatus 
+} from "@/helpers/backend_helper";
 
-  const entries = [
-    {
-      id: 1,
-      name: "Luxury Hotel Groups",
-      listing_type: "Hotel",
-      status: "Active",
-      plan: "Premium",
-      commission_rate: 0.15,
-      total_commission: "$2,400",
-      total_revenue: "$16,000",
-      role: "Vendor",
-    },
-    {
-      id: 2,
-      name: "Adventure Tours Inc",
-      listing_type: "Tour",
-      status: "Active",
-      plan: "Standard",
-      commission_rate: 0.1,
-      total_commission: "$1,050",
-      total_revenue: "$10,500",
-      role: "Agent",
-    },
-    {
-      id: 3,
-      name: "City Stays",
-      listing_type: "Hotel",
-      status: "Active",
-      plan: "Basic",
-      commission_rate: 0.08,
-      total_commission: "$860",
-      total_revenue: "$10,750",
-      role: "Vendor",
-    },
-    {
-      id: 4,
-      name: "Global Events",
-      listing_type: "Event",
-      status: "Inactive",
-      plan: "Standard",
-      commission_rate: 0.12,
-      total_commission: "$1,200",
-      total_revenue: "$10,000",
-      role: "Agent",
-    },
-    {
-      id: 5,
-      name: "Beach Resorts",
-      listing_type: "Hotel",
-      status: "Active",
-      plan: "Premium",
-      commission_rate: 0.15,
-      total_commission: "$2,750",
-      total_revenue: "$18,333",
-      role: "Vendor",
-    },
-  ];
+const index = () => {
+  const { hasPermission } = usePermissions();
+  const [activeTab, setActiveTab] = useState("all");
+  const [menuAnchor, setMenuAnchor] = useState({});
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch commissions from backend
+  useEffect(() => {
+    fetchCommissions();
+  }, [activeTab]);
+
+  const fetchCommissions = async () => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (activeTab !== "all") {
+        params.role = activeTab;
+      }
+      const response = await getAdminCommissions(params);
+      const commissions = response?.commissions || [];
+      
+      // Map backend data to frontend format
+      const mappedEntries = commissions.map((commission) => ({
+        id: commission.id,
+        name: commission.user?.business_name || commission.user?.email || `User ${commission.user_id}`,
+        listing_type: commission.listing_type || "-",
+        status: commission.is_active ? "Active" : "Inactive",
+        plan: commission.plan || "-",
+        commission_rate: parseFloat(commission.commission_rate) || 0,
+        total_commission: `$${parseFloat(commission.total_commission || 0).toLocaleString()}`,
+        total_revenue: `$${parseFloat(commission.total_revenue || 0).toLocaleString()}`,
+        role: commission.role === "vendor" ? "Vendor" : "Agent",
+        is_active: commission.is_active,
+        user_id: commission.user_id,
+      }));
+      
+      setEntries(mappedEntries);
+    } catch (error) {
+      console.error("Error fetching commissions:", error);
+      toast.error(error?.message || "Failed to fetch commissions");
+      setEntries([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tabs = [
     {
@@ -79,6 +77,62 @@ const index = () => {
       value: "agent",
     },
   ];
+
+  // Handle menu open/close
+  const handleMenuOpen = (event, entryId) => {
+    event.stopPropagation();
+    setMenuAnchor({ ...menuAnchor, [entryId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (entryId) => {
+    setMenuAnchor({ ...menuAnchor, [entryId]: null });
+  };
+
+  // Handle delete
+  const handleDeleteClick = (entry) => {
+    setItemToDelete(entry);
+    setDeleteModalOpen(true);
+    handleMenuClose(entry.id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setDeleting(true);
+      await deleteAdminCommission(itemToDelete.id);
+      toast.success(`${itemToDelete.role} commission deleted successfully`);
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
+      // Refresh data
+      await fetchCommissions();
+    } catch (error) {
+      console.error("Error deleting commission:", error);
+      toast.error(error?.message || "Failed to delete commission");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  // Handle activate/deactivate
+  const handleToggleStatus = async (entry) => {
+    try {
+      const newStatus = !entry.is_active;
+      await updateCommissionStatus(entry.id, newStatus);
+      toast.success(`Commission ${newStatus ? "activated" : "deactivated"} successfully`);
+      handleMenuClose(entry.id);
+      // Refresh data
+      await fetchCommissions();
+    } catch (error) {
+      console.error("Error updating commission status:", error);
+      toast.error(error?.message || "Failed to update commission status");
+    }
+  };
 
   return (
     <AdminDashboardLayout>
@@ -155,13 +209,26 @@ const index = () => {
                 </tr>
               </thead>
               <tbody>
-                {entries
-                  .filter((item) => {
-                    return activeTab === "all"
-                      ? true
-                      : item.role.toLowerCase() === activeTab;
-                  })
-                  .map((entry, index) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="10" className="text-center py-20">
+                      <CircularProgress size={24} />
+                    </td>
+                  </tr>
+                ) : entries.length === 0 ? (
+                  <tr>
+                    <td colSpan="10" className="text-center py-20">
+                      <div className="text-14 text-light-1">No commissions found</div>
+                    </td>
+                  </tr>
+                ) : (
+                  entries
+                    .filter((item) => {
+                      return activeTab === "all"
+                        ? true
+                        : item.role.toLowerCase() === activeTab;
+                    })
+                    .map((entry, index) => (
                     <tr key={index}>
                       <td className="align-middle text-12 lh-16 fw-500">
                         {entry.id}
@@ -210,15 +277,60 @@ const index = () => {
                         </span>
                       </td>
                       <td className="align-middle">
-                        <Ellipsis size={16} />
+                        <div className="position-relative">
+                          <button
+                            className="border-0 bg-transparent cursor-pointer p-5"
+                            onClick={(e) => handleMenuOpen(e, entry.id)}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          <MuiMenu
+                            anchorEl={menuAnchor[entry.id]}
+                            open={Boolean(menuAnchor[entry.id])}
+                            onClose={() => handleMenuClose(entry.id)}
+                          >
+                            <MenuItem 
+                              disabled={!hasPermission("commission_management", "update")}
+                              onClick={() => {
+                                if (hasPermission("commission_management", "update")) {
+                                  handleToggleStatus(entry);
+                                }
+                              }}
+                            >
+                              {entry.is_active ? "Deactivate" : "Activate"}
+                            </MenuItem>
+                            <MenuItem 
+                              disabled={!hasPermission("commission_management", "delete")}
+                              onClick={() => {
+                                if (hasPermission("commission_management", "delete")) {
+                                  handleDeleteClick(entry);
+                                }
+                              }} 
+                              className="text-red-2"
+                            >
+                              Delete
+                            </MenuItem>
+                          </MuiMenu>
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                    ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title={`Delete ${itemToDelete?.role} Commission`}
+        message={`Are you sure you want to delete the commission for "${itemToDelete?.name}"?`}
+        itemName={itemToDelete?.name}
+        loading={deleting}
+      />
     </AdminDashboardLayout>
   );
 };

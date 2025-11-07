@@ -4,27 +4,29 @@ import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
 import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Dialog } from "@mui/material";
+import { Dialog, CircularProgress } from "@mui/material";
 import { Checkbox } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { getAdminListings, approveListing, rejectListing, setListingStatus } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
+import { usePermissions } from "@/hooks/usePermissions";
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("submitted");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
 
   const fetchListings = async () => {
     setLoading(true);
-    setError("");
     try {
       const res = statusFilter ? await getAdminListings({ status: statusFilter }) : await getAdminListings();
       const data = res || {};
       const arr = Array.isArray(data) ? data : (data?.listings || data?.items || []);
       setListings(arr);
     } catch (e) {
-      setError(typeof e === "string" ? e : "Failed to load listings");
+      toast.error(e?.message || "Failed to load listings");
+      setListings([]);
     } finally {
       setLoading(false);
     }
@@ -60,29 +62,44 @@ const index = () => {
   };
 
   const onApprove = async (id) => {
+    if (!hasPermission("vendor_listing_management", "update")) {
+      toast.error("You don't have permission to approve listings");
+      return;
+    }
     try {
       await approveListing(id);
+      toast.success("Listing approved successfully");
       await fetchListings();
     } catch (e) {
-      setError(typeof e === "string" ? e : "Failed to approve listing");
+      toast.error(e?.message || "Failed to approve listing");
     }
   };
 
   const onReject = async (id) => {
+    if (!hasPermission("vendor_listing_management", "update")) {
+      toast.error("You don't have permission to reject listings");
+      return;
+    }
     try {
       await rejectListing(id, {});
+      toast.success("Listing rejected successfully");
       await fetchListings();
     } catch (e) {
-      setError(typeof e === "string" ? e : "Failed to reject listing");
+      toast.error(e?.message || "Failed to reject listing");
     }
   };
 
   const onChangeStatus = async (id, status) => {
+    if (!hasPermission("vendor_listing_management", "update")) {
+      toast.error("You don't have permission to update listing status");
+      return;
+    }
     try {
       await setListingStatus(id, status);
+      toast.success("Listing status updated successfully");
       await fetchListings();
     } catch (e) {
-      setError(typeof e === "string" ? e : "Failed to update status");
+      toast.error(e?.message || "Failed to update status");
     }
   };
 
@@ -143,17 +160,26 @@ const index = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading && (
+                {loading ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-20">Loading...</td>
+                    <td colSpan={8} className="text-center py-20">
+                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <CircularProgress size={24} />
+                        <span>Loading listings...</span>
+                      </div>
+                    </td>
                   </tr>
-                )}
-                {!loading && error && (
+                ) : filteredListings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-20 text-red-1">{error}</td>
+                    <td colSpan={8} className="text-center py-20">
+                      <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                        <BookOpen size={32} className="text-light-1 mb-5" />
+                        <span>No listings found</span>
+                      </div>
+                    </td>
                   </tr>
-                )}
-                {!loading && !error && filteredListings.map((entry, index) => (
+                ) : (
+                  filteredListings.map((entry, index) => (
                     <tr key={entry?.id || index}>
                       <td className="align-middle">
                         <img
@@ -203,6 +229,11 @@ const index = () => {
                           className="form-select border-light h-36 px-10 w-160"
                           value={(entry?.status || "").toString().toLowerCase()}
                           onChange={(e) => onChangeStatus(entry?.id, e.target.value)}
+                          disabled={!hasPermission("vendor_listing_management", "update")}
+                          style={{ 
+                            opacity: !hasPermission("vendor_listing_management", "update") ? 0.5 : 1,
+                            cursor: !hasPermission("vendor_listing_management", "update") ? "not-allowed" : "pointer"
+                          }}
                         >
                           <option value="draft">Draft</option>
                           <option value="submitted">Submitted</option>
@@ -211,7 +242,8 @@ const index = () => {
                         </select>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>

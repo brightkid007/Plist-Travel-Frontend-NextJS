@@ -6,8 +6,8 @@ const Filter = ({ onFilterChange }) => {
   const [category, setCategory] = useState("all");
   const [subcategory, setSubcategory] = useState("all");
   const [type, setType] = useState("all");
-  const [startDate, setStartDate] = useState(new DateObject());
-  const [endDate, setEndDate] = useState(new DateObject());
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const debounceTimer = useRef(null);
 
   useEffect(() => {
@@ -24,9 +24,11 @@ const Filter = ({ onFilterChange }) => {
           category: category !== "all" ? category : undefined,
           subcategory: subcategory !== "all" ? subcategory : undefined,
           type: type !== "all" ? type : undefined,
-          startDate: startDate ? startDate.format("YYYY-MM-DD") : new DateObject(),
-          endDate: endDate ? endDate.format("YYYY-MM-DD") : new DateObject(),
+          date_from: startDate ? startDate.format("YYYY-MM-DD") : undefined,
+          date_to: endDate ? endDate.format("YYYY-MM-DD") : undefined,
         };
+        // Remove undefined values
+        Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
         onFilterChange(filters);
       }, 300); // 300ms debounce delay
     }
@@ -84,6 +86,7 @@ const Filter = ({ onFilterChange }) => {
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
+            placeholder="Start Date"
           />
         </div>
       </div>
@@ -99,6 +102,7 @@ const Filter = ({ onFilterChange }) => {
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
+            placeholder="End Date"
           />
         </div>
       </div>

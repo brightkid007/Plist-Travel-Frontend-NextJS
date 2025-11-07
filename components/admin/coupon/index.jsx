@@ -11,13 +11,15 @@ import FormInput from "@/components/common/form/FormInput";
 import Filter from "../common/Filter";
 import { createAdminCoupon, getAdminCoupons, updateAdminCoupon, deleteAdminCoupon } from "@/helpers/backend_helper";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { toast } from "react-toastify";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
   const router = useRouter();
+  const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [entries, setEntries] = useState([]);
   const [actionOpenIndex, setActionOpenIndex] = useState(null);
   const [menuAnchor, setMenuAnchor] = useState({});
@@ -44,12 +46,13 @@ const index = () => {
     try {
       setDeleting(true);
       await deleteAdminCoupon(couponToDelete.id);
+      toast.success("Coupon deleted successfully");
       setEntries((prev) => prev.filter((e) => e.id !== couponToDelete.id));
       setDeleteModalOpen(false);
       setCouponToDelete(null);
     } catch (error) {
       console.error("Failed to delete coupon:", error);
-      setError(error?.message || "Failed to delete coupon");
+      toast.error(error?.message || "Failed to delete coupon");
     } finally {
       setDeleting(false);
     }
@@ -62,6 +65,14 @@ const index = () => {
 
   const handleClose = () => {
     setShowModal(false);
+  };
+
+  const handleCreateClick = () => {
+    if (hasPermission("coupon_promotion_management", "create")) {
+      setShowModal(true);
+    } else {
+      toast.error("You don't have permission to create coupons");
+    }
   };
 
   // Derive dashboard card analytics from loaded entries
@@ -112,7 +123,6 @@ const index = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      setError("");
       try {
         const res = await getAdminCoupons();
         // APIClient returns { message, data } or raw array depending on service settings
@@ -129,7 +139,7 @@ const index = () => {
         }));
         setEntries(normalized);
       } catch (e) {
-        setError(e?.toString?.() || "Failed to load coupons");
+        toast.error(e?.message || "Failed to load coupons");
       } finally {
         setLoading(false);
       }
@@ -179,7 +189,9 @@ const index = () => {
         <div className="col-auto">
           <button
             className="button bg-blue-1 text-white px-15 py-10 rounded-8"
-            onClick={() => setShowModal(true)}
+            onClick={handleCreateClick}
+            disabled={!hasPermission("coupon_promotion_management", "create")}
+            style={{ opacity: !hasPermission("coupon_promotion_management", "create") ? 0.5 : 1, cursor: !hasPermission("coupon_promotion_management", "create") ? "not-allowed" : "pointer" }}
           >
             <Plus /> Create Coupon
           </button>
@@ -239,12 +251,7 @@ const index = () => {
                     </td>
                   </tr>
                 )}
-                {error && !loading && (
-                  <tr>
-                    <td className="py-15 text-red-1" colSpan={8}>{error}</td>
-                  </tr>
-                )}
-                {!loading && !error && entries.length === 0 && (
+                {!loading && entries.length === 0 && (
                   <tr>
                     <td className="py-15 text-center" colSpan={8}>
                       <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
@@ -254,7 +261,7 @@ const index = () => {
                     </td>
                   </tr>
                 )}
-                {!loading && !error && entries
+                {!loading && entries
                   .map((entry, index) => (
                     <tr key={index}>
                       <td className="align-middle text-12 lh-16 fw-500">
@@ -300,28 +307,46 @@ const index = () => {
                             open={Boolean(menuAnchor[entry.id])}
                             onClose={() => handleMenuClose(entry.id)}
                           >
-                            <MenuItem onClick={() => {
-                              setSelected(entry);
-                              setShowEditModal(true);
-                              handleMenuClose(entry.id);
-                            }}>
+                            <MenuItem 
+                              disabled={!hasPermission("coupon_promotion_management", "update")}
+                              onClick={() => {
+                                if (hasPermission("coupon_promotion_management", "update")) {
+                                  setSelected(entry);
+                                  setShowEditModal(true);
+                                  handleMenuClose(entry.id);
+                                }
+                              }}
+                            >
                               Edit
                             </MenuItem>
-                            <MenuItem onClick={async () => {
-                              try {
-                                const nextActive = entry.status !== "Active";
-                                await updateAdminCoupon(entry.id, { is_active: nextActive });
-                                setEntries((prev) => prev.map((e) => e.id === entry.id ? { ...e, status: nextActive ? "Active" : "Inactive" } : e));
-                              } catch (_) { }
-                              handleMenuClose(entry.id);
-                            }}>
+                            <MenuItem 
+                              disabled={!hasPermission("coupon_promotion_management", "update")}
+                              onClick={async () => {
+                                if (!hasPermission("coupon_promotion_management", "update")) return;
+                                try {
+                                  const nextActive = entry.status !== "Active";
+                                  await updateAdminCoupon(entry.id, { is_active: nextActive });
+                                  toast.success(`Coupon ${nextActive ? "activated" : "deactivated"} successfully`);
+                                  setEntries((prev) => prev.map((e) => e.id === entry.id ? { ...e, status: nextActive ? "Active" : "Inactive" } : e));
+                                } catch (error) {
+                                  toast.error(error?.message || "Failed to update coupon status");
+                                }
+                                handleMenuClose(entry.id);
+                              }}
+                            >
                               {entry.status === "Active" ? "Deactivate" : "Activate"}
                             </MenuItem>
-                            <MenuItem onClick={() => {
-                              setCouponToDelete({ id: entry.id, code: entry.code });
-                              setDeleteModalOpen(true);
-                              handleMenuClose(entry.id);
-                            }} className="text-red-2">
+                            <MenuItem 
+                              disabled={!hasPermission("coupon_promotion_management", "delete")}
+                              onClick={() => {
+                                if (hasPermission("coupon_promotion_management", "delete")) {
+                                  setCouponToDelete({ id: entry.id, code: entry.code });
+                                  setDeleteModalOpen(true);
+                                  handleMenuClose(entry.id);
+                                }
+                              }} 
+                              className="text-red-2"
+                            >
                               Delete
                             </MenuItem>
                           </Menu>
@@ -393,7 +418,6 @@ const ModalContent = ({ onCreated, onClose }) => {
     status: "active",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const status = [
     {
@@ -423,7 +447,6 @@ const ModalContent = ({ onCreated, onClose }) => {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    setError("");
     try {
       const payload = {
         code: form.code.trim(),
@@ -450,9 +473,10 @@ const ModalContent = ({ onCreated, onClose }) => {
           expiry: created.date_to,
         });
       }
+      toast.success("Coupon created successfully");
       if (typeof onClose === 'function') onClose();
     } catch (e) {
-      setError(e?.toString?.() || "Failed to create coupon");
+      toast.error(e?.message || "Failed to create coupon");
     } finally {
       setSubmitting(false);
     }
@@ -564,9 +588,6 @@ const ModalContent = ({ onCreated, onClose }) => {
         value={form.status}
         onChange={(e) => handleChange("status", e.target.value)}
       />
-      {error && (
-        <div className="col-12 text-red-1 text-12">{error}</div>
-      )}
       <div className="col-12 d-flex justify-end gap-2 mt-10">
         <button
           className="text-14 border-light rounded-8 px-10 py-5"
@@ -598,7 +619,6 @@ const EditCouponModal = ({ data, onSaved, onClose }) => {
     status: data.status === "Active" ? "active" : "inactive",
   });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const discountType = [
     { label: "Percentage", value: "percent" },
@@ -615,7 +635,6 @@ const EditCouponModal = ({ data, onSaved, onClose }) => {
 
   const handleSave = async () => {
     setSubmitting(true);
-    setError("");
     try {
       const payload = {
         description: form.description || undefined,
@@ -637,9 +656,10 @@ const EditCouponModal = ({ data, onSaved, onClose }) => {
         status: (typeof updated.is_active === 'boolean' ? updated.is_active : form.status === "active") ? "Active" : "Inactive",
         expiry: updated.date_to || data.expiry || null,
       };
+      toast.success("Coupon updated successfully");
       onSaved && onSaved(mapped);
     } catch (e) {
-      setError(e?.toString?.() || "Failed to save coupon");
+      toast.error(e?.message || "Failed to save coupon");
     } finally {
       setSubmitting(false);
     }
@@ -664,7 +684,6 @@ const EditCouponModal = ({ data, onSaved, onClose }) => {
 
       <FormInput label="Status" type="select" gridClass="col-12" options={status} value={form.status} onChange={(e) => handleChange("status", e.target.value)} />
 
-      {error && <div className="col-12 text-red-1 text-12">{error}</div>}
       <div className="col-12 d-flex justify-end gap-2 mt-10">
         <button className="text-14 border-light rounded-8 px-10 py-5" onClick={onClose}>Close</button>
         <button className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5" onClick={handleSave} disabled={submitting}>

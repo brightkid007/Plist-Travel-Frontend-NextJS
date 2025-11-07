@@ -8,6 +8,7 @@ import { Add } from "@mui/icons-material";
 import List from "./List";
 import NotificationComposer from "./Add";
 import DatePicker, { DateObject } from "react-multi-date-picker";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // Notification Filter Component
 const NotificationFilter = ({ filters, onFilterChange }) => {
@@ -93,6 +94,7 @@ const NotificationFilter = ({ filters, onFilterChange }) => {
 };
 
 const index = () => {
+  const { hasPermission } = usePermissions();
   const [openFilter, setOpenFilter] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({
@@ -198,6 +200,11 @@ const index = () => {
           <button
             className="button bg-dark-blue text-white px-10 pr-15 py-10 rounded-8"
             onClick={() => setActiveTab("add")}
+            disabled={!hasPermission("notification_management", "create")}
+            style={{
+              opacity: !hasPermission("notification_management", "create") ? 0.5 : 1,
+              cursor: !hasPermission("notification_management", "create") ? "not-allowed" : "pointer",
+            }}
           >
             <Add className="text-18 mr-5" /> Create New Notification
           </button>

@@ -55,8 +55,7 @@ const LoginForm = () => {
           break;
       }
     } catch (err) {
-      const message = typeof err === "string" ? err : err?.message || "Login failed";
-      toast.error(message);
+      toast.error(err?.message || "Login failed");
     } finally {
       setLoading(false);
     }

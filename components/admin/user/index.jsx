@@ -6,20 +6,24 @@ import { Ellipsis, Mail, MapPin, Phone, Plus, MoreVertical, UserX } from "lucide
 import { useState, useEffect, useRef } from "react";
 import { Dialog, Menu, MenuItem, CircularProgress } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "react-toastify";
 import { 
   getAdminUsers, 
   createAdminUser, 
   updateAdminUser, 
   deleteAdminUser,
   updateUserStatus,
-  getUserRoles,
-  assignUserRole,
+  getAdminRoles,
   isAuthenticated
 } from "@/helpers/backend_helper";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = () => {
   const router = useRouter();
+  const { user: currentUser } = useAuth();
+  const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -27,9 +31,20 @@ const index = () => {
   // Backend integration states
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [roles, setRoles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  
+  // Check if current user is Super Admin
+  const isSuperAdmin = () => {
+    if (!currentUser || currentUser.role !== "admin") return false;
+    const currentUserRole = roles.find(r => r.id === currentUser.role_id);
+    return currentUserRole?.name === "Super Admin";
+  };
+  
+  // Check if user has permission for a specific resource and action
+  const checkPermission = (resource, action) => {
+    return hasPermission(resource, action);
+  };
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -37,7 +52,7 @@ const index = () => {
     is_active: true,
     first_name: "",
     last_name: "",
-    role_level: "support"
+    role_id: null
   });
   const [menuAnchor, setMenuAnchor] = useState({});
   const menuRef = useRef({});
@@ -58,7 +73,7 @@ const index = () => {
       is_active: true,
       first_name: "",
       last_name: "",
-      role_level: "support"
+      role_id: null
     });
   };
 
@@ -80,7 +95,8 @@ const index = () => {
       phone: profile.phone || "",
       address: profile.address || "",
       avatar_url: profile.avatar_url || "",
-      role_level: profile.role_level || "",
+      role_id: profile.role_id || null,
+      role_name: profile.role_name || null,
       // Computed fields for display
       status: user.disabledAt ? "Inactive" : (user.is_active ? "Active" : "Inactive"),
       location: profile.address || "N/A"
@@ -92,16 +108,15 @@ const index = () => {
     const loadUsers = async () => {
       try {
         setLoading(true);
-        setError(null);
         
         if (!isAuthenticated()) {
-          setError("Admin authentication required");
+          toast.error("Admin authentication required");
           return;
         }
 
         const [usersData, rolesData] = await Promise.all([
           getAdminUsers({ role: activeTab === "all" ? undefined : activeTab, includeDisabled: true }),
-          getUserRoles()
+          getAdminRoles()
         ]);
 
         // Handle backend response structure: { status, message, data }
@@ -118,11 +133,13 @@ const index = () => {
         const mappedUsers = usersList.map(mapUserData).filter(Boolean);
         setUsers(mappedUsers);
         
-        setRoles(rolesData?.data || []);
+        // Handle admin roles response structure
+        const adminRoles = rolesData?.data?.data || rolesData?.data || [];
+        setRoles(adminRoles);
         
       } catch (err) {
         console.error("Failed to load users:", err);
-        setError(err.message || "Failed to load users");
+        toast.error(err?.message || "Failed to load users");
       } finally {
         setLoading(false);
       }
@@ -134,7 +151,6 @@ const index = () => {
   // Handle user actions
   const handleCreateUser = async () => {
     try {
-      setError(null);
       const userPayload = {
         email: formData.email,
         password: formData.password || "plist123!@#", // Default password if not provided
@@ -142,7 +158,7 @@ const index = () => {
         is_active: formData.is_active,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        ...(formData.role === "admin" && { role_level: formData.role_level || "support" })
+        ...(formData.role === "admin" && formData.role_id && { role_id: formData.role_id })
       };
 
       const response = await createAdminUser(userPayload);
@@ -151,11 +167,12 @@ const index = () => {
         // Add the newly created user to the list
         // Note: Once backend implements list endpoint, this will be handled automatically
         setUsers(prev => [...prev, newUser]);
+        toast.success("User created successfully");
       }
       handleClose();
     } catch (err) {
       console.error("Failed to create user:", err);
-      setError(err.message || "Failed to create user");
+      toast.error(err?.message || "Failed to create user");
     }
   };
 
@@ -168,7 +185,7 @@ const index = () => {
       is_active: user.is_active !== false,
       first_name: user.first_name || "",
       last_name: user.last_name || "",
-      role_level: user.role_level || "support"
+      role_id: user.role_id || null
     });
     setShowEditModal(true);
     setMenuAnchor({ [user.id]: null });
@@ -177,14 +194,13 @@ const index = () => {
   const handleUpdateUser = async () => {
     if (!selectedUser) return;
     try {
-      setError(null);
       const updatePayload = {
         email: formData.email,
         role: formData.role,
         is_active: formData.is_active,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        ...(formData.role === "admin" && { role_level: formData.role_level })
+        ...(formData.role === "admin" && formData.role_id && { role_id: formData.role_id })
       };
 
       // Only include password if it's provided
@@ -198,11 +214,12 @@ const index = () => {
         setUsers(prev => prev.map(user => 
           user.id === selectedUser.id ? updatedUser : user
         ));
+        toast.success("User updated successfully");
       }
       handleClose();
     } catch (err) {
       console.error("Failed to update user:", err);
-      setError(err.message || "Failed to update user");
+      toast.error(err?.message || "Failed to update user");
     }
   };
 
@@ -217,14 +234,14 @@ const index = () => {
 
     try {
       setDeleting(true);
-      setError(null);
       await deleteAdminUser(userToDelete.id);
       setUsers(prev => prev.filter(user => user.id !== userToDelete.id));
       setDeleteModalOpen(false);
       setUserToDelete(null);
+      toast.success("User deleted successfully");
     } catch (err) {
       console.error("Failed to delete user:", err);
-      setError(err.message || "Failed to delete user");
+      toast.error(err?.message || "Failed to delete user");
     } finally {
       setDeleting(false);
     }
@@ -237,7 +254,6 @@ const index = () => {
 
   const handleUpdateUserStatus = async (userId, currentStatus) => {
     try {
-      setError(null);
       const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
       await updateUserStatus(userId, { 
         status: newStatus,
@@ -247,9 +263,35 @@ const index = () => {
         user.id === userId ? { ...user, status: newStatus, is_active: newStatus === "Active" } : user
       ));
       setMenuAnchor({ [userId]: null });
+      toast.success(`User ${newStatus.toLowerCase()}d successfully`);
     } catch (err) {
       console.error("Failed to update user status:", err);
-      setError(err.message || "Failed to update user status");
+      toast.error(err?.message || "Failed to update user status");
+    }
+  };
+
+  const handleAssignRole = async (userId, roleId) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (!user || user.role !== "admin") return;
+
+      await updateAdminUser(userId, { 
+        role_id: roleId || null
+      });
+      
+      // Update local state
+      const selectedRole = roles.find(r => r.id === roleId);
+      setUsers(prev => prev.map(u => 
+        u.id === userId ? { 
+          ...u, 
+          role_id: roleId,
+          role_name: selectedRole?.name || null
+        } : u
+      ));
+      toast.success("Role assigned successfully");
+    } catch (err) {
+      console.error("Failed to assign role:", err);
+      toast.error(err?.message || "Failed to assign role");
     }
   };
 
@@ -296,12 +338,6 @@ const index = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-1-05 text-red-2 px-15 py-10 rounded-8 mb-10">
-          {error}
-        </div>
-      )}
-
       <div className="row y-gap-10 x-gap-10 items-center mb-10">
         <div className="col-auto">
           <div className="row px-10">
@@ -320,17 +356,19 @@ const index = () => {
           </div>
         </div>
 
-        <div className="col-auto ms-auto">
-          <button
-            className="button bg-blue-1 text-white px-15 fw-400 py-10 rounded-8"
-            onClick={() => {
-              setSelectedUser(null);
-              setShowModal(true);
-            }}
-          >
-            <Plus size={20} /> Add User
-          </button>
-        </div>
+        {checkPermission("user_management", "create") && (
+          <div className="col-auto ms-auto">
+            <button
+              className="button bg-blue-1 text-white px-15 fw-400 py-10 rounded-8"
+              onClick={() => {
+                setSelectedUser(null);
+                setShowModal(true);
+              }}
+            >
+              <Plus size={20} /> Add User
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-8 border-light px-20 py-15">
@@ -345,6 +383,7 @@ const index = () => {
                 <tr>
                   <th>User</th>
                   <th>Role</th>
+                  <th>Admin Role</th>
                   <th>Status</th>
                   <th className="text-nowrap">Created At</th>
                   <th>Action</th>
@@ -353,29 +392,20 @@ const index = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-20">
+                    <td colSpan="7" className="text-center py-20">
                       <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
                         <CircularProgress size={20} thickness={5} />
                         <span>Loading users...</span>
                       </div>
                     </td>
                   </tr>
-                ) : error && users.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="text-center py-20">
-                      <div className="text-16 text-red-1">Error: {error}</div>
-                    </td>
-                  </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-20">
+                    <td colSpan="7" className="text-center py-20">
                       <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
                         <UserX size={18} />
                         <span>No users found</span>
                       </div>
-                      {error && (
-                        <div className="text-14 text-red-1 mt-10">Error: {error}</div>
-                      )}
                     </td>
                   </tr>
                 ) : (
@@ -406,6 +436,31 @@ const index = () => {
                         </span>
                       </td>
                       <td className="align-middle">
+                        {user.role === "admin" ? (
+                          checkPermission("user_management", "update") && isSuperAdmin() ? (
+                            <select
+                              className="form-select border-light rounded-8 py-5 px-10 text-12 w-140"
+                              value={user.role_id || ""}
+                              disabled={currentUser.id === user.id}
+                              onChange={(e) => handleAssignRole(user.id, e.target.value ? parseInt(e.target.value) : null)}
+                            >
+                              <option value="">No Role</option>
+                              {roles.map((role) => (
+                                <option key={role.id} value={role.id}>
+                                  {role.name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="text-12 text-light-1">
+                              {roles.find(r => r.id === user.role_id)?.name || "No Role"}
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-12 text-light-1">-</span>
+                        )}
+                      </td>
+                      <td className="align-middle">
                         <span
                           className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
                             user.status === "Active"
@@ -434,20 +489,36 @@ const index = () => {
                             open={Boolean(menuAnchor[user.id])}
                             onClose={() => handleMenuClose(user.id)}
                           >
-                            <MenuItem onClick={() => {
-                              handleEditClick(user);
-                              handleMenuClose(user.id);
-                            }}>
+                            <MenuItem 
+                              disabled={!checkPermission("user_management", "update")}
+                              onClick={() => {
+                                if (checkPermission("user_management", "update")) {
+                                  handleEditClick(user);
+                                  handleMenuClose(user.id);
+                                }
+                              }}
+                            >
                               Edit
                             </MenuItem>
-                            <MenuItem onClick={() => {
-                              handleUpdateUserStatus(user.id, user.status);
-                            }}>
+                            <MenuItem 
+                              disabled={!checkPermission("user_management", "update")}
+                              onClick={() => {
+                                if (checkPermission("user_management", "update")) {
+                                  handleUpdateUserStatus(user.id, user.status);
+                                }
+                              }}
+                            >
                               {user.status === "Active" ? "Deactivate" : "Activate"}
                             </MenuItem>
-                            <MenuItem onClick={() => {
-                              handleDeleteUserClick(user.id, user.name);
-                            }} className="text-red-2">
+                            <MenuItem 
+                              disabled={!checkPermission("user_management", "delete")}
+                              onClick={() => {
+                                if (checkPermission("user_management", "delete")) {
+                                  handleDeleteUserClick(user.id, user.name);
+                                }
+                              }} 
+                              className="text-red-2"
+                            >
                               Delete
                             </MenuItem>
                           </Menu>
@@ -477,6 +548,7 @@ const index = () => {
             setFormData={setFormData}
             title="Create New User"
             description="Add a new user to the system"
+            isSuperAdmin={isSuperAdmin()}
           />
           <div className="d-flex justify-end gap-2 mt-20">
             <button
@@ -511,6 +583,7 @@ const index = () => {
             title="Edit User"
             description="Update user information"
             isEdit={true}
+            isSuperAdmin={isSuperAdmin()}
           />
           <div className="d-flex justify-end gap-2 mt-20">
             <button
@@ -542,22 +615,23 @@ const index = () => {
   );
 };
 
-const ModalContent = ({ roles = [], formData, setFormData, title, description, isEdit = false }) => {
-  const roleOptions = roles.map(role => ({
-    label: role.name || role.value || role,
-    value: role.value || role.name?.toLowerCase() || role,
-  }));
+const ModalContent = ({ roles = [], formData, setFormData, title, description, isEdit = false, isSuperAdmin = false }) => {
+  const roleOptions = [
+    { label: "Admin", value: "admin" },
+    { label: "Vendor", value: "vendor" },
+    { label: "Agent", value: "agent" },
+    { label: "Customer", value: "customer" },
+  ];
 
   const statusOptions = [
     { label: "Active", value: true },
     { label: "Inactive", value: false },
   ];
 
-  const roleLevelOptions = [
-    { label: "Support", value: "support" },
-    { label: "Super Admin", value: "super_admin" },
-    { label: "Manager", value: "manager" },
-  ];
+  const adminRoleOptions = roles.map(role => ({
+    label: role.name,
+    value: role.id,
+  }));
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -622,19 +696,19 @@ const ModalContent = ({ roles = [], formData, setFormData, title, description, i
         placeholder="Select Role"
         gridClass="col-12 mt-5"
         options={roleOptions}
-        defaultValue={formData.role}
+        value={formData.role}
         onChange={(e) => handleChange("role", e.target.value)}
       />
 
-      {formData.role === "admin" && (
+      {formData.role === "admin" && isSuperAdmin && (
         <FormInput
-          label="Role Level"
+          label="Admin Role"
           type="select"
-          placeholder="Select Role Level"
+          placeholder="Select Admin Role"
           gridClass="col-12 mt-5"
-          options={roleLevelOptions}
-          defaultValue={formData.role_level}
-          onChange={(e) => handleChange("role_level", e.target.value)}
+          options={adminRoleOptions}
+          value={formData.role_id ? String(formData.role_id) : ""}
+          onChange={(e) => handleChange("role_id", e.target.value ? parseInt(e.target.value) : null)}
         />
       )}
 
@@ -644,7 +718,7 @@ const ModalContent = ({ roles = [], formData, setFormData, title, description, i
         placeholder="Select Status"
         gridClass="col-12 mt-5"
         options={statusOptions.map(s => ({ label: s.label, value: String(s.value) }))}
-        defaultValue={String(formData.is_active)}
+        value={String(formData.is_active)}
         onChange={(e) => handleChange("is_active", e.target.value === "true")}
       />
       
