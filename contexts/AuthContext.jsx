@@ -46,6 +46,19 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Check available roles for an email/password combination
+  const checkRoles = async (email, password) => {
+    try {
+      const response = await AuthAPIClient.create("/auth/check-roles", {
+        email,
+        password,
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // Login function
   const login = async (credentials) => {
     setLoading(true);
@@ -90,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     user,
     isAuthenticated: isAuthenticatedState,
     loading,
+    checkRoles,
     login,
     logout,
     updateUser,
