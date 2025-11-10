@@ -181,7 +181,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
                           Reject
                         </MenuItem>
                       )}
-                      {onRefund && row.transactionId && (row.originalStatus === "confirmed" || row.originalStatus === "cancelled") && (
+                      {onRefund && row.transactionId && (row.originalStatus !== "confirmed" || row.originalStatus === "cancelled") && (
                         <MenuItem
                           onClick={() => {
                             if (hasPermission("booking_oversight", "update")) {
@@ -189,7 +189,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
                               handleMenuClose(row.id);
                             }
                           }}
-                          disabled={actionLoading || row.paid === "refunded" || !hasPermission("booking_oversight", "update")}
+                          disabled={actionLoading || row.paid !== "refunded" || !hasPermission("booking_oversight", "update")}
                           className="text-blue-1"
                         >
                           Refund

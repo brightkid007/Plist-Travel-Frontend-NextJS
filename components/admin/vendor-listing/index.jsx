@@ -13,7 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 const index = () => {
   const { hasPermission } = usePermissions();
   const [activeTab, setActiveTab] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
 
@@ -34,7 +34,6 @@ const index = () => {
 
   useEffect(() => {
     fetchListings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
   const tabs = [
@@ -57,36 +56,7 @@ const index = () => {
     if (s === "approved") return "bg-green-1 text-green-2";
     if (s === "rejected") return "bg-red-1 text-white";
     if (s === "submitted") return "bg-yellow-1 text-dark-1";
-    // draft or unknown
     return "bg-light-2 text-dark-1";
-  };
-
-  const onApprove = async (id) => {
-    if (!hasPermission("vendor_listing_management", "update")) {
-      toast.error("You don't have permission to approve listings");
-      return;
-    }
-    try {
-      await approveListing(id);
-      toast.success("Listing approved successfully");
-      await fetchListings();
-    } catch (e) {
-      toast.error(e?.message || "Failed to approve listing");
-    }
-  };
-
-  const onReject = async (id) => {
-    if (!hasPermission("vendor_listing_management", "update")) {
-      toast.error("You don't have permission to reject listings");
-      return;
-    }
-    try {
-      await rejectListing(id, {});
-      toast.success("Listing rejected successfully");
-      await fetchListings();
-    } catch (e) {
-      toast.error(e?.message || "Failed to reject listing");
-    }
   };
 
   const onChangeStatus = async (id, status) => {

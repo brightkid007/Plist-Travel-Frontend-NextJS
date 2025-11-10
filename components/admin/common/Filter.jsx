@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 
-const Filter = ({ onFilterChange }) => {
+const Filter = ({ onFilterChange, options }) => {
   const [status, setStatus] = useState("all");
   const [category, setCategory] = useState("all");
   const [subcategory, setSubcategory] = useState("all");
@@ -9,6 +9,36 @@ const Filter = ({ onFilterChange }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const debounceTimer = useRef(null);
+
+  const categories = Array.isArray(options?.categories) ? options.categories : [];
+  const subcategories = Array.isArray(options?.subcategories) ? options.subcategories : [];
+  const statuses = Array.isArray(options?.statuses) ? options.statuses : [];
+  const types = Array.isArray(options?.types) ? options.types : [];
+
+  // Filter subcategories based on selected category (from options)
+  const filteredSubcategories =
+    category !== "all"
+      ? subcategories.filter((sub) => {
+          const categoryId = parseInt(category, 10);
+          return sub.listing_category_id === categoryId || sub.category_id === categoryId;
+        })
+      : subcategories;
+
+  // Reset subcategory when category changes and current selection is invalid
+  useEffect(() => {
+    if (category === "all") {
+      setSubcategory("all");
+    } else if (subcategory !== "all") {
+      const currentSub = subcategories.find((sub) => sub.id === parseInt(subcategory, 10));
+      if (currentSub) {
+        const categoryId = parseInt(category, 10);
+        const subCategoryId = currentSub.listing_category_id || currentSub.category_id;
+        if (subCategoryId !== categoryId) {
+          setSubcategory("all");
+        }
+      }
+    }
+  }, [category, subcategory, subcategories]);
 
   useEffect(() => {
     if (onFilterChange) {
@@ -65,9 +95,11 @@ const Filter = ({ onFilterChange }) => {
           onChange={(e) => setStatus(e.target.value)}
         >
           <option value="all">All Statuses</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="pending">Pending</option>
-          <option value="cancelled">Cancelled</option>
+          {statuses.map((s) => (
+            <option key={s} value={s}>
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -78,6 +110,11 @@ const Filter = ({ onFilterChange }) => {
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="all">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
       <div className="col-sm-auto">
@@ -86,7 +123,14 @@ const Filter = ({ onFilterChange }) => {
           value={subcategory}
           onChange={(e) => setSubcategory(e.target.value)}
         >
-          <option value="all">All Subcategories</option>
+          <option value="all">
+            {category === "all" ? "All Subcategories" : "All Subcategories"}
+          </option>
+          {filteredSubcategories.map((sub) => (
+            <option key={sub.id} value={sub.id}>
+              {sub.name}
+            </option>
+          ))}
         </select>
       </div>
       <div className="col-sm-auto">
@@ -97,11 +141,18 @@ const Filter = ({ onFilterChange }) => {
             value={startDate}
             onChange={(date) => {
               setStartDate(date);
+              // Ensure endDate is not earlier than startDate
+              if (endDate && date && endDate.toDate && date.toDate) {
+                if (endDate.toDate() < date.toDate()) {
+                  setEndDate(date);
+                }
+              }
             }}
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
             placeholder="Start Date"
+            maxDate={endDate || undefined}
           />
         </div>
       </div>
@@ -112,12 +163,20 @@ const Filter = ({ onFilterChange }) => {
             containerClassName="custom_container-picker"
             value={endDate}
             onChange={(date) => {
+              // Ensure endDate is not earlier than startDate
+              if (startDate && date && startDate.toDate && date.toDate) {
+                if (date.toDate() < startDate.toDate()) {
+                  setEndDate(startDate);
+                  return;
+                }
+              }
               setEndDate(date);
             }}
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
             placeholder="End Date"
+            minDate={startDate || undefined}
           />
         </div>
       </div>
@@ -129,20 +188,11 @@ const Filter = ({ onFilterChange }) => {
           onChange={(e) => setType(e.target.value)}
         >
           <option value="all">All Types</option>
-          <optgroup label="Property List">
-            <option value="hotel">Hotel</option>
-            <option value="vacation">Vacation Rental</option>
-            <option value="venue">Event Venue</option>
-            <option value="spaces">Spaces</option>
-          </optgroup>
-          <optgroup label="Non-Property List">
-            <option value="tour">Tour</option>
-            <option value="activity">Activity</option>
-            <option value="event">Event</option>
-            <option value="ride">Ride</option>
-            <option value="flight">Flight</option>
-          </optgroup>
-          <option value="travel-packages">Travel Packages</option>
+          {types.map((t) => (
+            <option key={t} value={t}>
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </option>
+          ))}
         </select>
       </div>
     </div>

@@ -18,6 +18,12 @@ const index = () => {
   const [filters, setFilters] = useState({});
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterOptions, setFilterOptions] = useState({
+    statuses: [],
+    categories: [],
+    subcategories: [],
+    types: [],
+  });
   
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -146,6 +152,62 @@ const index = () => {
       const summary = res?.summary || res?.data?.summary;
       const bookingsList = res?.bookings || res?.data?.bookings || [];
       setBookings(bookingsList);
+
+      // Build filter options from fetched data
+      try {
+        const statusSet = new Set();
+        const typeSet = new Set();
+        const categoriesMap = new Map(); // id -> { id, name }
+        const subcategoriesMap = new Map(); // id -> { id, name, listing_category_id }
+
+        bookingsList.forEach((b) => {
+          // Status
+          const status = (b.status || b.bookingStatus || "").toString().toLowerCase();
+          if (status) statusSet.add(status);
+
+          // Type
+          const listing = b.listing || {};
+          const typeVal = (listing.type || b.type || b.listingType || b.category_type || "").toString().toLowerCase();
+          if (typeVal) typeSet.add(typeVal);
+
+          // Category
+          const category = listing.category || {};
+          if (category && (category.id != null || category.name)) {
+            const cid = category.id ?? category.listing_category_id;
+            if (cid != null && !categoriesMap.has(cid)) {
+              categoriesMap.set(cid, { id: cid, name: category.name || `Category ${cid}` });
+            }
+          }
+
+          // Subcategory
+          const subcategory = listing.subcategory || {};
+          if (subcategory && (subcategory.id != null || subcategory.name)) {
+            const sid = subcategory.id;
+            if (sid != null && !subcategoriesMap.has(sid)) {
+              subcategoriesMap.set(sid, {
+                id: sid,
+                name: subcategory.name || `Subcategory ${sid}`,
+                listing_category_id: subcategory.listing_category_id ?? subcategory.category_id,
+              });
+            }
+          }
+        });
+
+        setFilterOptions({
+          statuses: Array.from(statusSet),
+          types: Array.from(typeSet),
+          categories: Array.from(categoriesMap.values()),
+          subcategories: Array.from(subcategoriesMap.values()),
+        });
+      } catch (e) {
+        // Safe fallback if option building fails
+        setFilterOptions({
+          statuses: [],
+          types: [],
+          categories: [],
+          subcategories: [],
+        });
+      }
       
       const total = summary?.total ?? bookingsList.length ?? cards[0].amount;
       const confirmed = summary?.confirmed ?? bookingsList.filter((b) => (b.status || b.bookingStatus) === "confirmed").length ?? cards[1].amount;
@@ -296,7 +358,7 @@ const index = () => {
         </div>
       </div>
 
-      <Filter onFilterChange={handleFilterChange} />
+      <Filter onFilterChange={handleFilterChange} options={filterOptions} />
 
       <DashboardCard data={cards} />
 
