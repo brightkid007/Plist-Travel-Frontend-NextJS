@@ -473,6 +473,35 @@ export const deleteAdminCoupon = (id) => PricingAPIClient.delete(`${url.DELETE_A
 // Get coupon analytics
 export const getCouponAnalytics = (params) => PricingAPIClient.get(url.GET_COUPON_ANALYTICS, params);
 
+// VENDOR COUPON MANAGEMENT
+// Get my coupons (vendor's own coupons)
+export const getMyCoupons = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? PricingAPIClient.get("/coupons/me", sanitized)
+      : PricingAPIClient.get("/coupons/me");
+  }
+  return PricingAPIClient.get("/coupons/me");
+};
+
+// Create vendor coupon
+export const createVendorCoupon = (data) => PricingAPIClient.create("/coupons", data);
+
+// Update vendor coupon
+export const updateVendorCoupon = (id, data) => PricingAPIClient.update(`/coupons/${id}`, data);
+
+// Delete vendor coupon
+export const deleteVendorCoupon = (id) => PricingAPIClient.delete(`/coupons/${id}`);
+
+// Get coupon by ID
+export const getCouponById = (id) => PricingAPIClient.get(`/coupons/${id}`);
+
 // CONTENT MANAGEMENT
 // Get all content (admin)
 export const getAdminContent = (params) => api.get(url.GET_ADMIN_CONTENT, params);
