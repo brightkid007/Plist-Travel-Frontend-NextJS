@@ -5,66 +5,103 @@ import { CircularProgress } from "@mui/material";
 const Amenities = ({ amenitiesList = [], selectedAmenities = [], onUpdate, accessibilityInfo = "", isAccessibilityEnabled: propIsAccessibilityEnabled = false, onAccessibilityChange, onAccessibilityEnabledChange }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(false);
-  // Track if accessibility checkbox is checked
-  // Use prop value if provided, otherwise infer from accessibilityInfo
-  const [isAccessibilityEnabled, setIsAccessibilityEnabled] = useState(() => {
-    // If prop is provided, use it (parent controls state)
-    if (onAccessibilityEnabledChange) {
-      return propIsAccessibilityEnabled;
+  
+  // For accessibility checkbox: if parent controls it, use prop directly (no state)
+  // Otherwise, use local state (backward compatibility)
+  const isParentControlled = !!onAccessibilityEnabledChange;
+  const [localIsAccessibilityEnabled, setLocalIsAccessibilityEnabled] = useState(() => {
+    // Only use local state if parent doesn't control it
+    if (!isParentControlled) {
+      return !!(accessibilityInfo && accessibilityInfo.trim());
     }
-    // Otherwise, infer from accessibilityInfo (backward compatibility)
-    return !!(accessibilityInfo && accessibilityInfo.trim());
+    return false; // Not used when parent controls
   });
+  
+  // Use prop value when parent controls, otherwise use local state
+  const isAccessibilityEnabled = isParentControlled 
+    ? propIsAccessibilityEnabled 
+    : localIsAccessibilityEnabled;
 
   // Initialize selected amenities from props
+  // Use ref to track previous value to avoid unnecessary updates
+  const prevSelectedAmenities = useRef(selectedAmenities);
+  
   useEffect(() => {
-    if (selectedAmenities && Array.isArray(selectedAmenities)) {
-      // If selectedAmenities is an array of IDs
-      if (selectedAmenities.length > 0 && typeof selectedAmenities[0] === 'number') {
-        setSelectedIds(selectedAmenities);
-      } 
-      // If selectedAmenities is an array of objects with id property
-      else if (selectedAmenities.length > 0 && selectedAmenities[0].id) {
-        setSelectedIds(selectedAmenities.map(a => a.id));
+    // Only update if selectedAmenities actually changed
+    const isEqual = JSON.stringify(prevSelectedAmenities.current) === JSON.stringify(selectedAmenities);
+    if (!isEqual) {
+      if (selectedAmenities && Array.isArray(selectedAmenities)) {
+        // If selectedAmenities is an array of IDs
+        if (selectedAmenities.length > 0 && typeof selectedAmenities[0] === 'number') {
+          setSelectedIds(selectedAmenities);
+        } 
+        // If selectedAmenities is an array of objects with id property
+        else if (selectedAmenities.length > 0 && selectedAmenities[0]?.id) {
+          setSelectedIds(selectedAmenities.map(a => a.id));
+        } else if (selectedAmenities.length === 0) {
+          // If empty array, clear selection
+          setSelectedIds([]);
+        }
       }
+      prevSelectedAmenities.current = selectedAmenities;
     }
   }, [selectedAmenities]);
 
-  // Sync checkbox state with prop when parent controls it
+  // Sync local state with accessibilityInfo when not parent-controlled (backward compatibility)
   useEffect(() => {
-    if (onAccessibilityEnabledChange) {
-      // Parent controls state - sync with prop
-      setIsAccessibilityEnabled(propIsAccessibilityEnabled);
-    } else {
-      // No parent control - infer from accessibilityInfo (backward compatibility)
-      // Checkbox is checked if accessibilityInfo is not null/undefined (even if empty string)
+    if (!isParentControlled) {
       const hasValue = accessibilityInfo !== null && accessibilityInfo !== undefined;
-      if (hasValue !== isAccessibilityEnabled) {
-        setIsAccessibilityEnabled(hasValue);
+      if (hasValue !== localIsAccessibilityEnabled) {
+        setLocalIsAccessibilityEnabled(hasValue);
       }
     }
-  }, [propIsAccessibilityEnabled, accessibilityInfo, onAccessibilityEnabledChange]);
+  }, [accessibilityInfo, isParentControlled, localIsAccessibilityEnabled]);
+
+  // Track when selectedIds change and notify parent after render
+  const prevSelectedIds = useRef(selectedIds);
+  const isInitialMount = useRef(true);
+  
+  useEffect(() => {
+    // Skip on initial mount to avoid calling parent during initial render
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      prevSelectedIds.current = selectedIds;
+      return;
+    }
+    
+    // Only notify parent if selectedIds actually changed and onUpdate is provided
+    if (onUpdate) {
+      const hasChanged = JSON.stringify(prevSelectedIds.current) !== JSON.stringify(selectedIds);
+      if (hasChanged) {
+        // Schedule update after render to avoid React warning
+        // Using requestAnimationFrame ensures this runs after the current render cycle
+        requestAnimationFrame(() => {
+          onUpdate(selectedIds);
+        });
+        prevSelectedIds.current = selectedIds;
+      }
+    }
+  }, [selectedIds, onUpdate]);
 
   const handleAmenityToggle = (amenityId) => {
     setSelectedIds((prev) => {
       const newSelected = prev.includes(amenityId)
         ? prev.filter((id) => id !== amenityId)
         : [...prev, amenityId];
-      
-      // Notify parent component
-      if (onUpdate) {
-        onUpdate(newSelected);
-      }
-      
       return newSelected;
     });
   };
 
   const handleAccessibilityCheckboxChange = (event) => {
     const checked = event.target.checked;
-    setIsAccessibilityEnabled(checked);
     
-    // Notify parent of checkbox state change
+    // Update local state if not parent-controlled (backward compatibility)
+    if (!isParentControlled) {
+      setLocalIsAccessibilityEnabled(checked);
+    }
+    
+    // Notify parent of checkbox state change (if parent controls it)
+    // This is called from an event handler, so it's safe to call parent state setters
     if (onAccessibilityEnabledChange) {
       onAccessibilityEnabledChange(checked);
     }
@@ -158,3 +195,4 @@ const Amenities = ({ amenitiesList = [], selectedAmenities = [], onUpdate, acces
 };
 
 export default Amenities;
+

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import StarRating from "../../common/StarRating";
 
 const Description = ({ data, categories = [], subcategories = [], onUpdate }) => {
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
@@ -19,10 +20,6 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
     if (onUpdate) {
       onUpdate(field, value);
     }
-  };
-
-  const handleStarRatingChange = (rating) => {
-    handleChange("star_rating", rating);
   };
 
   return (
@@ -85,22 +82,11 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
 
       <div className="col-sm-6 mt-5">
         <h1 className="text-14 lh-12 fw-500">Star Rating</h1>
-        <div className="d-flex items-center gap-1 mt-10">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => {
-              const rating = index + 1;
-              const isSelected = data?.star_rating && rating <= data.star_rating;
-              return (
-                <span
-                  key={index}
-                  className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                  onClick={() => handleStarRatingChange(rating)}
-                >
-                  {isSelected ? "★" : "☆"}
-                </span>
-              );
-            })}
+        <div className="mt-10">
+          <StarRating
+            value={data?.star_rating || 0}
+            onChange={(rating) => handleChange("star_rating", rating)}
+          />
         </div>
       </div>
 

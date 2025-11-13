@@ -24,7 +24,7 @@ const Description = ({ bookingType, setBookingType }) => {
             className="form-select rounded-8 border-light px-15 py-10 justify-between w-full mt-10"
             onChange={(event) => {
               if (event.target.value === "create-new-property") {
-                router.push("/vendor/listings/add?service=Hotels");
+                router.push("/vendor/listings/add?type=property&subtype=Hotel");
               }
             }}
           >

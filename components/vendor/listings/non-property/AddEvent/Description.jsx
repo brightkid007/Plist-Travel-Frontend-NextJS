@@ -1,5 +1,6 @@
 import { Checkbox } from "@mui/material";
 import { useState } from "react";
+import StarRating from "../../common/StarRating";
 
 const Description = () => {
   const [starRating, setStarRating] = useState(0);
@@ -55,17 +56,11 @@ const Description = () => {
 
       <div className="col-sm-6 mt-5">
         <h1 className="text-14 lh-12 fw-500">Star Rating</h1>
-        <div className="d-flex items-center gap-1 mt-10">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => (
-              <span
-                className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                onClick={() => setStarRating(index + 1)}
-              >
-                {index < starRating ? "★" : "☆"}
-              </span>
-            ))}
+        <div className="mt-10">
+          <StarRating
+            value={starRating}
+            onChange={setStarRating}
+          />
         </div>
       </div>
 

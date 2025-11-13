@@ -174,12 +174,26 @@ const index = ({ isProperty = true, isListing = true }) => {
     );
   };
 
-  const getTypeLabel = (type) => {
+  const getTypeLabel = (type, subtype) => {
+    // For property type, show subtype if available
+    if (type === "property" && subtype) {
+      const subtypeMap = {
+        Hotel: "Hotel",
+        Space: "Space",
+        Vacation: "Vacation",
+        EventVenue: "Event Venue",
+      };
+      return subtypeMap[subtype] || subtype;
+    }
+    
+    // For other types, show the type label
     const typeMap = {
       property: "Property",
       tour: "Tour",
       event: "Event",
       activity: "Activity",
+      flight: "Flight",
+      ride: "Ride",
     };
     return typeMap[type] || type;
   };
@@ -343,15 +357,15 @@ const index = ({ isProperty = true, isListing = true }) => {
                   ) : (
                     listings.map((listing) => (
                       <tr key={listing.id}>
-                        <td className="align-middle fw-600">{listing.title}</td>
-                        <td className="align-middle fw-500">{getTypeLabel(listing.type)}</td>
-                        <td className="align-middle fw-500">
+                        <td className="align-middle">{listing.title}</td>
+                        <td className="align-middle">{getTypeLabel(listing.type, listing.subtype)}</td>
+                        <td className="align-middle">
                           {listing.category?.name || "-"}
                         </td>
-                        <td className="align-middle fw-500">
+                        <td className="align-middle">
                           {getStatusBadge(listing.status)}
                         </td>
-                        <td className="align-middle fw-500 text-14">
+                        <td className="align-middle text-14">
                           {listing.created_at
                             ? new Date(listing.created_at).toLocaleDateString()
                             : "-"}
@@ -375,7 +389,7 @@ const index = ({ isProperty = true, isListing = true }) => {
                               setSelectedListingId(null);
                             }}
                           >
-                            <MenuItem
+                            {/* <MenuItem
                               onClick={() => {
                                 router.push(
                                   `/vendor/property/${listing.id}/manage`
@@ -398,6 +412,14 @@ const index = ({ isProperty = true, isListing = true }) => {
                               className="text-12"
                             >
                               Setting
+                            </MenuItem> */}
+                            <MenuItem
+                              onClick={() => {
+                                router.push(`/vendor/property/${listing.id}/edit`);
+                              }}
+                              className="text-12 text-red-1"
+                            >
+                              Edit
                             </MenuItem>
                             <MenuItem
                               onClick={() => {

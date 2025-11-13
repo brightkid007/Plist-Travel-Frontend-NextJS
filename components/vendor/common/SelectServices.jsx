@@ -38,10 +38,38 @@ const SelectServices = ({ setIsListings }) => {
               className="button rounded-8 py-10 px-30 text-14 -dark-1 bg-dark-3 text-white col-auto"
               onClick={() => {
                 if (selectedService) {
-                  router.push(
-                    "/vendor/listings/add?service=" +
-                      selectedService?.name
-                  );
+                  // Map service names to type/subtype
+                  const serviceMap = {
+                    "Hotels": { type: "property", subtype: "Hotel" },
+                    "Spaces": { type: "property", subtype: "Space" },
+                    "Vacation Rentals": { type: "property", subtype: "Vacation" },
+                    "Event Venues": { type: "property", subtype: "EventVenue" },
+                    "Events": { type: "event" },
+                    "Tours": { type: "tour" },
+                    "Activities": { type: "activity" },
+                    "Flights": { type: "flight" },
+                    "Rides": { type: "ride" },
+                  };
+                  
+                  const mapping = serviceMap[selectedService.name];
+                  if (mapping) {
+                    if (mapping.subtype) {
+                      // Property type with subtype
+                      router.push(
+                        `/vendor/listings/add?type=${mapping.type}&subtype=${mapping.subtype}`
+                      );
+                    } else {
+                      // Non-property type
+                      router.push(
+                        `/vendor/listings/add?type=${mapping.type}`
+                      );
+                    }
+                  } else {
+                    // Fallback to legacy format
+                    router.push(
+                      "/vendor/listings/add?service=" + selectedService?.name
+                    );
+                  }
                 } else {
                   setShowSnackbar(true);
                 }
