@@ -25,11 +25,39 @@ const index = () => {
   const [editingCoupon, setEditingCoupon] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [filters, setFilters] = useState({});
 
-  const loadCoupons = async () => {
+  const loadCoupons = async (filterParams = {}) => {
     try {
       setLoading(true);
-      const response = await getMyCoupons();
+      // Build query parameters from filters
+      const params = {};
+      
+      if (filterParams.is_active && filterParams.is_active !== "all") {
+        params.is_active = filterParams.is_active === "true" || filterParams.is_active === true;
+      }
+      
+      if (filterParams.listing_category_id && filterParams.listing_category_id !== "all") {
+        params.listing_category_id = filterParams.listing_category_id;
+      }
+      
+      if (filterParams.listing_subcategory_id && filterParams.listing_subcategory_id !== "all") {
+        params.listing_subcategory_id = filterParams.listing_subcategory_id;
+      }
+      
+      if (filterParams.listing_type && filterParams.listing_type !== "all") {
+        params.listing_type = filterParams.listing_type;
+      }
+      
+      if (filterParams.date_from) {
+        params.date_from = filterParams.date_from;
+      }
+      
+      if (filterParams.date_to) {
+        params.date_to = filterParams.date_to;
+      }
+
+      const response = await getMyCoupons(params);
       const couponsData = response?.data?.data || response?.data || response || [];
       setCoupons(Array.isArray(couponsData) ? couponsData : []);
     } catch (error) {
@@ -41,9 +69,26 @@ const index = () => {
     }
   };
 
+  // Create a stable filter key for dependency tracking
+  const filterKey = useMemo(() => {
+    return `${filters.is_active || ''}_${filters.listing_category_id || ''}_${filters.listing_subcategory_id || ''}_${filters.listing_type || ''}_${filters.date_from || ''}_${filters.date_to || ''}`;
+  }, [filters.is_active, filters.listing_category_id, filters.listing_subcategory_id, filters.listing_type, filters.date_from, filters.date_to]);
+
   useEffect(() => {
-    loadCoupons();
-  }, []);
+    loadCoupons(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey]);
+
+  const handleFilterChange = (newFilters) => {
+    // Clean up "all" values
+    const cleanedFilters = {};
+    Object.keys(newFilters).forEach((key) => {
+      if (newFilters[key] !== "all" && newFilters[key] !== "" && newFilters[key] !== null && newFilters[key] !== undefined) {
+        cleanedFilters[key] = newFilters[key];
+      }
+    });
+    setFilters(cleanedFilters);
+  };
 
   // Calculate dashboard card data from coupons
   const dashboardData = useMemo(() => {
@@ -131,7 +176,7 @@ const index = () => {
         </div>
       </div>
 
-      <Filter />
+      <Filter filters={filters} onFilterChange={handleFilterChange} />
 
       {loading ? (
         <div className="d-flex justify-center items-center py-40">
@@ -142,7 +187,7 @@ const index = () => {
           <CouponCard data={dashboardData} />
 
           <div className="py-10 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
-            <CouponList onEdit={handleEdit} refreshTrigger={refreshKey} />
+            <CouponList onEdit={handleEdit} refreshTrigger={refreshKey} filters={filters} />
           </div>
         </>
       )}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Menu, MenuItem } from "@mui/material";
 import { getMyCoupons, deleteVendorCoupon } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
-const CouponList = ({ detail = false, onEdit, refreshTrigger }) => {
+const CouponList = ({ detail = false, onEdit, refreshTrigger, filters = {} }) => {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -17,10 +17,37 @@ const CouponList = ({ detail = false, onEdit, refreshTrigger }) => {
   const [couponToDelete, setCouponToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const loadCoupons = async () => {
+  const loadCoupons = async (filterParams = {}) => {
     try {
       setLoading(true);
-      const response = await getMyCoupons();
+      // Build query parameters from filters
+      const params = {};
+      
+      if (filterParams.is_active !== undefined && filterParams.is_active !== "all") {
+        params.is_active = filterParams.is_active === "true" || filterParams.is_active === true;
+      }
+      
+      if (filterParams.listing_category_id && filterParams.listing_category_id !== "all") {
+        params.listing_category_id = filterParams.listing_category_id;
+      }
+      
+      if (filterParams.listing_subcategory_id && filterParams.listing_subcategory_id !== "all") {
+        params.listing_subcategory_id = filterParams.listing_subcategory_id;
+      }
+      
+      if (filterParams.listing_type && filterParams.listing_type !== "all") {
+        params.listing_type = filterParams.listing_type;
+      }
+      
+      if (filterParams.date_from) {
+        params.date_from = filterParams.date_from;
+      }
+      
+      if (filterParams.date_to) {
+        params.date_to = filterParams.date_to;
+      }
+
+      const response = await getMyCoupons(params);
       const couponsData = response?.data?.data || response?.data || response || [];
       setCoupons(Array.isArray(couponsData) ? couponsData : []);
     } catch (error) {
@@ -36,9 +63,15 @@ const CouponList = ({ detail = false, onEdit, refreshTrigger }) => {
     }
   };
 
+  // Create a stable filter key for dependency tracking
+  const filterKey = useMemo(() => {
+    return `${filters.is_active || ''}_${filters.listing_category_id || ''}_${filters.listing_subcategory_id || ''}_${filters.listing_type || ''}_${filters.date_from || ''}_${filters.date_to || ''}`;
+  }, [filters.is_active, filters.listing_category_id, filters.listing_subcategory_id, filters.listing_type, filters.date_from, filters.date_to]);
+
   useEffect(() => {
-    loadCoupons();
-  }, [refreshTrigger]);
+    loadCoupons(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger, filterKey]);
 
   const handleMenuClick = (event, couponId) => {
     setAnchorEl(event.currentTarget);
