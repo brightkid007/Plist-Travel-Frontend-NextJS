@@ -16,11 +16,11 @@ const index = () => {
       value: "basic-info",
       content: <BasicInfo key={"basic-info"} />,
     },
-    {
-      label: "Legal & Compliance",
-      value: "legal-compliance",
-      content: <LegalCompliance key={"legal-compliance"} />,
-    },
+    // {
+    //   label: "Legal & Compliance",
+    //   value: "legal-compliance",
+    //   content: <LegalCompliance key={"legal-compliance"} />,
+    // },
     {
       label: "Financial",
       value: "financial",
@@ -31,11 +31,11 @@ const index = () => {
       value: "technical-support",
       content: <TechnicalSupport key={"technical-support"} />,
     },
-    {
-      label: "Integration",
-      value: "integration",
-      content: <Integration key={"integration"} />,
-    },
+    // {
+    //   label: "Integration",
+    //   value: "integration",
+    //   content: <Integration key={"integration"} />,
+    // },
   ];
 
   return (

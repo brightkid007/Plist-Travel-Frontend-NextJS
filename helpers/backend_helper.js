@@ -108,6 +108,18 @@ export const updateCurrentUser = (data) => AuthAPIClient.update("/users/me", dat
 // Get user by ID
 export const getAdminUserById = (id) => AuthAPIClient.get(`/users/${id}`);
 
+// Get user addresses
+export const getUserAddresses = (userId) => AuthAPIClient.get(`/users/${userId}/address`);
+
+// Create new address
+export const createAddress = (data) => AuthAPIClient.create("/address", data);
+
+// Update address
+export const updateAddress = (id, data) => AuthAPIClient.update(`/address/${id}`, data);
+
+// Delete address
+export const deleteAddress = (id) => AuthAPIClient.delete(`/address/${id}`);
+
 // Create new user - uses /auth/register endpoint
 export const createAdminUser = (data) => AuthAPIClient.create("/auth/register", data);
 
@@ -226,6 +238,154 @@ export const setListingStatus = (id, status) => {
 
 // Get listing analytics - Listing Service
 export const getListingAnalytics = (params) => ListingAPIClient.get(url.GET_LISTING_ANALYTICS, params);
+
+// VENDOR LISTING MANAGEMENT
+// Create new listing
+export const createListing = (data) => ListingAPIClient.create("/listings", data);
+
+// Get my listings (vendor's own listings)
+export const getMyListings = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/listings/me", sanitized)
+      : ListingAPIClient.get("/listings/me");
+  }
+  return ListingAPIClient.get("/listings/me");
+};
+
+// Get listing by ID
+export const getListingById = (id) => ListingAPIClient.get(`/listings/${id}`);
+
+// Update listing
+export const updateListing = (id, data) => ListingAPIClient.update(`/listings/${id}`, data);
+
+// Delete listing
+export const deleteListing = (id) => ListingAPIClient.delete(`/listings/${id}`);
+
+// Get all listings (public)
+export const getAllListings = (params) => ListingAPIClient.get("/listings", params);
+
+// LISTING CATEGORY MANAGEMENT
+// Get all listing categories
+export const getListingCategories = (params) => ListingAPIClient.get("/listing-categories", params);
+
+// Get listing category by ID
+export const getListingCategoryById = (id) => ListingAPIClient.get(`/listing-categories/${id}`);
+
+// Create listing category (admin only)
+export const createListingCategory = (data) => ListingAPIClient.create("/listing-categories", data);
+
+// Update listing category (admin only)
+export const updateListingCategory = (id, data) => ListingAPIClient.update(`/listing-categories/${id}`, data);
+
+// Delete listing category (admin only)
+export const deleteListingCategory = (id) => ListingAPIClient.delete(`/listing-categories/${id}`);
+
+// LISTING SUBCATEGORY MANAGEMENT
+// Get all listing subcategories
+export const getListingSubcategories = (params) => ListingAPIClient.get("/listing-subcategories", params);
+
+// Get listing subcategory by ID
+export const getListingSubcategoryById = (id) => ListingAPIClient.get(`/listing-subcategories/${id}`);
+
+// Create listing subcategory (admin only)
+export const createListingSubcategory = (data) => ListingAPIClient.create("/listing-subcategories", data);
+
+// Update listing subcategory (admin only)
+export const updateListingSubcategory = (id, data) => ListingAPIClient.update(`/listing-subcategories/${id}`, data);
+
+// Delete listing subcategory (admin only)
+export const deleteListingSubcategory = (id) => ListingAPIClient.delete(`/listing-subcategories/${id}`);
+
+// AMENITY MANAGEMENT
+// Get all amenities
+export const getAmenities = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/amenities", sanitized)
+      : ListingAPIClient.get("/amenities");
+  }
+  return ListingAPIClient.get("/amenities");
+};
+
+// Get amenity by ID
+export const getAmenityById = (id) => ListingAPIClient.get(`/amenities/${id}`);
+
+// Create amenity (admin only)
+export const createAmenity = (data) => ListingAPIClient.create("/amenities", data);
+
+// Update amenity (admin only)
+export const updateAmenity = (id, data) => ListingAPIClient.update(`/amenities/${id}`, data);
+
+// Delete amenity (admin only)
+export const deleteAmenity = (id) => ListingAPIClient.delete(`/amenities/${id}`);
+
+// MEDIA MANAGEMENT
+// Upload media asset (image, video, pdf)
+export const uploadMedia = (file, listingId) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("listing_id", listingId.toString());
+  
+  return ListingAPIClient.service.post("/media", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+// Get all media assets
+export const getMediaAssets = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/media", sanitized)
+      : ListingAPIClient.get("/media");
+  }
+  return ListingAPIClient.get("/media");
+};
+
+// Get media asset by ID
+export const getMediaAssetById = (id) => ListingAPIClient.get(`/media/${id}`);
+
+// Update media asset (admin only)
+export const updateMediaAsset = (id, data) => ListingAPIClient.update(`/media/${id}`, data);
+
+// Delete media asset (admin only)
+export const deleteMediaAsset = (id) => ListingAPIClient.delete(`/media/${id}`);
+
+// FAQ MANAGEMENT
+// Get all FAQs
+export const getFAQs = (params) => ListingAPIClient.get("/faqs", params);
+
+// Get FAQ by ID
+export const getFAQById = (id) => ListingAPIClient.get(`/faqs/${id}`);
+
+// Create FAQ
+export const createFAQ = (data) => ListingAPIClient.create("/faqs", data);
+
+// Update FAQ
+export const updateFAQ = (id, data) => ListingAPIClient.update(`/faqs/${id}`, data);
+
+// Delete FAQ
+export const deleteFAQ = (id) => ListingAPIClient.delete(`/faqs/${id}`);
 
 // CATEGORY MANAGEMENT
 // Get all categories (admin)

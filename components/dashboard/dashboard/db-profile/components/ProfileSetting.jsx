@@ -1,12 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AvatarUploader from "@/components/dashboard/dashboard/db-settings/components/AvatarUploader";
 import SavedItems from "@/components/dashboard/dashboard/db-profile/components/SavedItems";
 import ProfileDetail from "@/components/dashboard/dashboard/db-profile/components/ProfileDetail";
 import SavedBookingCard from "./SavedBookingCard";
+import { getCurrentUser } from "@/helpers/backend_helper";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ProfileSettings = () => {
+  const { user } = useAuth();
+  const [userStats, setUserStats] = useState({
+    memberSince: null,
+    savedHotels: 0,
+    completedBookings: 0,
+    countriesVisited: 0,
+    loyaltyPoints: 0,
+  });
+
+  const loadUserStats = async () => {
+    try {
+      const response = await getCurrentUser();
+      const userData = response?.data || response || {};
+      
+      // Format member since date
+      let memberSince = "N/A";
+      if (userData.createdAt) {
+        const date = new Date(userData.createdAt);
+        memberSince = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      } else if (user?.createdAt) {
+        const date = new Date(user.createdAt);
+        memberSince = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+
+      setUserStats({
+        memberSince,
+        savedHotels: userData.saved_hotels_count || 0,
+        completedBookings: userData.completed_bookings_count || 0,
+        countriesVisited: userData.countries_visited_count || 0,
+        loyaltyPoints: userData.loyalty_points || userData.profile?.loyalty_points || 0,
+      });
+    } catch (error) {
+      // Silently fail - use default values
+      console.error("Failed to load user stats:", error);
+    }
+  };
+  
+  useEffect(() => {
+    if (user) {
+      loadUserStats();
+    }
+  }, [user]);
+
   const options = [
     {
       label: "Profile Details",
@@ -29,19 +74,19 @@ const ProfileSettings = () => {
           </div>
 
           <div className="text-12 lh-14 mt-10 mb-10 fw-400">
-            👤 Member since April 2023
+            👤 Member since {userStats.memberSince}
           </div>
           <div className="text-12 lh-14 mt-10 mb-10 fw-400">
-            🤍 2 saved hotels
+            🤍 {userStats.savedHotels} saved {userStats.savedHotels === 1 ? 'hotel' : 'hotels'}
           </div>
           <div className="text-12 lh-14 mt-10 mb-10 fw-400">
-            ⏳ 5 completed bookings
+            ⏳ {userStats.completedBookings} completed {userStats.completedBookings === 1 ? 'booking' : 'bookings'}
           </div>
           <div className="text-12 lh-14 mt-10 mb-10 fw-400">
-            📝 3 countries visited
+            📝 {userStats.countriesVisited} {userStats.countriesVisited === 1 ? 'country' : 'countries'} visited
           </div>
           <button className="button rounded-16 py-10 px-30 text-12 -dark-1 bg-blue-1 text-white">
-            100 Loyalty Points
+            {userStats.loyaltyPoints} Loyalty Points
           </button>
         </div>
       </div>

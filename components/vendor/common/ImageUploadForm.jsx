@@ -3,7 +3,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
-const ImageUploadForm = () => {
+const ImageUploadForm = ({ onFileSelect, multiple = true }) => {
   const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState("");
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -14,9 +14,8 @@ const ImageUploadForm = () => {
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     const allowedTypes = [
       "image/png",
@@ -25,22 +24,38 @@ const ImageUploadForm = () => {
       "image/gif",
       "image/svg+xml",
     ];
-    if (!allowedTypes.includes(file.type)) {
-      failedUpload("Only SVG, PNG, JPG, or GIF files are allowed.");
-      return;
-    }
 
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
-    img.onload = () => {
-      if (img.width > 800 || img.height > 400) {
-        failedUpload(
-          `Image is too large! Max size is 800x400px. Yours is ${img.width}x${img.height}px.`
-        );
-      } else {
-        setFileName(file.name);
+    // Process each file
+    Array.from(files).forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        failedUpload("Only SVG, PNG, JPG, or GIF files are allowed.");
+        return;
       }
-    };
+
+      // Check file size (2MB max based on backend)
+      if (file.size > 2 * 1024 * 1024) {
+        failedUpload("File size must be less than 2MB.");
+        return;
+      }
+
+      // Validate image file
+      const imageElement = new window.Image();
+      imageElement.src = URL.createObjectURL(file);
+      imageElement.onload = () => {
+        setFileName(file.name);
+        if (onFileSelect) {
+          onFileSelect(file);
+        }
+      };
+      imageElement.onerror = () => {
+        failedUpload("Invalid image file.");
+      };
+    });
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const failedUpload = (message) => {
@@ -53,9 +68,42 @@ const ImageUploadForm = () => {
 
   const handleDrop = (event) => {
     event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      setFileName(file.name);
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "image/gif",
+        "image/svg+xml",
+      ];
+
+      // Process dropped files
+      Array.from(files).forEach((file) => {
+        if (!allowedTypes.includes(file.type)) {
+          failedUpload("Only SVG, PNG, JPG, or GIF files are allowed.");
+          return;
+        }
+
+        // Check file size (2MB max based on backend)
+        if (file.size > 2 * 1024 * 1024) {
+          failedUpload("File size must be less than 2MB.");
+          return;
+        }
+
+        // Validate image
+        const imageElement = new window.Image();
+        imageElement.src = URL.createObjectURL(file);
+        imageElement.onload = () => {
+          setFileName(file.name);
+          if (onFileSelect) {
+            onFileSelect(file);
+          }
+        };
+        imageElement.onerror = () => {
+          failedUpload("Invalid image file.");
+        };
+      });
     }
   };
 
@@ -76,11 +124,12 @@ const ImageUploadForm = () => {
         ref={fileInputRef}
         style={{ display: "none" }}
         onChange={handleFileChange}
+        multiple={multiple}
       />
       <FileUploadIcon className="text-light-1 text-40" />
       <div className="text-14 text-light-1">or drag and drop</div>
       <div className="text-12 text-light-1">
-        SVG, PNG, JPG or GIF (max. 800x400px)
+        SVG, PNG, JPG or GIF (max. 2MB)
       </div>
       <div className="text-12 text-black-50 lh-1">
         *Double Click on the image to select featured.

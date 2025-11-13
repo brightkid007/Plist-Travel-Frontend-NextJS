@@ -5,7 +5,7 @@ function Footer() {
   const linksData = [
     { label: "Privacy", url: "#" },
     { label: "Terms", url: "#" },
-    { label: "Site Map", url: "#" },
+    // { label: "Site Map", url: "#" },
   ];
 
   return (
@@ -32,7 +32,6 @@ function Footer() {
             </div>
           </div>
         </div>
-        {/* End .col-auto */}
 
         <div className="col-auto">
           <div className="d-flex x-gap-5 y-gap-5 items-center">
@@ -40,9 +39,7 @@ function Footer() {
             <button className="text-14 fw-500 underline">USD</button>
           </div>
         </div>
-        {/* End .col-auto */}
       </div>
-      {/* End .row */}
     </footer>
   );
 }

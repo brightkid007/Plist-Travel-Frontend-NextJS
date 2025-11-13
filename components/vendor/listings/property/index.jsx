@@ -1,56 +1,188 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState, useEffect } from "react";
 import VendorDashboardLayout from "../../common/layout";
 import SelectServices from "./SelectServices";
 import { Menu, MenuItem } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { getMyListings, deleteListing, getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
+import { CircularProgress } from "@mui/material";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 
 const index = ({ isProperty = true, isListing = true }) => {
   const [isListings, setIsListings] = useState(isListing);
-
-  const listings = [
-    {
-      id: 1,
-      image: "/img/testimonials/1/4.png",
-      name: "Luxury Beach Resort",
-      type: "Hotel",
-      bookings: "45",
-      price: "$350/night",
-      status: "Active",
-    },
-    {
-      id: 2,
-      image: "/img/testimonials/1/4.png",
-      name: "City Walking Tour",
-      type: "Tour",
-      bookings: "32",
-      price: "$45/person",
-      status: "Active",
-    },
-    {
-      id: 3,
-      image: "/img/testimonials/1/4.png",
-      name: "Wine Tasting Experience",
-      type: "Event",
-      bookings: "22",
-      price: "$75/person",
-      status: "Active",
-    },
-    {
-      id: 4,
-      image: "/img/testimonials/1/4.png",
-      name: "Mountain Cabin Retreat",
-      type: "Hotel",
-      bookings: "28",
-      price: "$250/night  ",
-      status: "Inactive",
-    },
-  ];
-
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedListingId, setSelectedListingId] = useState(null);
   const showMoreMenu = Boolean(anchorEl);
   const router = useRouter();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [listingToDelete, setListingToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Filter states
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "all",
+    type: "all",
+    category_id: "all",
+    subcategory_id: "all",
+  });
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+
+  // Load categories and subcategories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const [catRes, subcatRes] = await Promise.all([
+          getListingCategories(),
+          getListingSubcategories(),
+        ]);
+        setCategories(catRes?.data || catRes || []);
+        setSubcategories(subcatRes?.data || subcatRes || []);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Filter subcategories based on selected category
+  useEffect(() => {
+    if (filters.category_id && filters.category_id !== "all") {
+      const filtered = subcategories.filter(
+        (sub) => sub.listing_category_id === parseInt(filters.category_id, 10)
+      );
+      setFilteredSubcategories(filtered);
+      // Reset subcategory if it's not in the filtered list
+      if (filters.subcategory_id !== "all") {
+        const subcatExists = filtered.some(
+          (sub) => sub.id === parseInt(filters.subcategory_id, 10)
+        );
+        if (!subcatExists) {
+          setFilters((prev) => ({ ...prev, subcategory_id: "all" }));
+        }
+      }
+    } else {
+      setFilteredSubcategories([]);
+      setFilters((prev) => ({ ...prev, subcategory_id: "all" }));
+    }
+  }, [filters.category_id, subcategories]);
+
+  // Load listings when filters change (with debounce for search)
+  useEffect(() => {
+    if (!isListings) return;
+
+    const timeoutId = setTimeout(() => {
+      loadListings();
+    }, filters.search ? 500 : 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [isListings, filters.status, filters.type, filters.category_id, filters.subcategory_id, filters.search]);
+
+  const loadListings = async () => {
+    try {
+      setLoading(true);
+      // Build filters object, removing "all" values
+      const filterParams = {};
+      if (filters.search && filters.search.trim()) {
+        filterParams.search = filters.search.trim();
+      }
+      if (filters.status && filters.status !== "all") {
+        filterParams.status = filters.status;
+      }
+      if (filters.type && filters.type !== "all") {
+        filterParams.type = filters.type;
+      }
+      if (filters.category_id && filters.category_id !== "all") {
+        filterParams.category_id = filters.category_id;
+      }
+      if (filters.subcategory_id && filters.subcategory_id !== "all") {
+        filterParams.subcategory_id = filters.subcategory_id;
+      }
+
+      const response = await getMyListings(filterParams);
+      const listingsData = response?.data || response || [];
+      setListings(Array.isArray(listingsData) ? listingsData : []);
+    } catch (error) {
+      console.error("Error loading listings:", error);
+      if (error?.response?.status === 404 || error?.status === 404) {
+        setListings([]);
+      } else {
+        toast.error(error?.message || "Failed to load listings");
+        setListings([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleDeleteClick = (listingId) => {
+    const listing = listings.find((l) => l.id === listingId);
+    setListingToDelete(listing);
+    setDeleteModalOpen(true);
+    setAnchorEl(null);
+    setSelectedListingId(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setListingToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!listingToDelete) return;
+
+    try {
+      setDeleting(true);
+      await deleteListing(listingToDelete.id);
+      toast.success("Listing deleted successfully");
+      loadListings();
+      setDeleteModalOpen(false);
+      setListingToDelete(null);
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      toast.error(error?.message || "Failed to delete listing");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusMap = {
+      draft: { label: "Draft", className: "bg-light-2 text-dark-1" },
+      submitted: { label: "Submitted", className: "bg-blue-1 text-white" },
+      approved: { label: "Active", className: "bg-dark-4 text-white" },
+      rejected: { label: "Rejected", className: "bg-red-1 text-white" },
+    };
+    const statusInfo = statusMap[status] || { label: status, className: "bg-light-2 text-dark-1" };
+    return (
+      <span className={`rounded-100 px-10 text-center text-14 ${statusInfo.className}`}>
+        {statusInfo.label}
+      </span>
+    );
+  };
+
+  const getTypeLabel = (type) => {
+    const typeMap = {
+      property: "Property",
+      tour: "Tour",
+      event: "Event",
+      activity: "Activity",
+    };
+    return typeMap[type] || type;
+  };
 
   return (
     <VendorDashboardLayout>
@@ -81,6 +213,8 @@ const index = ({ isProperty = true, isListing = true }) => {
                   type="text"
                   placeholder="Search listings..."
                   className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+                  value={filters.search}
+                  onChange={(e) => handleFilterChange("search", e.target.value)}
                 />
                 <i
                   className="icon-search text-light-1 position-absolute"
@@ -93,126 +227,191 @@ const index = ({ isProperty = true, isListing = true }) => {
               </div>
             </div>
             <div className="col-sm-auto">
-              <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
+              <select
+                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+                value={filters.status}
+                onChange={(e) => handleFilterChange("status", e.target.value)}
+              >
                 <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="approved">Active</option>
+                <option value="rejected">Rejected</option>
               </select>
             </div>
 
             <div className="col-sm-auto">
-              <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-                <option value="all">Listing Type</option>
+              <select
+                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+                value={filters.type}
+                onChange={(e) => handleFilterChange("type", e.target.value)}
+              >
+                <option value="all">All Types</option>
+                <option value="property">Property</option>
+                <option value="tour">Tour</option>
+                <option value="event">Event</option>
+                <option value="activity">Activity</option>
               </select>
             </div>
 
             <div className="col-sm-auto">
-              <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-                <option value="all">Category</option>
+              <select
+                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+                value={filters.category_id}
+                onChange={(e) => {
+                  handleFilterChange("category_id", e.target.value);
+                }}
+              >
+                <option value="all">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-sm-auto">
-              <select className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full">
-                <option value="all">Sub Category</option>
+              <select
+                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+                value={filters.subcategory_id}
+                onChange={(e) => handleFilterChange("subcategory_id", e.target.value)}
+                disabled={!filters.category_id || filters.category_id === "all"}
+              >
+                <option value="all">All Subcategories</option>
+                {filteredSubcategories.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-sm-auto ms-auto">
-              <button className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full">
-                Export Listings
+              <button
+                className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full"
+                onClick={() => {
+                  setFilters({
+                    search: "",
+                    status: "all",
+                    type: "all",
+                    category_id: "all",
+                    subcategory_id: "all",
+                  });
+                }}
+              >
+                Clear Filters
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-8 border-light px-15 py-15">
+          <div className="bg-white rounded-8 border-light px-15 py-5">
             <div className="overflow-scroll scroll-bar-1">
               <table className="table-2 col-12">
                 <thead>
                   <tr className="text-light-1 fw-600">
-                    <th>Image</th>
                     <th>Name</th>
                     <th>Type</th>
-                    <th>Price</th>
-                    <th>Bookings</th>
+                    <th>Category</th>
                     <th>Status</th>
+                    <th>Created</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {listings.map((row, index) => (
-                    <tr key={index}>
-                      <td className="align-middle">
-                        <img
-                          className="rounded-8"
-                          src={row.image}
-                          alt={row.name}
-                          style={{
-                            height: "50px",
-                            width: "60px",
-                            objectFit: "fill",
-                          }}
-                        />
-                      </td>
-                      <td className="align-middle fw-600">{row.name}</td>
-                      <td className="align-middle fw-500">{row.type}</td>
-                      <td className="align-middle fw-500">{row.price}</td>
-                      <td className="align-middle fw-500">{row.bookings}</td>
-                      <td className="align-middle fw-500">
-                        <span
-                          className={`rounded-100 px-10 text-center text-14 ${
-                            row.status === "Active"
-                              ? "bg-dark-4 text-white"
-                              : "border-light"
-                          }`}
-                        >
-                          {row.status}
-                        </span>
-                      </td>
-                      <td className="align-middle">
-                        <span
-                          id={row.id}
-                          className="material-symbols-outlined cursor-pointer"
-                          onClick={(event) => setAnchorEl(event.currentTarget)}
-                        >
-                          more_horiz
-                        </span>
-                        <Menu
-                          id="more-menu"
-                          anchorEl={anchorEl}
-                          open={showMoreMenu}
-                          onClose={() => setAnchorEl(null)}
-                        >
-                          <MenuItem
-                            onClick={() => {
-                              router.push(
-                                "/vendor/property/" + anchorEl.id + "/manage"
-                              );
-                            }}
-                            className="text-12"
-                          >
-                            Manage {isProperty ? "Property" : "Listing"}
-                          </MenuItem>
-                          {/* <MenuItem
-                            onClick={() => {
-                              router.push("/vendor/property");
-                            }}
-                            className="text-12"
-                          >
-                            Accommendations
-                          </MenuItem> */}
-                          <MenuItem
-                            onClick={() => {
-                              router.push(
-                                "/vendor/property/" + anchorEl.id + "/setting"
-                              );
-                            }}
-                            className="text-12"
-                          >
-                            Setting
-                          </MenuItem>
-                        </Menu>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="6" className="text-center py-40">
+                        <div className="d-flex justify-center items-center">
+                          <CircularProgress />
+                          <span className="ml-10 text-14">Loading listings...</span>
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                  ) : listings.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="text-center py-40">
+                        <div className="d-flex flex-column items-center justify-center">
+                          <span className="material-symbols-outlined text-48 text-light-1 mb-10">
+                            hotel
+                          </span>
+                          <div className="text-16 text-light-1">No listings found</div>
+                          <div className="text-14 text-light-1 mt-5">
+                            Click "Add New {isProperty ? "Property" : "Listing"}" to create your first listing
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    listings.map((listing) => (
+                      <tr key={listing.id}>
+                        <td className="align-middle fw-600">{listing.title}</td>
+                        <td className="align-middle fw-500">{getTypeLabel(listing.type)}</td>
+                        <td className="align-middle fw-500">
+                          {listing.category?.name || "-"}
+                        </td>
+                        <td className="align-middle fw-500">
+                          {getStatusBadge(listing.status)}
+                        </td>
+                        <td className="align-middle fw-500 text-14">
+                          {listing.created_at
+                            ? new Date(listing.created_at).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td className="align-middle">
+                          <span
+                            className="material-symbols-outlined cursor-pointer"
+                            onClick={(event) => {
+                              setAnchorEl(event.currentTarget);
+                              setSelectedListingId(listing.id);
+                            }}
+                          >
+                            more_horiz
+                          </span>
+                          <Menu
+                            id="more-menu"
+                            anchorEl={anchorEl}
+                            open={showMoreMenu && selectedListingId === listing.id}
+                            onClose={() => {
+                              setAnchorEl(null);
+                              setSelectedListingId(null);
+                            }}
+                          >
+                            <MenuItem
+                              onClick={() => {
+                                router.push(
+                                  `/vendor/property/${listing.id}/manage`
+                                );
+                                setAnchorEl(null);
+                                setSelectedListingId(null);
+                              }}
+                              className="text-12"
+                            >
+                              Manage {isProperty ? "Property" : "Listing"}
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                router.push(
+                                  `/vendor/property/${listing.id}/setting`
+                                );
+                                setAnchorEl(null);
+                                setSelectedListingId(null);
+                              }}
+                              className="text-12"
+                            >
+                              Setting
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                handleDeleteClick(listing.id);
+                              }}
+                              className="text-12 text-red-1"
+                            >
+                              Delete
+                            </MenuItem>
+                          </Menu>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -221,6 +420,18 @@ const index = ({ isProperty = true, isListing = true }) => {
       ) : (
         <SelectServices setIsListings={setIsListings} />
       )}
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Listing"
+        message={`Are you sure you want to delete the listing "${listingToDelete?.title || `#${listingToDelete?.id}`}"?`}
+        itemName={listingToDelete?.title || `Listing #${listingToDelete?.id}`}
+        loading={deleting}
+        confirmLabel="Delete"
+        confirmingLabel="Deleting..."
+      />
     </VendorDashboardLayout>
   );
 };
