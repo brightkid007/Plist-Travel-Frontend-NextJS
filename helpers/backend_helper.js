@@ -6,6 +6,7 @@ import {
   CommunicationAPIClient,
   PricingAPIClient,
   PaymentAPIClient,
+  ReviewAPIClient,
   setAuthorization,
   clearAuthorization
 } from "./api_helper";
@@ -638,3 +639,51 @@ export const getPackageSubscriptions = (params) => PricingAPIClient.get(url.GET_
 export const exportPackageSubscriptionsPdf = (data) => PricingAPIClient.create(url.EXPORT_PACKAGE_SUBSCRIPTIONS_PDF, data);
 export const updatePackageSubscriptionStatus = (id, data) => PricingAPIClient.patch(`${url.UPDATE_PACKAGE_SUBSCRIPTION_STATUS}/${id}/status`, data);
 export const updatePackageSubscription = (id, data) => PricingAPIClient.update(`${url.UPDATE_PACKAGE_SUBSCRIPTION}/${id}`, data);
+
+// ===========================================
+// REVIEW & RATING (Review-Rating Service)
+// ===========================================
+
+// Get all reviews (vendor can see reviews for their listings)
+export const getReviews = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ReviewAPIClient.get("/reviews", sanitized)
+      : ReviewAPIClient.get("/reviews");
+  }
+  return ReviewAPIClient.get("/reviews");
+};
+
+// Get review by ID
+export const getReviewById = (id) => ReviewAPIClient.get(`/reviews/${id}`);
+
+// Get reviews by listing ID
+export const getReviewsByListingId = (listingId, params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ReviewAPIClient.get(`/reviews/by-listing/${listingId}`, sanitized)
+      : ReviewAPIClient.get(`/reviews/by-listing/${listingId}`);
+  }
+  return ReviewAPIClient.get(`/reviews/by-listing/${listingId}`);
+};
+
+// Create review
+export const createReview = (data) => ReviewAPIClient.create("/reviews", data);
+
+// Update review
+export const updateReview = (id, data) => ReviewAPIClient.update(`/reviews/${id}`, data);
+
+// Delete review
+export const deleteReview = (id) => ReviewAPIClient.delete(`/reviews/${id}`);
