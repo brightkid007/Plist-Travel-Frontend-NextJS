@@ -1,7 +1,7 @@
 import { OpenInFull } from "@mui/icons-material";
 import { Dialog, Radio, CircularProgress } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
-import { getReviews, getListingById } from "@/helpers/backend_helper";
+import { getReviews, getListingById, createReviewReply } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 
 const ReviewList = ({ detail = false, filters = {} }) => {
@@ -97,7 +97,6 @@ const ReviewList = ({ detail = false, filters = {} }) => {
   const initModalContent = () => {
     setReplyText("");
     setRate({});
-    setModalContentStatus("main");
     setSelectedReview(null);
   };
   
@@ -108,40 +107,105 @@ const ReviewList = ({ detail = false, filters = {} }) => {
 
   const handleOpenModal = (review) => {
     setSelectedReview(review);
-    // If review has replies, populate the reply text
+    // If review has replies, populate the reply text and ratings
     if (review.replies && review.replies.length > 0) {
       // Get the latest reply
       const latestReply = review.replies[review.replies.length - 1];
       setReplyText(latestReply.comment || "");
+      // Populate ratings if they exist
+      if (latestReply.overall_experience || latestReply.cleanliness || latestReply.house_rules || latestReply.communication || latestReply.would_rent_again !== undefined) {
+        setRate({
+          overall: latestReply.overall_experience || null,
+          cleanliness: latestReply.cleanliness || null,
+          houserule: latestReply.house_rules || null,
+          communication: latestReply.communication || null,
+          would_rent_again: latestReply.would_rent_again !== undefined ? latestReply.would_rent_again : null,
+        });
+      } else {
+        setRate({});
+      }
+    } else {
+      // Reset if no replies
+      setReplyText("");
+      setRate({});
     }
     setShowModal(true);
   };
 
-  const [modalContentStatus, setModalContentStatus] = useState("main");
+  const handleSubmit = async (wouldRentAgain) => {
+    if (!selectedReview?.id) {
+      toast.error("Review ID is missing");
+      return;
+    }
 
-  const modalContentMap = {
-    main: (
-      <ModalMainContent
-        setModalContentStatus={setModalContentStatus}
-        replyText={replyText}
-        rate={rate}
-      />
-    ),
-    reply: (
-      <ReplyForm
-        setModalContentStatus={setModalContentStatus}
-        replyText={replyText}
-        setReplyText={setReplyText}
-      />
-    ),
-    rate: (
-      <RateForm
-        setModalContentStatus={setModalContentStatus}
-        rate={rate}
-        setRate={setRate}
-        initModalContent={initModalContent}
-      />
-    ),
+    // Validate that at least overall_experience is provided (required field)
+    if (!rate.overall) {
+      toast.error("Please provide an Overall Experience rating");
+      return;
+    }
+
+    // Validate that comment is provided (required field)
+    const trimmedComment = replyText?.trim() || "";
+    if (!trimmedComment) {
+      toast.error("Please provide a reply comment");
+      return;
+    }
+
+    try {
+      const payload = {
+        review_id: selectedReview.id,
+        overall_experience: rate.overall || null,
+        cleanliness: rate.cleanliness || null,
+        house_rules: rate.houserule || null,
+        communication: rate.communication || null,
+        would_rent_again: wouldRentAgain !== undefined ? wouldRentAgain : null,
+        comment: trimmedComment, // Required field - ensure it's not null or undefined
+      };
+
+      // Debug: Log the payload to verify comment is included
+      console.log("Submitting payload:", payload);
+      console.log("Comment value:", payload.comment);
+      console.log("Comment type:", typeof payload.comment);
+      console.log("Comment length:", payload.comment?.length);
+
+      // Use the general createReviewReply endpoint instead of createReviewReplyRating
+      // because the rating endpoint doesn't accept comment, but comment is required
+      await createReviewReply(payload);
+      toast.success("Guest rating and reply submitted successfully");
+      
+      // Refresh reviews to get updated data with replies
+      const response = await getReviews(filters);
+      const reviewsData = response?.data?.reviews || response?.reviews || response?.data || response || [];
+      const reviewsArray = Array.isArray(reviewsData) ? reviewsData : [];
+      setReviews(reviewsArray);
+      
+      // Update selected review if it's still open
+      if (selectedReview) {
+        const updatedReview = reviewsArray.find(r => r.id === selectedReview.id);
+        if (updatedReview) {
+          setSelectedReview(updatedReview);
+          // Update rate and reply state with the new reply data
+          if (updatedReview.replies && updatedReview.replies.length > 0) {
+            const latestReply = updatedReview.replies[updatedReview.replies.length - 1];
+            setRate({
+              overall: latestReply.overall_experience || null,
+              cleanliness: latestReply.cleanliness || null,
+              houserule: latestReply.house_rules || null,
+              communication: latestReply.communication || null,
+              would_rent_again: latestReply.would_rent_again !== undefined ? latestReply.would_rent_again : null,
+            });
+            setReplyText(latestReply.comment || "");
+          }
+        }
+      }
+      
+      // Close modal after successful submission
+      handleClose();
+    } catch (error) {
+      console.error("Error submitting rating and reply:", error);
+      toast.error(error?.message || "Failed to submit rating and reply");
+      throw error;
+    }
   };
 
   const formatDate = (dateString) => {
@@ -156,7 +220,7 @@ const ReviewList = ({ detail = false, filters = {} }) => {
 
   const getStatusBadge = (status) => {
     const statusColors = {
-      approved: "bg-green-1 text-white",
+      approved: "bg-green-2 text-white", // Made green bolder for 'approved'
       pending: "bg-yellow-1 text-dark-1",
       rejected: "bg-red-1 text-white",
     };
@@ -278,286 +342,208 @@ const ReviewList = ({ detail = false, filters = {} }) => {
               </div>
             </div>
           )}
-          {modalContentMap[modalContentStatus]}
+          <CombinedRatingReplyForm
+            rate={rate}
+            setRate={setRate}
+            replyText={replyText}
+            setReplyText={setReplyText}
+            onSubmit={handleSubmit}
+            onCancel={handleClose}
+          />
         </div>
       </Dialog>
     </div>
   );
 };
 
-const ModalMainContent = ({ setModalContentStatus, replyText, rate }) => {
+const CombinedRatingReplyForm = ({ rate, setRate, replyText, setReplyText, onSubmit, onCancel }) => {
+  const [reRent, setReRent] = useState(rate?.would_rent_again !== undefined ? rate.would_rent_again : false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Update reRent when rate changes
+  useEffect(() => {
+    if (rate?.would_rent_again !== undefined) {
+      setReRent(rate.would_rent_again);
+    }
+  }, [rate?.would_rent_again]);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await onSubmit(reRent);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
-      <div className="text-14 lh-12 fw-500">How did he do as a guest?</div>
-      <div className="text-12 lh-12 text-light-1 mb-10">
-        Rating will prompt them to review you in return.
+      <div className="text-14 lh-12 fw-500 mb-10">How did he do as a guest?</div>
+      <div className="text-12 lh-12 text-light-1 mb-15">
+        Rate the guest on different aspects and provide a reply.
       </div>
-      {Object.keys(rate).length > 0 ? (
-        <div className="bg-light-2 rounded-8 py-5 px-10 text-12 lh-12 mb-10">
-          <div className="row x-gap-10 y-gap-10">
-            <div className="col-6 mt-5">
-              <h1 className="text-14 lh-12 fw-500">
-                Overall Experience<span className="text-red-1">*</span>
-              </h1>
-              <div className="d-flex items-center gap-1">
-                {Array(5)
-                  .fill(null)
-                  .map((_, index) => (
-                    <span
-                      className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                      onClick={() => setRate({ ...rate, overall: index + 1 })}
-                    >
-                      {index < rate?.overall ? "★" : "☆"}
-                    </span>
-                  ))}
-              </div>
-            </div>
 
-            <div className="col-6 mt-5">
-              <h1 className="text-14 lh-12 fw-500">Cleanliness</h1>
-              <div className="d-flex items-center gap-1">
-                {Array(5)
-                  .fill(null)
-                  .map((_, index) => (
-                    <span
-                      className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                      onClick={() =>
-                        setRate({ ...rate, cleanliness: index + 1 })
-                      }
-                    >
-                      {index < rate?.cleanliness ? "★" : "☆"}
-                    </span>
-                  ))}
-              </div>
+      {/* Rating Section */}
+      <div className="bg-light-2 rounded-8 py-10 px-15 mb-20">
+        <div className="row x-gap-10 y-gap-10">
+          <div className="col-6 mt-5">
+            <h1 className="text-14 lh-12 fw-500">
+              Overall Experience<span className="text-red-1">*</span>
+            </h1>
+            <div className="d-flex items-center gap-1 mt-5">
+              {Array(5)
+                .fill(null)
+                .map((_, index) => (
+                  <span
+                    key={index}
+                    className="text-20 text-yellow-1 lh-14 cursor-pointer"
+                    onClick={() => setRate({ ...rate, overall: index + 1 })}
+                  >
+                    {index < (rate?.overall || 0) ? "★" : "☆"}
+                  </span>
+                ))}
             </div>
+          </div>
 
-            <div className="col-6 mt-5">
-              <h1 className="text-14 lh-12 fw-500">House Rules</h1>
-              <div className="d-flex items-center gap-1">
-                {Array(5)
-                  .fill(null)
-                  .map((_, index) => (
-                    <span
-                      className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                      onClick={() => setRate({ ...rate, houserule: index + 1 })}
-                    >
-                      {index < rate?.houserule ? "★" : "☆"}
-                    </span>
-                  ))}
-              </div>
+          <div className="col-6 mt-5">
+            <h1 className="text-14 lh-12 fw-500">Cleanliness</h1>
+            <div className="d-flex items-center gap-1 mt-5">
+              {Array(5)
+                .fill(null)
+                .map((_, index) => (
+                  <span
+                    key={index}
+                    className="text-20 text-yellow-1 lh-14 cursor-pointer"
+                    onClick={() => setRate({ ...rate, cleanliness: index + 1 })}
+                  >
+                    {index < (rate?.cleanliness || 0) ? "★" : "☆"}
+                  </span>
+                ))}
             </div>
+          </div>
 
-            <div className="col-6 mt-5">
-              <h1 className="text-14 lh-12 fw-500">Communication</h1>
-              <div className="d-flex items-center gap-1">
-                {Array(5)
-                  .fill(null)
-                  .map((_, index) => (
-                    <span
-                      className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                      onClick={() =>
-                        setRate({ ...rate, communication: index + 1 })
-                      }
-                    >
-                      {index < rate?.communication ? "★" : "☆"}
-                    </span>
-                  ))}
-              </div>
+          <div className="col-6 mt-5">
+            <h1 className="text-14 lh-12 fw-500">House Rules</h1>
+            <div className="d-flex items-center gap-1 mt-5">
+              {Array(5)
+                .fill(null)
+                .map((_, index) => (
+                  <span
+                    key={index}
+                    className="text-20 text-yellow-1 lh-14 cursor-pointer"
+                    onClick={() => setRate({ ...rate, houserule: index + 1 })}
+                  >
+                    {index < (rate?.houserule || 0) ? "★" : "☆"}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          <div className="col-6 mt-5">
+            <h1 className="text-14 lh-12 fw-500">Communication</h1>
+            <div className="d-flex items-center gap-1 mt-5">
+              {Array(5)
+                .fill(null)
+                .map((_, index) => (
+                  <span
+                    key={index}
+                    className="text-20 text-yellow-1 lh-14 cursor-pointer"
+                    onClick={() => setRate({ ...rate, communication: index + 1 })}
+                  >
+                    {index < (rate?.communication || 0) ? "★" : "☆"}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          <div className="col-12 mt-10">
+            <h1 className="text-14 lh-12 fw-500 mb-5">Would you rent to him again?</h1>
+            <div className="d-flex items-center gap-15">
+              <label className="d-flex items-center cursor-pointer">
+                <Radio
+                  checked={reRent === true}
+                  onChange={(e) => setReRent(true)}
+                  value="yes"
+                  name="would_rent_again"
+                />
+                <span className="text-14">Yes</span>
+              </label>
+              <label className="d-flex items-center cursor-pointer">
+                <Radio
+                  checked={reRent === false}
+                  onChange={(e) => setReRent(false)}
+                  value="no"
+                  name="would_rent_again"
+                />
+                <span className="text-14">No</span>
+              </label>
             </div>
           </div>
         </div>
-      ) : (
-        <button
-          className="text-14 text-blue-1 border-blue-1 rounded-8 px-10"
-          onClick={() => setModalContentStatus("rate")}
-        >
-          Rate Guest
-        </button>
-      )}
-      <div className="text-14 lh-12 fw-500 mt-20">Reply to Guest Review</div>
+      </div>
+
+      {/* Reply Section */}
+      <div className="text-14 lh-12 fw-500 mb-5">Reply to Guest Review<span className="text-red-1">*</span></div>
       <div className="text-12 lh-12 text-light-1 mb-10">
-        Rating will prompt them to review you in return.
+        Provide a reply comment to the guest's review. Click on tokens below to insert dynamic fields.
       </div>
-      {replyText ? (
-        <div className="bg-light-2 mt-10 rounded-8 py-5 px-10 text-16 lh-12 mb-10 text-break">
-          {replyText}
-        </div>
-      ) : (
-        <button
-          className="text-14 text-blue-1 border-blue-1 rounded-8 px-10"
-          onClick={() => setModalContentStatus("reply")}
-        >
-          Reply
-        </button>
-      )}
-    </>
-  );
-};
-
-const RateForm = ({ setModalContentStatus, rate, setRate, initModalContent }) => {
-  const [reRent, setReRent] = useState(false);
-
-  return (
-    <div className="row x-gap-10 y-gap-10">
-      <div className="col-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">
-          Overall Experience<span className="text-red-1">*</span>
-        </h1>
-        <div className="d-flex items-center gap-1">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => (
+      
+      {/* Dynamic Fields/Tokens */}
+      <div className="mb-10">
+        <div className="row x-gap-5 y-gap-5">
+          {[
+            { value: "{{property_name}}", label: "Property Name" },
+            { value: "{{guest_first_name}}", label: "Guest First Name" },
+            { value: "{{guest_last_name}}", label: "Guest Last Name" },
+            { value: "{{check_in_date}}", label: "Check-in Date" },
+            { value: "{{check_in_time}}", label: "Check-in Time" },
+            { value: "{{check_out_date}}", label: "Check-out Date" },
+            { value: "{{check_out_time}}", label: "Check-out Time" },
+            { value: "{{booking_id}}", label: "Booking ID" },
+            { value: "{{nights}}", label: "Total Nights" },
+          ].map((item, index) => (
+            <div key={index} className="col-auto">
               <span
-                className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                onClick={() => setRate({ ...rate, overall: index + 1 })}
+                className="text-12 fw-500 rounded-100 bg-blue-2 px-10 py-5 text-blue-1 cursor-pointer hover:bg-blue-3 transition d-inline-block"
+                onClick={() => setReplyText((prev) => (prev || "") + item.value)}
+                title={`Insert ${item.label}`}
               >
-                {index < rate?.overall ? "★" : "☆"}
+                {item.label}
               </span>
-            ))}
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="col-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Cleanliness</h1>
-        <div className="d-flex items-center gap-1">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => (
-              <span
-                className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                onClick={() => setRate({ ...rate, cleanliness: index + 1 })}
-              >
-                {index < rate?.cleanliness ? "★" : "☆"}
-              </span>
-            ))}
-        </div>
-      </div>
-
-      <div className="col-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">House Rules</h1>
-        <div className="d-flex items-center gap-1">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => (
-              <span
-                className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                onClick={() => setRate({ ...rate, houserule: index + 1 })}
-              >
-                {index < rate?.houserule ? "★" : "☆"}
-              </span>
-            ))}
-        </div>
-      </div>
-
-      <div className="col-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Communication</h1>
-        <div className="d-flex items-center gap-1">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => (
-              <span
-                className="text-20 text-yellow-1 lh-14 cursor-pointer"
-                onClick={() => setRate({ ...rate, communication: index + 1 })}
-              >
-                {index < rate?.communication ? "★" : "☆"}
-              </span>
-            ))}
-        </div>
-      </div>
-
-      <div className="col-12 mt-15">
-        <h1 className="text-14 lh-12 fw-500">Would you rent to him again?</h1>
-        <div className="d-flex items-center gap-1 mt-10">
-          <Radio
-            className="px-0 py-0"
-            checked={reRent}
-            onChange={() => setReRent(true)}
-          />
-          Yes
-          <Radio
-            className="px-0 py-0"
-            checked={!reRent}
-            onChange={() => setReRent(false)}
-          />
-          No
-        </div>
-      </div>
-
-      <div className="d-flex justify-end gap-2">
-        <button
-          className="text-14 border-light rounded-8 px-10 py-5"
-          onClick={() => {
-            setModalContentStatus("main");
-            initModalContent();
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
-          onClick={() => {
-            setModalContentStatus("main");
-          }}
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const ReplyForm = ({ setModalContentStatus, replyText, setReplyText }) => {
-  const dynamicFields = [
-    { value: "{{property_name}}", label: "Name of booked property" },
-    { value: "{{guest_first_name}}", label: "Guest First Name" },
-    { value: "{{guest_last_name}}", label: "Guest Last Name" },
-    { value: "{{check_in_date}}", label: "Check-in Date" },
-    { value: "{{check_in_time}}", label: "Check-in Time" },
-    { value: "{{check_out_date}}", label: "Check-out Date" },
-    { value: "{{check_out_time}}", label: "Check-out Time" },
-    { value: "{{booking_id}}", label: "Booking ID" },
-    { value: "{{nights}}", label: "Total nights booked" },
-  ];
-  return (
-    <>
-      <div className="d-flex items-center flex-wrap gap-2 mb-10">
-        {dynamicFields.map((item, index) => (
-          <span
-            className="text-12 fw-500 rounded-100 bg-blue-2 px-10 text-blue-1 cursor-pointer"
-            key={index}
-            onClick={() => setReplyText(replyText + item.value)}
-          >
-            {item.label}
-          </span>
-        ))}
-      </div>
+      
       <textarea
-        className="text-14 border-light rounded-8 bg-white px-10 py-5 mb-10"
-        placeholder="Enter your quick reply"
-        value={replyText}
+        className="text-14 border-light rounded-8 bg-white px-10 py-10 mb-20 w-full"
+        placeholder="Enter your reply to the guest review..."
+        value={replyText || ""}
         onChange={(e) => setReplyText(e.target.value)}
+        rows={4}
+        required
       />
-      <div className="d-flex justify-end gap-2">
+
+      {/* Submit Buttons */}
+      <div className="d-flex justify-end" style={{ gap: 16 }}>
         <button
-          className="text-14 border-light rounded-8 px-10 py-5"
-          onClick={() => {
-            setReplyText("");
-            setModalContentStatus("main");
-          }}
+          className="text-14 border-light rounded-8 px-15 py-8"
+          onClick={onCancel}
+          disabled={submitting}
         >
           Cancel
         </button>
         <button
-          className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
-          onClick={() => {
-            setModalContentStatus("main");
-          }}
+          className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-15 py-8"
+          onClick={handleSubmit}
+          disabled={submitting}
         >
-          Send
+          {submitting ? "Submitting..." : "Submit Rating & Reply"}
         </button>
       </div>
     </>
   );
 };
+
 
 export default ReviewList;
