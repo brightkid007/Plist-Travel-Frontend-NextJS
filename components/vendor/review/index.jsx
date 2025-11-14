@@ -3,7 +3,7 @@
 import { useState } from "react";
 import VendorDashboardLayout from "../common/layout";
 import ReviewList from "./ReviewList";
-import Filter from "../common/Filter";
+import ReviewFilter from "./ReviewFilter";
 
 const index = () => {
   const [filters, setFilters] = useState({});
@@ -30,7 +30,7 @@ const index = () => {
         </div>
       </div>
 
-      <Filter filters={filters} onFilterChange={handleFilterChange} />
+      <ReviewFilter filters={filters} onFilterChange={handleFilterChange} />
 
       <div className="py-10 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
         <ReviewList filters={filters} />

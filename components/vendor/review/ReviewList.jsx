@@ -34,6 +34,14 @@ const ReviewList = ({ detail = false, filters = {} }) => {
       if (filterParams.search) {
         params.search = filterParams.search;
       }
+      
+      if (filterParams.date_from) {
+        params.date_from = filterParams.date_from;
+      }
+      
+      if (filterParams.date_to) {
+        params.date_to = filterParams.date_to;
+      }
 
       const response = await getReviews(params);
       const reviewsData = response?.data?.reviews || response?.reviews || response?.data || response || [];
@@ -86,8 +94,8 @@ const ReviewList = ({ detail = false, filters = {} }) => {
 
   // Create a stable filter key for dependency tracking
   const filterKey = useMemo(() => {
-    return `${filters.status || ''}_${filters.rating || ''}_${filters.listing_id || ''}_${filters.search || ''}`;
-  }, [filters.status, filters.rating, filters.listing_id, filters.search]);
+    return `${filters.status || ''}_${filters.rating || ''}_${filters.listing_id || ''}_${filters.search || ''}_${filters.date_from || ''}_${filters.date_to || ''}`;
+  }, [filters.status, filters.rating, filters.listing_id, filters.search, filters.date_from, filters.date_to]);
 
   useEffect(() => {
     loadReviews(filters);
