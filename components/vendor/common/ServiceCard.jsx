@@ -1,18 +1,23 @@
 const ServiceCard = ({ selectedService, setSelectedService, data = [] }) => {
+  const handleCardClick = (item) => {
+    // Update selected service state only (no navigation)
+    if (setSelectedService) {
+      setSelectedService(item);
+    }
+  };
+
   return (
     <div className="row y-gap-30">
       {data.map((item, index) => (
         <div key={index} className="col-xl-4 col-lg-6 col-md-6 col-sm-12">
           <div
             className={
-              "py-30 px-30 rounded-8 bg-white shadow-3 cursor-pointer " +
+              "py-30 px-30 rounded-8 bg-white shadow-3 cursor-pointer transition-all hover:shadow-4 " +
               (item.name == selectedService?.name
-                ? "border-blue-1"
+                ? "border-blue-1 border-2"
                 : "border-light")
             }
-            onClick={() => {
-              setSelectedService(item);
-            }}
+            onClick={() => handleCardClick(item)}
           >
             <div className="row y-gap-20 justify-between items-center">
               <div className="row-auto">

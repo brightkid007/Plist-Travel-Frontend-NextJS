@@ -28,6 +28,30 @@ const SelectServices = () => {
 
   const router = useRouter();
 
+  // Map service names to type
+  const serviceMap = {
+    "Events": { type: "event" },
+    "Tours": { type: "tour" },
+    "Activities": { type: "activity" },
+    "Flights": { type: "flight" },
+    "Rides": { type: "ride" },
+  };
+
+  // Navigate to add listing page based on service
+  const navigateToAddListing = (service) => {
+    const mapping = serviceMap[service.name];
+    if (mapping) {
+      router.push(
+        `/vendor/listings/add?type=${mapping.type}`
+      );
+    } else {
+      // Fallback to legacy format
+      router.push(
+        "/vendor/listings/add?service=" + service?.name
+      );
+    }
+  };
+
   return (
     <>
       <div className="row y-gap-20 py-10 px-10 rounded-8 bg-white shadow-3">
@@ -54,26 +78,7 @@ const SelectServices = () => {
               className="button rounded-8 py-10 px-30 text-14 -dark-1 bg-dark-3 text-white col-auto"
               onClick={() => {
                 if (selectedService) {
-                  // Map service names to type
-                  const serviceMap = {
-                    "Events": { type: "event" },
-                    "Tours": { type: "tour" },
-                    "Activities": { type: "activity" },
-                    "Flights": { type: "flight" },
-                    "Rides": { type: "ride" },
-                  };
-                  
-                  const mapping = serviceMap[selectedService.name];
-                  if (mapping) {
-                    router.push(
-                      `/vendor/listings/add?type=${mapping.type}`
-                    );
-                  } else {
-                    // Fallback to legacy format
-                    router.push(
-                      "/vendor/listings/add?service=" + selectedService?.name
-                    );
-                  }
+                  navigateToAddListing(selectedService);
                 } else {
                   setShowSnackbar(true);
                 }
