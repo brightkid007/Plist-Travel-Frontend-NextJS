@@ -127,6 +127,7 @@ const Location = ({ address = {}, onUpdate }) => {
           });
 
           const fullStreet = [streetNumber, route].filter(Boolean).join(' ').trim();
+
           const update = onUpdateRef.current;
           if (update) {
             update('location_address_id', null);
@@ -174,6 +175,8 @@ const Location = ({ address = {}, onUpdate }) => {
         retryTimer = setTimeout(() => {
           tryInitialize();
         }, 100);
+      } else if (attemptCount >= maxAttempts) {
+        console.warn('Failed to initialize autocomplete after', maxAttempts, 'attempts');
       }
     };
 
@@ -268,7 +271,7 @@ const Location = ({ address = {}, onUpdate }) => {
 
   return (
     <div className="row y-gap-10 x-gap-10">
-      <h1 className="text-20 lh-14 fw-600">Tour Location</h1>
+      <h1 className="text-20 lh-14 fw-600">Listing Location</h1>
 
       <div className="col-12 mt-5">
         <div className="d-flex items-center justify-between mb-10">
@@ -386,3 +389,4 @@ const Location = ({ address = {}, onUpdate }) => {
 };
 
 export default Location;
+

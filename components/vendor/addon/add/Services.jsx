@@ -2,7 +2,7 @@
 
 import { Checkbox } from "@mui/material";
 import { useState } from "react";
-import Calendar from "../../roomtype/Calendar";
+import Calendar from "../../roomtype/AddRoomType/Calendar";
 import { useRouter } from "next/navigation";
 // import { LocalizationProvider } from "@mui/x-date-pickers-pro/LocalizationProvider";
 // import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";

@@ -609,3 +609,35 @@ export const getPackageSubscriptions = (params) => PricingAPIClient.get(url.GET_
 export const exportPackageSubscriptionsPdf = (data) => PricingAPIClient.create(url.EXPORT_PACKAGE_SUBSCRIPTIONS_PDF, data);
 export const updatePackageSubscriptionStatus = (id, data) => PricingAPIClient.patch(`${url.UPDATE_PACKAGE_SUBSCRIPTION_STATUS}/${id}/status`, data);
 export const updatePackageSubscription = (id, data) => PricingAPIClient.update(`${url.UPDATE_PACKAGE_SUBSCRIPTION}/${id}`, data);
+
+// ===========================================
+// ROOM TYPE MANAGEMENT (Listing Service)
+// ===========================================
+
+// Get all room types (with optional filters)
+export const getRoomTypes = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/room-types", sanitized)
+      : ListingAPIClient.get("/room-types");
+  }
+  return ListingAPIClient.get("/room-types");
+};
+
+// Get room type by ID
+export const getRoomTypeById = (id) => ListingAPIClient.get(`/room-types/${id}`);
+
+// Create new room type
+export const createRoomType = (data) => ListingAPIClient.create("/room-types", data);
+
+// Update room type
+export const updateRoomType = (id, data) => ListingAPIClient.update(`/room-types/${id}`, data);
+
+// Delete room type
+export const deleteRoomType = (id) => ListingAPIClient.delete(`/room-types/${id}`);

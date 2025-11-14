@@ -3,21 +3,26 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Description from "./Description";
 import Image from "./Image";
 import Location from "./Location";
-import Amenities from "../../common/Amenities";
-import { useRouter, useSearchParams } from "next/navigation";
+import Amenities from "../../AddListing/Amenities";
+import { useRouter } from "next/navigation";
 import VendorDashboardLayout from "../../../common/layout";
-import FAQs from "../../common/FAQs";
+import FAQs from "../../AddListing/FAQs";
 import { createListing, updateListing, createAddress, getListingCategories, getListingSubcategories, getAmenities, uploadMedia, createFAQ, getListingById, getFAQs, getMediaAssets, deleteFAQ } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
+import { validateStep } from "@/utils/validationUtils";
+import { getServiceName } from "@/utils/listingUtils";
 
-const index = ({ listingId, isEditMode = false, service: propService }) => {
+const index = ({ listingId, isEditMode = false, type: propType, subtype: propSubtype }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const service = propService || searchParams.get("service") || "";
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
   const [activeStep, setActiveStep] = useState(1);
+
+  const type = propType;
+  const subtype = propSubtype;
+  const service = getServiceName(type, subtype);
+
   const [listingData, setListingData] = useState({
     title: "",
     category_id: null,
@@ -46,38 +51,21 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
   const [existingImages, setExistingImages] = useState([]);
   const [existingFaqIds, setExistingFaqIds] = useState([]);
 
-  // Map frontend property types to backend type
-  const getPropertyType = (serviceName) => {
-    const typeMap = {
-      "Hotels": "property",
-      "Vacation Rentals": "property",
-      "Event Venues": "property",
-      "Spaces": "property",
-    };
-    return typeMap[serviceName] || "property";
-  };
-
-  // Map service name to subtype
-  const getSubtypeFromService = (serviceName) => {
-    if (!serviceName) return null;
-    const subtypeMap = {
-      "Hotels": "Hotel",
-      "Spaces": "Space",
-      "Vacation Rentals": "Vacation",
-      "Event Venues": "EventVenue",
-    };
-    return subtypeMap[serviceName] || null;
-  };
-
   // Load categories, subcategories, and amenities
   useEffect(() => {
     const loadData = async () => {
       try {
+        const filterParams = { type: type || "property" };
+        if (subtype) {
+          filterParams.subtype = subtype;
+        }
         const [catRes, subcatRes, amenitiesRes] = await Promise.all([
-          getListingCategories(),
-          getListingSubcategories(),
+          getListingCategories(filterParams),
+          getListingSubcategories(filterParams),
           getAmenities(),
         ]);
+        console.log(catRes, subcatRes, amenitiesRes);
+
         setCategories(catRes?.data || catRes || []);
         setSubcategories(subcatRes?.data || subcatRes || []);
         setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
@@ -87,7 +75,7 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
       }
     };
     loadData();
-  }, []);
+  }, [type, subtype]);
 
   // Load listing data when in edit mode
   useEffect(() => {
@@ -104,8 +92,16 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
         ]);
 
         const listing = listingRes?.data || listingRes;
-        
+
         if (listing) {
+          // Set type and subtype from listing data
+          if (listing.type) {
+            setListingType(listing.type);
+          }
+          if (listing.subtype) {
+            setListingSubtype(listing.subtype);
+          }
+
           // Update listing data
           setListingData((prev) => ({
             ...prev,
@@ -121,7 +117,6 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
             accessibilityInfo: listing.accessibility_info || "",
             isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
             status: listing.status || "draft",
-            // Note: subtype is loaded from listing.subtype if available
           }));
 
           // Load address if location_address_id exists
@@ -163,66 +158,9 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
     loadListingData();
   }, [isEditMode, listingId, router]);
 
-  // Validate step before proceeding
-  const validateStep = (step) => {
-    switch (step) {
-      case 1: // Property Description
-        if (!listingData.title || !listingData.title.trim()) {
-          toast.error("Please enter a listing title");
-          return false;
-        }
-        // if (!listingData.description || !listingData.description.trim()) {
-        //   toast.error("Please enter a description");
-        //   return false;
-        // }
-        if (!listingData.category_id) {
-          toast.error("Please select a category");
-          return false;
-        }
-        // if (!listingData.subcategory_id) {
-        //   toast.error("Please select a subcategory");
-        //   return false;
-        // }
-        return true;
-
-      case 2: // Property Images
-        // Images are optional, but we can show a warning
-        if (uploadedImages.length === 0) {
-          // Show warning but allow to continue
-          toast.warning("No images added. You can add images later.");
-        }
-        return true;
-
-      case 3: // Location
-        // Address is optional, but validate if any address fields are filled or if a saved address is selected
-        // Check if a saved address is selected (location_address_id exists)
-        if (listingData.location_address_id) {
-          // Saved address is selected, validation passed
-          return true;
-        }
-        // If no saved address, validate manual address fields
-        if (!listingData.address.line1 || !listingData.address.line1.trim()) {
-          toast.error("Please enter a street address or select a saved address");
-          return false;
-        }
-        if (!listingData.address.city || !listingData.address.city.trim()) {
-          toast.error("Please enter a city or select a saved address");
-          return false;
-        }
-        // If no address fields are filled and no saved address, it's optional, allow to continue
-        return true;
-
-      case 4: // Property Amenities
-        // Amenities are optional
-        return true;
-
-      case 5: // FAQs
-        // FAQs are optional
-        return true;
-
-      default:
-        return true;
-    }
+  // Use validation utility function
+  const validateStepLocal = (step) => {
+    return validateStep(step, listingData, uploadedImages, existingImages, false);
   };
 
   const handleSave = async () => {
@@ -245,11 +183,11 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
         setSaving(false);
         return;
       }
-      // if (!listingData.subcategory_id) {
-      //   toast.error("Please select a subcategory");
-      //   setSaving(false);
-      //   return;
-      // }
+      if (!listingData.subcategory_id) {
+        toast.error("Please select a subcategory");
+        setSaving(false);
+        return;
+      }
 
       // Create address if location data is provided (address is optional)
       let locationAddressId = listingData.location_address_id;
@@ -293,12 +231,9 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
         accessibilityInfoValue = null;
       }
 
-      // Determine subtype from service name
-      const subtype = getSubtypeFromService(service);
-
       const listingPayload = {
         title: listingData.title.trim(),
-        type: getPropertyType(service),
+        type: type || "property",
         subtype: subtype || null, // Include subtype for property type
         category_id: listingData.category_id || null,
         subcategory_id: listingData.subcategory_id || null,
@@ -419,7 +354,7 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
 
           toast.success("Listing created successfully!");
           localStorage.setItem("add-rateplan-property-id", createdListing.id);
-          router.push(`/vendor/room-type/add?service=${encodeURIComponent(service)}&listingId=${createdListing.id}`);
+          router.push(`/vendor/room-type/add?type=${type}&subtype=${subtype}&listingId=${createdListing.id}`);
         } else {
           toast.error("Failed to create listing. Please try again.");
         }
@@ -566,69 +501,67 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
           <>
             <h1 className="text-30 lh-14 fw-600">
               {isEditMode ? "Edit Your Listing" : "Add Your Listing"}
-              {service && (
-                <span className="text-12 text-white rounded-100 px-10 bg-dark-4 ml-10 fw-400">
-                  {service}
-                </span>
-              )}
+              <span className="text-12 text-white rounded-100 px-10 bg-dark-4 ml-10 fw-400">
+                {service}
+              </span>
             </h1>
-        <div className="col-12 overflow-scroll scroll-bar-1">
-          <div className="d-flex justify-between">
-            {propertySteps.map((step, index) => (
-              <div
-                className="d-flex flex-column items-center"
-                style={{ minWidth: "120px" }}
-                key={index}
-              >
-                <div
-                  className={
-                    "size-35 flex-center rounded-full cursor-pointer text-14 " +
-                    (step.id > activeStep
-                      ? "bg-light-2 text-light-1"
-                      : "bg-blue-1 text-white")
-                  }
-                >
-                  {step.id < activeStep ? svgIcon.icon_check : step.id}
-                </div>
-                <div className="text-12 text-center mt-10">{step.name}</div>
+            <div className="col-12 overflow-scroll scroll-bar-1">
+              <div className="d-flex justify-between">
+                {propertySteps.map((step, index) => (
+                  <div
+                    className="d-flex flex-column items-center"
+                    style={{ minWidth: "120px" }}
+                    key={index}
+                  >
+                    <div
+                      className={
+                        "size-35 flex-center rounded-full cursor-pointer text-14 " +
+                        (step.id > activeStep
+                          ? "bg-light-2 text-light-1"
+                          : "bg-blue-1 text-white")
+                      }
+                    >
+                      {step.id < activeStep ? svgIcon.icon_check : step.id}
+                    </div>
+                    <div className="text-12 text-center mt-10">{step.name}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-        <div className="col-12">
-          <div className="border-light rounded-8 px-20 py-15">
-            {propertySteps[activeStep - 1].content}
-          </div>
-        </div>
+            </div>
+            <div className="col-12">
+              <div className="border-light rounded-8 px-20 py-15">
+                {propertySteps[activeStep - 1].content}
+              </div>
+            </div>
 
-        <div className="col-12 d-flex justify-between">
-          <button
-            onClick={() => setActiveStep(activeStep - 1)}
-            className="border-light bg-light-2 rounded-8 py-5 px-20 fw-500 bg-white text-14"
-            disabled={activeStep === 1 || saving}
-          >
-            Previous
-          </button>
-          <button
-            className="rounded-8 py-5 px-20 bg-dark-4 text-white text-14"
-            onClick={async () => {
-              if (activeStep < propertySteps.length) {
-                // Validate current step before proceeding
-                if (validateStep(activeStep)) {
-                  setActiveStep(activeStep + 1);
-                }
-              } else {
-                // Final step - validate and save
-                if (validateStep(activeStep)) {
-                  await handleSave();
-                }
-              }
-            }}
-            disabled={saving}
-          >
-            {saving ? (isEditMode ? "Updating..." : "Saving...") : activeStep < propertySteps.length ? "Continue" : (isEditMode ? "Update" : "Save")}
-          </button>
-        </div>
+            <div className="col-12 d-flex justify-between">
+              <button
+                onClick={() => setActiveStep(activeStep - 1)}
+                className="border-light bg-light-2 rounded-8 py-5 px-20 fw-500 bg-white text-14"
+                disabled={activeStep === 1 || saving}
+              >
+                Previous
+              </button>
+              <button
+                className="rounded-8 py-5 px-20 bg-dark-4 text-white text-14"
+                onClick={async () => {
+                  if (activeStep < propertySteps.length) {
+                    // Validate current step before proceeding
+                    if (validateStepLocal(activeStep)) {
+                      setActiveStep(activeStep + 1);
+                    }
+                  } else {
+                    // Final step - validate and save
+                    if (validateStepLocal(activeStep)) {
+                      await handleSave();
+                    }
+                  }
+                }}
+                disabled={saving}
+              >
+                {saving ? (isEditMode ? "Updating..." : "Saving...") : activeStep < propertySteps.length ? "Continue" : (isEditMode ? "Update" : "Save")}
+              </button>
+            </div>
           </>
         )}
       </div>

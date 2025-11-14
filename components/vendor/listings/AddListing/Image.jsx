@@ -1,4 +1,4 @@
-import ImageGallery from "../../common/ImageGallery";
+import ImageGallery from "../common/ImageGallery";
 
 const Image = ({ images = [], existingImages = [], onImagesChange, onExistingImagesChange, listingId }) => {
   return (
@@ -16,3 +16,4 @@ const Image = ({ images = [], existingImages = [], onImagesChange, onExistingIma
 };
 
 export default Image;
+

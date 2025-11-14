@@ -3,21 +3,26 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Description from "./Description";
 import Image from "./Image";
 import Location from "./Location";
-import Amenities from "../../common/Amenities";
-import { useRouter, useSearchParams } from "next/navigation";
+import Amenities from "../../AddListing/Amenities";
+import { useRouter } from "next/navigation";
 import VendorDashboardLayout from "../../../common/layout";
-import FAQs from "../../common/FAQs";
+import FAQs from "../../AddListing/FAQs";
 import { createListing, updateListing, createAddress, getListingCategories, getListingSubcategories, getAmenities, uploadMedia, createFAQ, getListingById, getFAQs, getMediaAssets, deleteFAQ } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
+import { validateStep } from "@/utils/validationUtils";
+import { getServiceName } from "@/utils/listingUtils";
 
-const index = ({ listingId, isEditMode = false, service: propService }) => {
+const index = ({ listingId, isEditMode = false, type: propType, subtype: propSubtype }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const service = propService || searchParams.get("service") || "";
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
   const [activeStep, setActiveStep] = useState(1);
+
+  const type = propType;
+  const subtype = propSubtype;
+  const service = getServiceName(type, subtype);
+
   const [listingData, setListingData] = useState({
     title: "",
     category_id: null,
@@ -49,48 +54,29 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
   const [existingImages, setExistingImages] = useState([]);
   const [existingFaqIds, setExistingFaqIds] = useState([]);
 
-  // Map frontend property types to backend type
-  const getPropertyType = (serviceName) => {
-    const typeMap = {
-      "Hotels": "property",
-      "Vacation Rentals": "property",
-      "Event Venues": "property",
-      "Spaces": "property",
-    };
-    return typeMap[serviceName] || "property";
-  };
-
-  // Map service name to subtype
-  const getSubtypeFromService = (serviceName) => {
-    if (!serviceName) return null;
-    const subtypeMap = {
-      "Hotels": "Hotel",
-      "Spaces": "Space",
-      "Vacation Rentals": "Vacation",
-      "Event Venues": "EventVenue",
-    };
-    return subtypeMap[serviceName] || null;
-  };
-
   // Load categories, subcategories, and amenities
-  const loadData = async () => {
-    try {
-      const [catRes, subcatRes, amenitiesRes] = await Promise.all([
-        getListingCategories(),
-        getListingSubcategories(),
-        getAmenities(),
-      ]);
-      setCategories(catRes?.data || catRes || []);
-      setSubcategories(subcatRes?.data || subcatRes || []);
-      setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
-    } catch (error) {
-      console.error("Error loading data:", error);
-      toast.error(error?.message || "Failed to load data");
-    }
-  };
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const filterParams = { type: type || "property" };
+        if (subtype) {
+          filterParams.subtype = subtype;
+        }
+        const [catRes, subcatRes, amenitiesRes] = await Promise.all([
+          getListingCategories(filterParams),
+          getListingSubcategories(filterParams),
+          getAmenities(),
+        ]);
+        setCategories(catRes?.data || catRes || []);
+        setSubcategories(subcatRes?.data || subcatRes || []);
+        setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        toast.error(error?.message || "Failed to load data");
+      }
+    };
     loadData();
-  }, []);
+  }, [type, subtype]);
 
   // Load listing data when in edit mode
   useEffect(() => {
@@ -108,6 +94,14 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
         const listing = listingRes?.data || listingRes;
         
         if (listing) {
+          // Set type and subtype from listing data
+          if (listing.type) {
+            setListingType(listing.type);
+          }
+          if (listing.subtype) {
+            setListingSubtype(listing.subtype);
+          }
+
           setListingData((prev) => ({
             ...prev,
             title: listing.title || "",
@@ -161,31 +155,9 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
     loadListingData();
   }, [isEditMode, listingId, router]);
 
-  const validateStep = (step) => {
-    switch (step) {
-      case 1:
-        if (!listingData.title || listingData.title.trim() === "") {
-          toast.error("Please enter a listing title");
-          return false;
-        }
-        return true;
-      case 2:
-        if (uploadedImages.length === 0 && existingImages.length === 0) {
-          toast.warning("No images added. You can add images later.");
-        }
-        return true;
-      case 3:
-        if (!listingData.location_address_id && (!listingData.address.line1 || listingData.address.line1.trim() === "")) {
-          toast.warning("No location address selected. You can add it later.");
-        }
-        return true;
-      case 4:
-        return true;
-      case 5:
-        return true;
-      default:
-        return true;
-    }
+  // Use validation utility function
+  const validateStepLocal = (step) => {
+    return validateStep(step, listingData, uploadedImages, existingImages, false);
   };
 
   const handleSave = async () => {
@@ -194,6 +166,16 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
 
       if (!listingData.title || listingData.title.trim() === "") {
         toast.error("Please enter a listing title");
+        setSaving(false);
+        return;
+      }
+      if (!listingData.category_id) {
+        toast.error("Please select a category");
+        setSaving(false);
+        return;
+      }
+      if (!listingData.subcategory_id) {
+        toast.error("Please select a subcategory");
         setSaving(false);
         return;
       }
@@ -210,11 +192,9 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
         accessibilityInfoValue = null;
       }
 
-      const subtype = getSubtypeFromService(service);
-
       const listingPayload = {
         title: listingData.title.trim(),
-        type: getPropertyType(service),
+        type: type || "property",
         subtype: subtype || null,
         category_id: listingData.category_id || null,
         subcategory_id: listingData.subcategory_id || null,
@@ -354,7 +334,7 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
 
           toast.success("Listing created successfully!");
           localStorage.setItem("add-rateplan-property-id", createdListing.id);
-          router.push(`/vendor/room-type/add?service=${encodeURIComponent(service)}&listingId=${createdListing.id}`);
+          router.push(`/vendor/room-type/add?type=${type}&subtype=${subtype}&listingId=${createdListing.id}`);
         } else {
           toast.error("Failed to create listing. Please try again.");
         }
@@ -548,7 +528,7 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
                 disabled={saving}
                 onClick={async () => {
                   if (activeStep < propertySteps.length) {
-                    if (validateStep(activeStep)) {
+                    if (validateStepLocal(activeStep)) {
                       setActiveStep(activeStep + 1);
                     }
                   } else {

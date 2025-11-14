@@ -26,7 +26,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
     <div className="row y-gap-10 x-gap-10">
       <h1 className="text-20 lh-14 fw-600">Property Description</h1>
       <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Space Name</h1>
+        <h1 className="text-14 lh-12 fw-500">Space Name <span className="text-red-1">*</span></h1>
         <input
           className="border-light rounded-8 py-5 px-15 w-full mt-10"
           type="text"
@@ -38,7 +38,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
       </div>
 
       <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Category</h1>
+        <h1 className="text-14 lh-12 fw-500">Category <span className="text-red-1">*</span></h1>
         <select
           className="form-select rounded-8 border-light px-15 py-10 justify-between text-14 w-full mt-10"
           value={data?.category_id || ""}
@@ -49,6 +49,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
               onUpdate("subcategory_id", null);
             }
           }}
+          required
         >
           <option value="">Select category</option>
           {categories.map((cat) => (
@@ -60,7 +61,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
       </div>
 
       <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Subcategory</h1>
+        <h1 className="text-14 lh-12 fw-500">Subcategory <span className="text-red-1">*</span></h1>
         <select
           className="form-select rounded-8 border-light px-15 py-10 justify-between text-14 w-full mt-10"
           value={data?.subcategory_id || ""}
@@ -69,6 +70,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
             handleChange("subcategory_id", subcategoryId);
           }}
           disabled={!data?.category_id}
+          required
         >
           <option value="">Select subcategory</option>
           {filteredSubcategories.map((sub) => (

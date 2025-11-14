@@ -3,21 +3,26 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Description from "./Description";
 import Image from "./Image";
 import Location from "./Location";
-import Amenities from "../../common/Amenities";
-import { useRouter, useSearchParams } from "next/navigation";
+import Amenities from "../../AddListing/Amenities";
+import { useRouter } from "next/navigation";
 import VendorDashboardLayout from "../../../common/layout";
-import FAQs from "../../common/FAQs";
+import FAQs from "../../AddListing/FAQs";
 import { createListing, updateListing, createAddress, getListingCategories, getListingSubcategories, getAmenities, uploadMedia, createFAQ, getListingById, getFAQs, getMediaAssets, deleteFAQ } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
+import { validateStep } from "@/utils/validationUtils";
+import { getServiceName } from "@/utils/listingUtils";
 
-const index = ({ listingId, isEditMode = false, service: propService }) => {
+const index = ({ listingId, isEditMode = false, type: propType, subtype: propSubtype }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const service = propService || searchParams.get("service") || "";
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
   const [activeStep, setActiveStep] = useState(1);
+
+  const type = propType;
+  const subtype = propSubtype;
+  const service = getServiceName(type, subtype);
+
   const [listingData, setListingData] = useState({
     title: "",
     category_id: null,
@@ -36,9 +41,8 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
     images: [],
     amenities: [],
     accessibilityInfo: "",
-    isAccessibilityEnabled: false, // Track checkbox state separately
+    isAccessibilityEnabled: false,
     faqs: [],
-    // Hotel-specific fields
     contact_email: "",
     contact_phone: "",
   });
@@ -49,199 +53,147 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
   const [existingImages, setExistingImages] = useState([]);
   const [existingFaqIds, setExistingFaqIds] = useState([]);
 
-  // Map frontend property types to backend type
-  const getPropertyType = (serviceName) => {
-    const typeMap = {
-      "Hotels": "property",
-      "Vacation Rentals": "property",
-      "Event Venues": "property",
-      "Spaces": "property",
-    };
-    return typeMap[serviceName] || "property";
-  };
-
-  // Map service name to subtype
-  const getSubtypeFromService = (serviceName) => {
-    if (!serviceName) return null;
-    const subtypeMap = {
-      "Hotels": "Hotel",
-      "Spaces": "Space",
-      "Vacation Rentals": "Vacation",
-      "Event Venues": "EventVenue",
-    };
-    return subtypeMap[serviceName] || null;
-  };
-
-  // Load categories, subcategories, and amenities
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [catRes, subcatRes, amenitiesRes] = await Promise.all([
-          getListingCategories(),
-          getListingSubcategories(),
-          getAmenities(),
-        ]);
-        setCategories(catRes?.data || catRes || []);
-        setSubcategories(subcatRes?.data || subcatRes || []);
-        setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error(error?.message || "Failed to load data");
+  const loadData = async () => {
+    try {
+      const filterParams = { type: type || "property" };
+      if (subtype) {
+        filterParams.subtype = subtype;
       }
-    };
+      const [catRes, subcatRes, amenitiesRes] = await Promise.all([
+        getListingCategories(filterParams),
+        getListingSubcategories(filterParams),
+        getAmenities(),
+      ]);
+      setCategories(catRes?.data || catRes || []);
+      setSubcategories(subcatRes?.data || subcatRes || []);
+      setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      toast.error(error?.message || "Failed to load data");
+    }
+  };
+
+  useEffect(() => {
     loadData();
-  }, []);
+  }, [type, subtype]);
 
-  // Load listing data when in edit mode
-  useEffect(() => {
-    const loadListingData = async () => {
-      if (!isEditMode || !listingId) return;
+  const loadListingData = async () => {
+    if (!isEditMode || !listingId) return;
 
-      try {
-        setLoading(true);
-        // Load listing, FAQs, and media in parallel
-        const [listingRes, faqsRes, mediaRes] = await Promise.all([
-          getListingById(listingId),
-          getFAQs({ listing_id: listingId }),
-          getMediaAssets({ listing_id: listingId }),
-        ]);
+    try {
+      setLoading(true);
+      const [listingRes, faqsRes, mediaRes] = await Promise.all([
+        getListingById(listingId),
+        getFAQs({ listing_id: listingId }),
+        getMediaAssets({ listing_id: listingId }),
+      ]);
 
-        const listing = listingRes?.data || listingRes;
-        
-        if (listing) {
-          // Update listing data
-          setListingData((prev) => ({
-            ...prev,
-            title: listing.title || "",
-            category_id: listing.category_id || null,
-            subcategory_id: listing.subcategory_id || null,
-            description: listing.description || "",
-            star_rating: listing.star_rating || null,
-            location_address_id: listing.location_address_id || null,
-            amenities: listing.amenity && Array.isArray(listing.amenity)
-              ? listing.amenity.map((a) => a.id)
-              : [],
-            accessibilityInfo: listing.accessibility_info || "",
-            isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
-            status: listing.status || "draft",
-            // Note: contact_email and contact_phone are not in the listing model
-            // They might come from vendor_profile or be stored separately
-            contact_email: listing.contact_email || "",
-            contact_phone: listing.contact_phone || "",
-          }));
+      const listing = listingRes?.data || listingRes;
 
-          // Load address if location_address_id exists
-          // Address will be loaded via the Location component using location_address_id
-
-          // Load FAQs
-          const faqsData = faqsRes?.data || faqsRes || [];
-          const faqsArray = Array.isArray(faqsData) ? faqsData : [];
-          setListingData((prev) => ({
-            ...prev,
-            faqs: faqsArray.map((faq) => ({
-              question: faq.question || "",
-              answer: faq.answer || "",
-            })),
-          }));
-          setExistingFaqIds(faqsArray.map((faq) => faq.id).filter((id) => id));
-
-          // Load media
-          const mediaData = mediaRes?.data || mediaRes || [];
-          const mediaArray = Array.isArray(mediaData) ? mediaData : [];
-          setExistingImages(mediaArray);
-        } else {
-          toast.error("Listing not found");
-          router.push("/vendor/listings/property");
+      if (listing) {
+        if (listing.type) {
+          setListingType(listing.type);
         }
-      } catch (error) {
-        console.error("Error loading listing:", error);
-        toast.error(error?.message || "Failed to load listing");
-        router.push("/vendor/listings/property");
-      } finally {
-        setLoading(false);
-      }
-    };
+        if (listing.subtype) {
+          setListingSubtype(listing.subtype);
+        }
 
+        setListingData((prev) => ({
+          ...prev,
+          title: listing.title || "",
+          category_id: listing.category_id || null,
+          subcategory_id: listing.subcategory_id || null,
+          description: listing.description || "",
+          star_rating: listing.star_rating || null,
+          location_address_id: listing.location_address_id || null,
+          amenities: listing.amenity && Array.isArray(listing.amenity)
+            ? listing.amenity.map((a) => a.id)
+            : [],
+          accessibilityInfo: listing.accessibility_info || "",
+          isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
+          status: listing.status || "draft",
+          contact_email: listing.contact_email || "",
+          contact_phone: listing.contact_phone || "",
+        }));
+
+        const faqsData = faqsRes?.data || faqsRes || [];
+        const faqsArray = Array.isArray(faqsData) ? faqsData : [];
+        setListingData((prev) => ({
+          ...prev,
+          faqs: faqsArray.map((faq) => ({
+            question: faq.question || "",
+            answer: faq.answer || "",
+          })),
+        }));
+        setExistingFaqIds(faqsArray.map((faq) => faq.id).filter((id) => id));
+
+        const mediaData = mediaRes?.data || mediaRes || [];
+        const mediaArray = Array.isArray(mediaData) ? mediaData : [];
+        setExistingImages(mediaArray);
+      } else {
+        toast.error("Listing not found");
+        router.push("/vendor/listings/property");
+      }
+    } catch (error) {
+      console.error("Error loading listing:", error);
+      toast.error(error?.message || "Failed to load listing");
+      router.push("/vendor/listings/property");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadListingData();
   }, [isEditMode, listingId, router]);
 
-  const validateStep = (step) => {
-    switch (step) {
-      case 1: // Description
-        if (!listingData.title || listingData.title.trim() === "") {
-          toast.error("Please enter a listing title");
-          return false;
-        }
-        return true;
-
-      case 2: // Images
-        // Images are optional, but show warning if none
-        if (uploadedImages.length === 0 && existingImages.length === 0) {
-          toast.warning("No images added. You can add images later.");
-        }
-        return true;
-
-      case 3: // Location
-        // Location is optional, but show warning if no address
-        if (!listingData.location_address_id && (!listingData.address.line1 || listingData.address.line1.trim() === "")) {
-          toast.warning("No location address selected. You can add it later.");
-        }
-        return true;
-
-      case 4: // Amenities
-        // Amenities are optional
-        return true;
-
-      case 5: // FAQs
-        // FAQs are optional
-        return true;
-
-      default:
-        return true;
-    }
+  // Use validation utility function
+  const validateStepLocal = (step) => {
+    return validateStep(step, listingData, uploadedImages, existingImages, false);
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
 
-      // Validate required fields
       if (!listingData.title || listingData.title.trim() === "") {
         toast.error("Please enter a listing title");
         setSaving(false);
         return;
       }
+      if (!listingData.category_id) {
+        toast.error("Please select a category");
+        setSaving(false);
+        return;
+      }
+      if (!listingData.subcategory_id) {
+        toast.error("Please select a subcategory");
+        setSaving(false);
+        return;
+      }
 
-      // Handle accessibility info
       let accessibilityInfoValue = null;
       if (listingData.isAccessibilityEnabled) {
-        // Checkbox is checked - save the text (even if empty)
         accessibilityInfoValue = listingData.accessibilityInfo
           ? listingData.accessibilityInfo.trim()
           : "";
-        // If empty string after trim, set to null
         if (accessibilityInfoValue === "") {
           accessibilityInfoValue = null;
         }
       } else {
-        // Checkbox is unchecked - save null
         accessibilityInfoValue = null;
       }
 
-      // Determine subtype from service name
-      const subtype = getSubtypeFromService(service);
-
       const listingPayload = {
         title: listingData.title.trim(),
-        type: getPropertyType(service),
-        subtype: subtype || null, // Include subtype for property type
+        type: type || "property",
+        subtype: subtype || null,
         category_id: listingData.category_id || null,
         subcategory_id: listingData.subcategory_id || null,
         description: listingData.description.trim(),
         star_rating: listingData.star_rating || null,
         accessibility_info: accessibilityInfoValue,
         location_address_id: listingData.location_address_id || null,
-        // Only include status in update if it exists, otherwise don't change it
         ...(isEditMode ? {} : { status: "draft" }),
         amenities: listingData.amenities && Array.isArray(listingData.amenities) && listingData.amenities.length > 0
           ? listingData.amenities.filter(id => typeof id === 'number' && !isNaN(id))
@@ -249,15 +201,10 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
       };
 
       if (isEditMode && listingId) {
-        // Update existing listing
         const response = await updateListing(listingId, listingPayload);
         const updatedListing = response?.data || response;
 
         if (updatedListing) {
-          // Handle address creation/update if needed
-          // Address is handled separately via Location component
-
-          // Handle image uploads
           if (uploadedImages.length > 0) {
             try {
               const uploadPromises = uploadedImages.map((file) =>
@@ -270,11 +217,8 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
             }
           }
 
-          // Handle FAQs
-          // Update FAQs: Delete existing and create new ones
           if (existingFaqIds.length > 0) {
             try {
-              // Delete existing FAQs
               await Promise.all(
                 existingFaqIds.map((faqId) => deleteFAQ(faqId))
               );
@@ -284,10 +228,8 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
             }
           }
 
-          // Create new FAQs if any were added
           if (listingData.faqs && Array.isArray(listingData.faqs) && listingData.faqs.length > 0) {
             try {
-              // Filter out empty FAQs (both question and answer must be filled)
               const validFaqs = listingData.faqs.filter(
                 (faq) => faq.question?.trim() && faq.answer?.trim()
               );
@@ -314,12 +256,10 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
           toast.error("Failed to update listing. Please try again.");
         }
       } else {
-        // Create new listing
         const response = await createListing(listingPayload);
         const createdListing = response?.data || response;
 
         if (createdListing) {
-          // Handle address creation if needed
           if (!listingData.location_address_id && listingData.address.line1) {
             try {
               const addressResponse = await createAddress({
@@ -332,7 +272,6 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
               });
               const newAddress = addressResponse?.data || addressResponse;
               if (newAddress?.id) {
-                // Update listing with new address
                 await updateListing(createdListing.id, {
                   location_address_id: newAddress.id,
                 });
@@ -347,7 +286,6 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
             }
           }
 
-          // Handle image uploads
           if (uploadedImages.length > 0) {
             try {
               const uploadPromises = uploadedImages.map((file) =>
@@ -360,11 +298,8 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
             }
           }
 
-          // Handle FAQs
-          // Create FAQs if any were added
           if (listingData.faqs && Array.isArray(listingData.faqs) && listingData.faqs.length > 0) {
             try {
-              // Filter out empty FAQs (both question and answer must be filled)
               const validFaqs = listingData.faqs.filter(
                 (faq) => faq.question?.trim() && faq.answer?.trim()
               );
@@ -387,7 +322,7 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
 
           toast.success("Listing created successfully!");
           localStorage.setItem("add-rateplan-property-id", createdListing.id);
-          router.push(`/vendor/room-type/add?service=${encodeURIComponent(service)}&listingId=${createdListing.id}`);
+          router.push(`/vendor/room-type/add?type=${type}&subtype=${subtype}&listingId=${createdListing.id}`);
         } else {
           toast.error("Failed to create listing. Please try again.");
         }
@@ -410,14 +345,12 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
 
   const updateAddressData = useCallback((field, value) => {
     setListingData((prev) => {
-      // If field is 'address_id', update location_address_id separately
       if (field === 'address_id' || field === 'location_address_id') {
         return {
           ...prev,
           location_address_id: value,
         };
       }
-      // Otherwise, update address fields
       return {
         ...prev,
         address: {
@@ -428,7 +361,6 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
     });
   }, []);
 
-  // Memoize callback functions to prevent re-creating them on every render
   const handleAmenitiesUpdate = useCallback((amenities) => {
     updateListingData("amenities", amenities);
   }, [updateListingData]);
@@ -441,13 +373,10 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
     updateListingData("isAccessibilityEnabled", enabled);
   }, [updateListingData]);
 
-  // Memoize FAQs update callback to prevent re-creating it
   const handleFAQsUpdate = useCallback((faqs) => {
     updateListingData("faqs", faqs);
   }, [updateListingData]);
 
-  // Memoize propertySteps to prevent re-creating components on every render
-  // Only recreate when essential data changes
   const propertySteps = useMemo(() => [
     {
       id: 1,
@@ -587,11 +516,10 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
                 disabled={saving}
                 onClick={async () => {
                   if (activeStep < propertySteps.length) {
-                    if (validateStep(activeStep)) {
+                    if (validateStepLocal(activeStep)) {
                       setActiveStep(activeStep + 1);
                     }
                   } else {
-                    // Last step - save
                     await handleSave();
                   }
                 }}
@@ -599,10 +527,10 @@ const index = ({ listingId, isEditMode = false, service: propService }) => {
                 {saving
                   ? "Saving..."
                   : activeStep < propertySteps.length
-                  ? "Continue"
-                  : isEditMode
-                  ? "Update"
-                  : "Save"}
+                    ? "Continue"
+                    : isEditMode
+                      ? "Update"
+                      : "Save"}
               </button>
             </div>
           </>

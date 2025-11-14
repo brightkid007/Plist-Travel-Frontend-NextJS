@@ -66,6 +66,7 @@ const Calendar = () => {
               setStartDate(date);
               setEvents([{ ...events[0], start: date.format("YYYY-MM-DD") }]);
             }}
+            placeholder="Start Date"
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
@@ -74,7 +75,7 @@ const Calendar = () => {
       </div>
       <div className="col-sm-6 mt-10">
         <h1 className="text-15 lh-14 fw-500">End Date</h1>
-        <div className="border-light rounded-8 py-10 px-20 w-full mt-10 cursor-text text-light-1 bg-white">
+        <div className="border-light rounded-8 py-10 px-20 w-full mt-10 cursor-text bg-white">
           <DatePicker
             inputClass="custom_input-picker"
             containerClassName="custom_container-picker"
@@ -86,6 +87,7 @@ const Calendar = () => {
                 .format("YYYY-MM-DD");
               setEvents([{ ...events[0], end: endDateString }]);
             }}
+            placeholder="End Date"
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
@@ -102,14 +104,6 @@ const Calendar = () => {
             eventContent={renderEventContent}
           />
         </div>
-      </div>
-      <div className="col-12 mt-10 d-flex justify-between items-center">
-        <button className="button border-light rounded-8 px-15 py-10 fw-500">
-          Cancel
-        </button>
-        <button className="button bg-dark-4 rounded-8 px-15 py-10 text-white fw-500">
-          Apply
-        </button>
       </div>
     </div>
   );

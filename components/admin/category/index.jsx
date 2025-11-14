@@ -34,6 +34,7 @@ const index = () => {
     description: "",
     category_id: "",
     type: "",
+    subtype: "",
     status: "active"
   });
 
@@ -45,6 +46,7 @@ const index = () => {
       description: "",
       category_id: "",
       type: "",
+      subtype: "",
       status: "active"
     });
   };
@@ -190,12 +192,24 @@ const index = () => {
       }
       
       if (activeTab === "category") {
-        // Category fields: name, description, type, status
+        // Category fields: name, description, type, subtype (if property), status
         if (!formData.type) {
           toast.error("Type is required");
           return;
         }
         payload.type = formData.type;
+        // Handle subtype: only applicable for property type
+        if (formData.type === "property") {
+          // If subtype is provided and not empty, include it; otherwise, set to null
+          if (formData.subtype && formData.subtype.trim() !== "") {
+            payload.subtype = formData.subtype;
+          } else {
+            payload.subtype = null;
+          }
+        } else {
+          // If type is not property, explicitly set subtype to null
+          payload.subtype = null;
+        }
         payload.is_active = formData.status === "active";
       } else {
         // Subcategory fields: name, description, parent category id, status
@@ -247,6 +261,7 @@ const index = () => {
         description: item.description || "",
         category_id: "",
         type: item.type || "",
+        subtype: item.subtype || "",
         status: item.is_active !== false ? "active" : "inactive"
       });
     } else {
@@ -300,9 +315,17 @@ const index = () => {
 
   // Handle form change
   const handleFormChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: value
+      };
+      // Clear subtype when type changes (if not property)
+      if (name === "type" && value !== "property") {
+        updated.subtype = "";
+      }
+      return updated;
     });
   };
 
@@ -702,6 +725,25 @@ const ModalContent = ({ activeTab, formData, handleFormChange, categories, editi
             value={formData.type}
             onChange={handleFormChange}
           />
+
+          {formData.type === "property" && (
+            <FormInput
+              label="Subtype"
+              type="select"
+              name="subtype"
+              placeholder="Select subtype (optional)"
+              gridClass="col-12 mt-5"
+              options={[
+                { value: "", label: "Select subtype (optional)" },
+                { value: "Hotel", label: "Hotel" },
+                { value: "Vacation", label: "Vacation Rental" },
+                { value: "Space", label: "Space" },
+                { value: "EventVenue", label: "Event Venue" }
+              ]}
+              value={formData.subtype || ""}
+              onChange={handleFormChange}
+            />
+          )}
 
           <FormInput
             label="Status"

@@ -4,7 +4,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/navigation";
 
-const SelectServices = ({ setIsListings }) => {
+const SelectServices = () => {
   const data = [
     {
       name: "Spaces",
@@ -53,7 +53,7 @@ const SelectServices = ({ setIsListings }) => {
           <div className="row y-gap-20 justify-between items-end">
             <button
               className="button rounded-8 py-10 px-30 text-14 -dark-1 border-light text-light-1 col-auto"
-              onClick={() => setIsListings(true)}
+              onClick={() => router.push("/vendor/listings/property")}
             >
               <i className="icon icon-chevron-left mr-10" /> Back
             </button>

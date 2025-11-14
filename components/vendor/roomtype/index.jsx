@@ -67,7 +67,7 @@ const index = () => {
         <div className="col-md-auto d-flex justify-content-end">
           <button
             className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
-            onClick={() => router.push("/vendor/room-type/add?service=Hotels")}
+            onClick={() => router.push("/vendor/room-type/add?subtype=Hotel")}
           >
             <i className="icon-plus mr-10"></i> Add New Room Type
           </button>
