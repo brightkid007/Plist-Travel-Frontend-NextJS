@@ -3,10 +3,13 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Description from "./Description";
 import Image from "./Image";
 import Location from "./Location";
+import ListingDetails from "./ListingDetails";
+import ListingPrice from "./ListingPrice";
 import Amenities from "../../AddListing/Amenities";
 import { useRouter } from "next/navigation";
 import VendorDashboardLayout from "../../../common/layout";
 import FAQs from "../../AddListing/FAQs";
+import Calendar from "../common/Calendar";
 import { createListing, updateListing, createAddress, getListingCategories, getListingSubcategories, getAmenities, uploadMedia, createFAQ, getListingById, getFAQs, getMediaAssets, deleteFAQ } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
@@ -42,6 +45,37 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     accessibilityInfo: "",
     isAccessibilityEnabled: false,
     faqs: [],
+    // ListingDetails fields
+    listingDetails: {
+      size: "",
+      event_maximum_capacity: "",
+      is_multi_day: false,
+      event_days: [],
+      performer_speaker_info: "",
+      age_restriction: "",
+      special_offers_id: null,
+      parking_info: "",
+      covid_safety_guidelines: "",
+      cancellation_policy_id: null,
+      accessibility_info: "",
+      is_accessibility_enabled: false,
+    },
+    // ListingPrice fields
+    listingPrice: {
+      ticket_prices: [{ category: "", price: "" }],
+      base_prices_by_day_of_week: false,
+      additional_prices_by_guests: false,
+      base_prices_by_day: {},
+      guest_prices: [{ guest_start: "", guest_end: "", price: "" }],
+    },
+    // Calendar fields
+    calendar: {
+      calendar_type: 1,
+      calendar_start_date: null,
+      calendar_end_date: null,
+      blocked_dates: [],
+      available_dates: [],
+    },
   });
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -85,10 +119,7 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
       const listing = listingRes?.data || listingRes;
 
       if (listing) {
-        // Set type from listing data
-        if (listing.type) {
-          setListingType(listing.type);
-        }
+        // Type is already set from props, no need to set listingType state
 
         setListingData((prev) => ({
           ...prev,
@@ -105,6 +136,41 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
           accessibilityInfo: listing.accessibility_info || "",
           isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
           status: listing.status || "draft",
+          // ListingDetails fields
+          listingDetails: {
+            size: listing.size || "",
+            event_maximum_capacity: listing.event_maximum_capacity || "",
+            is_multi_day: listing.is_multi_day || false,
+            event_days: listing.event_days && Array.isArray(listing.event_days) ? listing.event_days : [],
+            performer_speaker_info: listing.performer_speaker_info || "",
+            age_restriction: listing.age_restriction || "",
+            special_offers_id: listing.special_offers_id || null,
+            parking_info: listing.parking_info || "",
+            covid_safety_guidelines: listing.covid_safety_guidelines || "",
+            cancellation_policy_id: listing.cancellation_policy_id || null,
+            accessibility_info: listing.accessibility_info || "",
+            is_accessibility_enabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
+          },
+          // ListingPrice fields
+          listingPrice: {
+            ticket_prices: listing.ticket_prices && Array.isArray(listing.ticket_prices) && listing.ticket_prices.length > 0
+              ? listing.ticket_prices
+              : [{ category: "", price: "" }],
+            base_prices_by_day_of_week: listing.base_prices_by_day && typeof listing.base_prices_by_day === 'object' && Object.keys(listing.base_prices_by_day).length > 0,
+            additional_prices_by_guests: listing.guest_prices && Array.isArray(listing.guest_prices) && listing.guest_prices.length > 0,
+            base_prices_by_day: listing.base_prices_by_day && typeof listing.base_prices_by_day === 'object' ? listing.base_prices_by_day : {},
+            guest_prices: listing.guest_prices && Array.isArray(listing.guest_prices) && listing.guest_prices.length > 0
+              ? listing.guest_prices
+              : [{ guest_start: "", guest_end: "", price: "" }],
+          },
+          // Calendar fields
+          calendar: {
+            calendar_type: listing.calendar_type || 1,
+            calendar_start_date: listing.calendar_start_date || null,
+            calendar_end_date: listing.calendar_end_date || null,
+            blocked_dates: listing.blocked_dates && Array.isArray(listing.blocked_dates) ? listing.blocked_dates : [],
+            available_dates: listing.available_dates && Array.isArray(listing.available_dates) ? listing.available_dates : [],
+          },
         }));
 
         const faqs = faqsRes?.data || faqsRes || [];
@@ -204,6 +270,15 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         accessibilityInfoValue = null;
       }
 
+      // Prepare listingDetails data
+      const listingDetailsData = listingData.listingDetails || {};
+      
+      // Prepare listingPrice data
+      const listingPriceData = listingData.listingPrice || {};
+      
+      // Prepare calendar data
+      const calendarData = listingData.calendar || {};
+
       const listingPayload = {
         title: listingData.title.trim(),
         type: type || "event",
@@ -218,6 +293,39 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         amenities: listingData.amenities && Array.isArray(listingData.amenities) && listingData.amenities.length > 0
           ? listingData.amenities.filter(id => typeof id === 'number' && !isNaN(id))
           : [],
+        // ListingDetails fields
+        size: listingDetailsData.size || null,
+        event_maximum_capacity: listingDetailsData.event_maximum_capacity || null,
+        is_multi_day: listingDetailsData.is_multi_day || false,
+        event_days: listingDetailsData.event_days && Array.isArray(listingDetailsData.event_days) && listingDetailsData.event_days.length > 0
+          ? listingDetailsData.event_days
+          : null,
+        performer_speaker_info: listingDetailsData.performer_speaker_info || null,
+        age_restriction: listingDetailsData.age_restriction || null,
+        special_offers_id: listingDetailsData.special_offers_id || null,
+        parking_info: listingDetailsData.parking_info || null,
+        covid_safety_guidelines: listingDetailsData.covid_safety_guidelines || null,
+        cancellation_policy_id: listingDetailsData.cancellation_policy_id || null,
+        // ListingPrice fields (stored as JSON)
+        ticket_prices: listingPriceData.ticket_prices && Array.isArray(listingPriceData.ticket_prices) && listingPriceData.ticket_prices.length > 0
+          ? listingPriceData.ticket_prices.filter(t => t.category && t.price)
+          : null,
+        base_prices_by_day: listingPriceData.base_prices_by_day && Object.keys(listingPriceData.base_prices_by_day).length > 0
+          ? listingPriceData.base_prices_by_day
+          : null,
+        guest_prices: listingPriceData.guest_prices && Array.isArray(listingPriceData.guest_prices) && listingPriceData.guest_prices.length > 0
+          ? listingPriceData.guest_prices.filter(g => g.guest_start && g.guest_end && g.price)
+          : null,
+        // Calendar fields
+        calendar_type: calendarData.calendar_type || 1,
+        calendar_start_date: calendarData.calendar_start_date || null,
+        calendar_end_date: calendarData.calendar_end_date || null,
+        blocked_dates: calendarData.blocked_dates && Array.isArray(calendarData.blocked_dates) && calendarData.blocked_dates.length > 0
+          ? calendarData.blocked_dates
+          : null,
+        available_dates: calendarData.available_dates && Array.isArray(calendarData.available_dates) && calendarData.available_dates.length > 0
+          ? calendarData.available_dates
+          : null,
       };
 
       if (isEditMode && listingId) {
@@ -407,26 +515,43 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     },
     {
       id: 4,
-      name: "Amenities",
+      name: "Listing Details",
       content: (
-        <Amenities
-          amenitiesList={amenitiesList}
-          selectedAmenities={listingData.amenities || []}
-          onUpdate={handleAmenitiesUpdate}
-          accessibilityInfo={listingData.accessibilityInfo || ""}
-          isAccessibilityEnabled={listingData.isAccessibilityEnabled || false}
-          onAccessibilityChange={handleAccessibilityInfoChange}
-          onAccessibilityEnabledChange={handleAccessibilityEnabledChange}
+        <ListingDetails
+          bookingType={listingData.booking_type}
+          listingId={isEditMode ? listingId : null}
+          data={listingData.listingDetails}
+          onUpdate={(details) => updateListingData("listingDetails", details)}
         />
       ),
     },
     {
       id: 5,
+      name: "Listing Price",
+      content: (
+        <ListingPrice
+          data={listingData.listingPrice}
+          onUpdate={(price) => updateListingData("listingPrice", price)}
+        />
+      ),
+    },
+    {
+      id: 6,
       name: "FAQs",
       content: (
         <FAQs
           faqs={listingData.faqs || []}
           onUpdate={(faqs) => updateListingData("faqs", faqs)}
+        />
+      ),
+    },
+    {
+      id: 7,
+      name: "Calendar",
+      content: (
+        <Calendar
+          data={listingData.calendar}
+          onUpdate={(calendar) => updateListingData("calendar", calendar)}
         />
       ),
     },
@@ -456,67 +581,67 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
           </div>
         ) : (
           <>
-        <h1 className="text-30 lh-14 fw-600">
+            <h1 className="text-30 lh-14 fw-600">
               {isEditMode ? "Edit Your Listing" : "Add Your Listing"}
-          <span className="text-12 text-white rounded-100 px-10 bg-dark-4 ml-10 fw-400">
-            {service}
-          </span>
-        </h1>
-        <div className="col-12 overflow-scroll scroll-bar-1">
-          <div className="d-flex justify-between">
-            {propertySteps.map((step, index) => (
-              <div
-                className="d-flex flex-column items-center"
-                style={{ minWidth: "120px" }}
-                key={index}
-              >
-                <div
-                  className={
-                    "size-35 flex-center rounded-full cursor-pointer text-14 " +
-                    (step.id > activeStep
-                      ? "bg-light-2 text-light-1"
-                      : "bg-blue-1 text-white")
-                  }
-                >
-                  {step.id < activeStep ? svgIcon.icon_check : step.id}
-                </div>
-                <div className="text-12 text-center mt-10">{step.name}</div>
+              <span className="text-12 text-white rounded-100 px-10 bg-dark-4 ml-10 fw-400">
+                {service}
+              </span>
+            </h1>
+            <div className="col-12 overflow-scroll scroll-bar-1">
+              <div className="d-flex justify-between">
+                {propertySteps.map((step, index) => (
+                  <div
+                    className="d-flex flex-column items-center"
+                    style={{ minWidth: "120px" }}
+                    key={index}
+                  >
+                    <div
+                      className={
+                        "size-35 flex-center rounded-full cursor-pointer text-14 " +
+                        (step.id > activeStep
+                          ? "bg-light-2 text-light-1"
+                          : "bg-blue-1 text-white")
+                      }
+                    >
+                      {step.id < activeStep ? svgIcon.icon_check : step.id}
+                    </div>
+                    <div className="text-12 text-center mt-10">{step.name}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-        <div className="col-12">
-          <div className="border-light rounded-8 px-20 py-15">
-            {propertySteps[activeStep - 1].content}
-          </div>
-        </div>
+            </div>
+            <div className="col-12">
+              <div className="border-light rounded-8 px-20 py-15">
+                {propertySteps[activeStep - 1].content}
+              </div>
+            </div>
 
-        <div className="col-12 d-flex justify-between">
-          <button
-            onClick={() => setActiveStep(activeStep - 1)}
-            className="border-light bg-light-2 rounded-8 py-5 px-20 fw-500 bg-white text-14"
+            <div className="col-12 d-flex justify-between">
+              <button
+                onClick={() => setActiveStep(activeStep - 1)}
+                className="border-light bg-light-2 rounded-8 py-5 px-20 fw-500 bg-white text-14"
                 disabled={activeStep === 1 || saving}
-          >
-            Previous
-          </button>
-          <button
-            className="rounded-8 py-5 px-20 bg-dark-4 text-white text-14"
+              >
+                Previous
+              </button>
+              <button
+                className="rounded-8 py-5 px-20 bg-dark-4 text-white text-14"
                 onClick={async () => {
-              if (activeStep < propertySteps.length) {
+                  if (activeStep < propertySteps.length) {
                     if (validateStepLocal(activeStep)) {
-                setActiveStep(activeStep + 1);
+                      setActiveStep(activeStep + 1);
                     }
-              } else {
+                  } else {
                     if (validateStepLocal(activeStep)) {
                       await handleSave();
                     }
-              }
-            }}
+                  }
+                }}
                 disabled={saving}
-          >
+              >
                 {saving ? (isEditMode ? "Updating..." : "Saving...") : activeStep < propertySteps.length ? "Continue" : (isEditMode ? "Update" : "Save")}
-          </button>
-        </div>
+              </button>
+            </div>
           </>
         )}
       </div>

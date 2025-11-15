@@ -20,7 +20,9 @@ const ListingPrice = ({ roomTypeData, updateRoomTypeData }) => {
     <div className="row y-gap-10 x-gap-20">
       <h1 className="text-20 lh-14 fw-600">Listing Price</h1>
       <div className="col-md-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Base Price</h1>
+        <h1 className="text-14 lh-12 fw-500">
+          Base Price <span className="text-red-1">*</span>
+        </h1>
         <input
           className="border-light rounded-8 py-5 px-15 w-full mt-10"
           type="number"

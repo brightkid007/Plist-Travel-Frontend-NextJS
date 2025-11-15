@@ -5,7 +5,16 @@ import { Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
-import { ListingAPIClient } from "@/helpers/api_helper";
+import { 
+  getListingCategories, 
+  getListingSubcategories, 
+  createListingCategory, 
+  updateListingCategory, 
+  deleteListingCategory,
+  createListingSubcategory,
+  updateListingSubcategory,
+  deleteListingSubcategory
+} from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { usePermissions } from "@/hooks/usePermissions";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
@@ -55,8 +64,9 @@ const index = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await ListingAPIClient.get("/listing-categories");
-      setCategories(response?.data || []);
+      const response = await getListingCategories();
+      const categoriesData = response?.data || response || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (error) {
       console.error("Error fetching categories:", error);
       toast.error(error?.message || "Failed to fetch categories");
@@ -70,8 +80,9 @@ const index = () => {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await ListingAPIClient.get("/listing-subcategories");
-      setSubcategories(response?.data || []);
+      const response = await getListingSubcategories();
+      const subcategoriesData = response?.data || response || [];
+      setSubcategories(Array.isArray(subcategoriesData) ? subcategoriesData : []);
     } catch (error) {
       console.error("Error fetching subcategories:", error);
       toast.error(error?.message || "Failed to fetch subcategories");
@@ -225,17 +236,19 @@ const index = () => {
       let response;
       if (editingId) {
         // Update
-        response = await ListingAPIClient.update(
-          `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}/${editingId}`,
-          payload
-        );
+        if (activeTab === "category") {
+          response = await updateListingCategory(editingId, payload);
+        } else {
+          response = await updateListingSubcategory(editingId, payload);
+        }
         toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} updated successfully`);
       } else {
         // Create
-        response = await ListingAPIClient.create(
-          `/${activeTab === "category" ? "listing-categories" : "listing-subcategories"}`,
-          payload
-        );
+        if (activeTab === "category") {
+          response = await createListingCategory(payload);
+        } else {
+          response = await createListingSubcategory(payload);
+        }
         toast.success(`${activeTab === "category" ? "Category" : "Subcategory"} created successfully`);
       }
       
@@ -287,9 +300,11 @@ const index = () => {
 
     try {
       setDeleting(true);
-      await ListingAPIClient.delete(
-        `/${itemToDelete.type === "category" ? "listing-categories" : "listing-subcategories"}/${itemToDelete.id}`
-      );
+      if (itemToDelete.type === "category") {
+        await deleteListingCategory(itemToDelete.id);
+      } else {
+        await deleteListingSubcategory(itemToDelete.id);
+      }
       toast.success(`${itemToDelete.type === "category" ? "Category" : "Subcategory"} deleted successfully`);
       
       // Refresh data

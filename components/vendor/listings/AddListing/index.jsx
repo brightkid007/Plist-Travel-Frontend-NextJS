@@ -108,117 +108,117 @@ const AddListing = ({
   const [existingImages, setExistingImages] = useState([]);
   const [existingFaqIds, setExistingFaqIds] = useState([]);
 
+  const loadData = async () => {
+    try {
+      const filterParams = { type: type || "property" };
+      if (subtype) {
+        filterParams.subtype = subtype;
+      }
+      const [catRes, subcatRes, amenitiesRes] = await Promise.all([
+        getListingCategories(filterParams),
+        getListingSubcategories(filterParams),
+        getAmenities(),
+      ]);
+
+      setCategories(catRes?.data || catRes || []);
+      setSubcategories(subcatRes?.data || subcatRes || []);
+      setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      toast.error(error?.message || "Failed to load data");
+    }
+  };
   // Load categories, subcategories, and amenities
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const filterParams = { type: type || "property" };
-        if (subtype) {
-          filterParams.subtype = subtype;
-        }
-        const [catRes, subcatRes, amenitiesRes] = await Promise.all([
-          getListingCategories(filterParams),
-          getListingSubcategories(filterParams),
-          getAmenities(),
-        ]);
-
-        setCategories(catRes?.data || catRes || []);
-        setSubcategories(subcatRes?.data || subcatRes || []);
-        setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error(error?.message || "Failed to load data");
-      }
-    };
     loadData();
   }, [type, subtype]);
 
-  // Load listing data when in edit mode
-  useEffect(() => {
-    const loadListingData = async () => {
-      if (!isEditMode || !listingId) return;
+  const loadListingData = async () => {
+    if (!isEditMode || !listingId) return;
 
-      try {
-        setLoading(true);
-        const [listingRes, faqsRes, mediaRes] = await Promise.all([
-          getListingById(listingId),
-          getFAQs({ listing_id: listingId }),
-          getMediaAssets({ listing_id: listingId }),
-        ]);
+    try {
+      setLoading(true);
+      const [listingRes, faqsRes, mediaRes] = await Promise.all([
+        getListingById(listingId),
+        getFAQs({ listing_id: listingId }),
+        getMediaAssets({ listing_id: listingId }),
+      ]);
 
-        const listing = listingRes?.data || listingRes;
+      const listing = listingRes?.data || listingRes;
 
-        if (listing) {
-          // Update listing data with all fields including subtype-specific ones
-          const updatedData = {
-            title: listing.title || "",
-            category_id: listing.category_id || null,
-            subcategory_id: listing.subcategory_id || null,
-            description: listing.description || "",
-            star_rating: listing.star_rating || null,
-            location_address_id: listing.location_address_id || null,
-            amenities: listing.amenity && Array.isArray(listing.amenity)
-              ? listing.amenity.map((a) => a.id)
-              : [],
-            accessibilityInfo: listing.accessibility_info || "",
-            isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
-            status: listing.status || "draft",
-          };
+      if (listing) {
+        // Update listing data with all fields including subtype-specific ones
+        const updatedData = {
+          title: listing.title || "",
+          category_id: listing.category_id || null,
+          subcategory_id: listing.subcategory_id || null,
+          description: listing.description || "",
+          star_rating: listing.star_rating || null,
+          location_address_id: listing.location_address_id || null,
+          amenities: listing.amenity && Array.isArray(listing.amenity)
+            ? listing.amenity.map((a) => a.id)
+            : [],
+          accessibilityInfo: listing.accessibility_info || "",
+          isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
+          status: listing.status || "draft",
+        };
 
-          // Add subtype-specific fields
-          if (subtype === "Hotel") {
-            updatedData.contact_email = listing.contact_email || "";
-            updatedData.contact_phone = listing.contact_phone || "";
-          } else if (subtype === "EventVenue") {
-            updatedData.manager_name = listing.manager_name || "";
-            updatedData.manager_phone = listing.manager_phone || "";
-            updatedData.parking_info = listing.parking_info || "";
-          } else if (subtype === "Space") {
-            updatedData.manager_name = listing.manager_name || "";
-            updatedData.manager_phone = listing.manager_phone || "";
-          }
+        // Add subtype-specific fields
+        if (subtype === "Hotel") {
+          updatedData.contact_email = listing.contact_email || "";
+          updatedData.contact_phone = listing.contact_phone || "";
+        } else if (subtype === "EventVenue") {
+          updatedData.manager_name = listing.manager_name || "";
+          updatedData.manager_phone = listing.manager_phone || "";
+          updatedData.parking_info = listing.parking_info || "";
+        } else if (subtype === "Space") {
+          updatedData.manager_name = listing.manager_name || "";
+          updatedData.manager_phone = listing.manager_phone || "";
+        }
 
+        setListingData((prev) => ({
+          ...prev,
+          ...updatedData,
+        }));
+
+        // Load FAQs
+        const faqs = faqsRes?.data || faqsRes || [];
+        if (Array.isArray(faqs)) {
           setListingData((prev) => ({
             ...prev,
-            ...updatedData,
+            faqs: faqs.map((faq) => ({
+              question: faq.question || "",
+              answer: faq.answer || "",
+            })),
           }));
-
-          // Load FAQs
-          const faqs = faqsRes?.data || faqsRes || [];
-          if (Array.isArray(faqs)) {
-            setListingData((prev) => ({
-              ...prev,
-              faqs: faqs.map((faq) => ({
-                question: faq.question || "",
-                answer: faq.answer || "",
-              })),
-            }));
-            setExistingFaqIds(faqs.map((faq) => faq.id).filter((id) => id));
-          }
-
-          // Load existing images
-          const media = mediaRes?.data || mediaRes || [];
-          if (Array.isArray(media)) {
-            const images = media.filter((m) => m.type === "image").map((m) => ({
-              id: m.id,
-              url: m.url,
-              type: m.type,
-            }));
-            setExistingImages(images);
-          }
-        } else {
-          toast.error("Listing not found");
-          router.push("/vendor/listings/property");
+          setExistingFaqIds(faqs.map((faq) => faq.id).filter((id) => id));
         }
-      } catch (error) {
-        console.error("Error loading listing data:", error);
-        toast.error(error?.message || "Failed to load listing data");
-        router.push("/vendor/listings/property");
-      } finally {
-        setLoading(false);
-      }
-    };
 
+        // Load existing images
+        const media = mediaRes?.data || mediaRes || [];
+        if (Array.isArray(media)) {
+          const images = media.filter((m) => m.type === "image").map((m) => ({
+            id: m.id,
+            url: m.url,
+            type: m.type,
+          }));
+          setExistingImages(images);
+        }
+      } else {
+        toast.error("Listing not found");
+        router.push("/vendor/listings/property");
+      }
+    } catch (error) {
+      console.error("Error loading listing data:", error);
+      toast.error(error?.message || "Failed to load listing data");
+      router.push("/vendor/listings/property");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load listing data when in edit mode
+  useEffect(() => {
     loadListingData();
   }, [isEditMode, listingId, router, subtype]);
 
@@ -366,7 +366,7 @@ const AddListing = ({
           }
 
           toast.success("Listing updated successfully!");
-          router.push("/vendor/listings/property");
+          router.push(`/vendor/room-type/add?subtype=${subtype}&listingId=${updatedListing.id}`);
         } else {
           toast.error("Failed to update listing. Please try again.");
         }

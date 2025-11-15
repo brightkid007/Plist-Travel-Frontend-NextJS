@@ -1,13 +1,14 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { AuthAPIClient } from "@/helpers/api_helper";
 import {
   setAuth,
   getAuthToken,
   clearAuth,
   getLoggedInUser,
   setLoggedInUser,
-  isAuthenticated
+  isAuthenticated,
+  checkRoles as checkRolesAPI,
+  login as loginAPI
 } from "@/helpers/backend_helper";
 
 const AuthContext = createContext();
@@ -49,10 +50,7 @@ export const AuthProvider = ({ children }) => {
   // Check available roles for an email/password combination
   const checkRoles = async (email, password) => {
     try {
-      const response = await AuthAPIClient.create("/auth/check-roles", {
-        email,
-        password,
-      });
+      const response = await checkRolesAPI(email, password);
       return response;
     } catch (error) {
       throw error;
@@ -64,13 +62,14 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       // POST to /auth/login on auth backend with { email, password, role }
-      const response = await AuthAPIClient.create("/auth/login", credentials);
-      if (response && response.accessToken) {
-        setAuth(response.accessToken); // saves token
-        setLoggedInUser(response); // saves user data
-        setUser(response);
+      const response = await loginAPI(credentials);
+      const responseData = response?.data || response;
+      if (responseData && responseData.accessToken) {
+        setAuth(responseData.accessToken); // saves token
+        setLoggedInUser(responseData); // saves user data
+        setUser(responseData);
         setIsAuthenticatedState(true);
-        return { success: true, user: response };
+        return { success: true, user: responseData };
       } else {
         throw new Error("Invalid login response");
       }

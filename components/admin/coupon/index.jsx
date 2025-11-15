@@ -125,7 +125,6 @@ const index = () => {
       setLoading(true);
       try {
         const res = await getAdminCoupons();
-        // APIClient returns { message, data } or raw array depending on service settings
         const items = res?.data?.coupons || res?.coupons || res?.data || res || [];
         const normalized = (Array.isArray(items) ? items : []).map((c) => ({
           id: c.id || c.ID || c.uuid,
@@ -182,11 +181,6 @@ const index = () => {
           </div>
         </div>
         <div className="col-auto ms-auto">
-          {/* <button className="button border-blue-1 text-blue-1 px-15 py-10 rounded-8">
-            Export Data
-          </button> */}
-        </div>
-        <div className="col-auto">
           <button
             className="button bg-blue-1 text-white px-15 py-10 rounded-8"
             onClick={handleCreateClick}

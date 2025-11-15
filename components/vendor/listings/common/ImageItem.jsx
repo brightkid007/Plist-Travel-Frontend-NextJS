@@ -1,4 +1,5 @@
 import { Close } from "@mui/icons-material";
+import { getImageUrl as getImageUrlUtil } from "@/utils/imageUtils";
 
 /**
  * Reusable image item component for displaying images with remove functionality
@@ -20,25 +21,8 @@ const ImageItem = ({
   alt = "Image",
   getImageUrl,
 }) => {
-  // Default image URL handler
-  const getDefaultImageUrl = (img) => {
-    // If it's a file object, create object URL
-    if (img instanceof File) {
-      return URL.createObjectURL(img);
-    }
-    // If it's an existing image with URL, use the full URL
-    if (img.url) {
-      // Check if URL is already complete or needs base URL
-      if (img.url.startsWith("http://") || img.url.startsWith("https://")) {
-        return img.url;
-      }
-      // Construct full URL from relative path
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081"}${img.url}`;
-    }
-    return null;
-  };
-
-  const imageUrl = getImageUrl ? getImageUrl(image) : getDefaultImageUrl(image);
+  // Use provided getImageUrl function or fall back to utility function
+  const imageUrl = getImageUrl ? getImageUrl(image) : getImageUrlUtil(image);
   const imageId = image.id || index;
 
   const handleRemove = () => {
@@ -53,19 +37,20 @@ const ImageItem = ({
   }
 
   return (
+    console.log("imageUrl", imageUrl),
     <div className="position-relative">
       <img
         src={imageUrl}
         alt={alt}
-        className="w-full h-150 object-cover rounded-8 border-light"
+        className="w-full h-120 object-cover rounded-8 border-light"
         onError={(e) => {
-          e.target.src = "/placeholder-image.png"; 
+          e.target.src = "/img/testimonials/1/4.png"; // Fallback image
         }}
       />
       {showRemoveButton && (
         <button
           onClick={handleRemove}
-          className="position-absolute bg-red-1 text-white rounded-circle size-30 cursor-pointer"
+          className="position-absolute bg-red-1 text-white rounded-circle size-25 flex-center cursor-pointer border-none"
           style={{ top: "15px", right: "15px" }}
           disabled={isDeleting}
         >

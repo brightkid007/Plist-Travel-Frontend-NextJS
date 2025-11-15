@@ -1,28 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Radio } from "@mui/material";
 
-const Calendar = () => {
-  const [activeType, setActiveType] = useState(1);
-  const [startDate, setStartDate] = useState(new DateObject());
-  const [endDate, setEndDate] = useState(new DateObject());
-  const [events, setEvents] = useState([{ title: "Event" }]);
+const Calendar = ({ data, onUpdate }) => {
+  // Get data from props or use defaults
+  const activeType = data?.calendar_type || 1;
+  const startDate = data?.calendar_start_date 
+    ? new DateObject(data.calendar_start_date)
+    : new DateObject();
+  const endDate = data?.calendar_end_date
+    ? new DateObject(data.calendar_end_date)
+    : new DateObject();
+  const blockedDates = data?.blocked_dates || [];
+  const availableDates = data?.available_dates || [];
+
+  const [events, setEvents] = useState([]);
+
+  // Update events when calendar data changes
+  useEffect(() => {
+    const calendarEvents = [];
+    
+    // Add start/end date range event if set
+    if (data?.calendar_start_date && data?.calendar_end_date) {
+      calendarEvents.push({
+        title: activeType === 1 ? "Open Calendar Period" : "Blocked Calendar Period",
+        start: data.calendar_start_date,
+        end: data.calendar_end_date,
+        backgroundColor: activeType === 1 ? "#4CAF50" : "#F44336",
+      });
+    }
+    
+    // Add blocked dates as events (only if calendar type is Open)
+    if (activeType === 1 && blockedDates.length > 0) {
+      blockedDates.forEach(date => {
+        calendarEvents.push({
+          title: "Blocked",
+          start: date,
+          backgroundColor: "#F44336",
+          display: "background",
+        });
+      });
+    }
+    
+    // Add available dates as events (only if calendar type is Blocked)
+    if (activeType === 2 && availableDates.length > 0) {
+      availableDates.forEach(date => {
+        calendarEvents.push({
+          title: "Available",
+          start: date,
+          backgroundColor: "#4CAF50",
+          display: "background",
+        });
+      });
+    }
+    
+    setEvents(calendarEvents);
+  }, [activeType, data?.calendar_start_date, data?.calendar_end_date, blockedDates, availableDates]);
+
+  const handleFieldChange = (field, value) => {
+    if (onUpdate) {
+      onUpdate({
+        ...data,
+        [field]: value
+      });
+    }
+  };
 
   const calendarTypes = [
     {
       id: 1,
       label: "Open Calendar",
       description:
-        "An open calendar means your place is available most of the time. You can block off any dates you’d like.",
+        "An open calendar means your place is available most of the time. You can block off any dates you'd like.",
     },
     {
       id: 2,
       label: "Blocked Calendar",
       description:
-        "A blocked calendar means your place has limited availability. You can open any dates you’d like.",
+        "A blocked calendar means your place has limited availability. You can open any dates you'd like.",
     },
   ];
 
@@ -40,10 +98,9 @@ const Calendar = () => {
               className="flex-shrink-0" 
               checked={activeType === type.id}
               onChange={() => {
-                setActiveType(type.id);
-                setEvents([{ ...events[0], title: type.label }]);
+                handleFieldChange("calendar_type", type.id);
               }}
-              name="discount-option"
+              name="calendar-type"
               value={type.id}
             />
             <div className="flex-grow-1">
@@ -63,8 +120,8 @@ const Calendar = () => {
             containerClassName="custom_container-picker"
             value={startDate}
             onChange={(date) => {
-              setStartDate(date);
-              setEvents([{ ...events[0], start: date.format("YYYY-MM-DD") }]);
+              const dateString = date ? date.format("YYYY-MM-DD") : null;
+              handleFieldChange("calendar_start_date", dateString);
             }}
             numberOfMonths={1}
             offsetY={10}
@@ -80,11 +137,8 @@ const Calendar = () => {
             containerClassName="custom_container-picker"
             value={endDate}
             onChange={(date) => {
-              setEndDate(date);
-              const endDateString = new DateObject(date)
-                .add(1, "day")
-                .format("YYYY-MM-DD");
-              setEvents([{ ...events[0], end: endDateString }]);
+              const dateString = date ? date.format("YYYY-MM-DD") : null;
+              handleFieldChange("calendar_end_date", dateString);
             }}
             numberOfMonths={1}
             offsetY={10}
@@ -103,14 +157,7 @@ const Calendar = () => {
           />
         </div>
       </div>
-      <div className="col-12 mt-10 d-flex justify-between items-center">
-        <button className="button border-light rounded-8 px-15 py-10 fw-500">
-          Cancel
-        </button>
-        <button className="button bg-dark-4 rounded-8 px-15 py-10 text-white fw-500">
-          Apply
-        </button>
-      </div>
+      {/* Note: Blocked/Available dates selection can be added later if needed */}
     </div>
   );
 };

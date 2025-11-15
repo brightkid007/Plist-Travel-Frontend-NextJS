@@ -77,6 +77,23 @@ export const isAuthenticated = () => {
 // Gets the logged in user data from local session
 
 // ===========================================
+// AUTHENTICATION API METHODS
+// ===========================================
+
+// Check available roles for an email/password combination
+export const checkRoles = (email, password) => {
+  return AuthAPIClient.create("/auth/check-roles", {
+    email,
+    password,
+  });
+};
+
+// Login user with credentials
+export const login = (credentials) => {
+  return AuthAPIClient.create("/auth/login", credentials);
+};
+
+// ===========================================
 // ADMIN API METHODS
 // ===========================================
 
@@ -333,7 +350,7 @@ export const updateAmenity = (id, data) => ListingAPIClient.update(`/amenities/$
 export const deleteAmenity = (id) => ListingAPIClient.delete(`/amenities/${id}`);
 
 // MEDIA MANAGEMENT
-// Upload media asset (image, video, pdf)
+// Upload media asset (image, video, pdf) for listing
 export const uploadMedia = (file, listingId) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -346,7 +363,20 @@ export const uploadMedia = (file, listingId) => {
   });
 };
 
-// Get all media assets
+// Upload media asset for room type (separate from listing images)
+export const uploadRoomTypeMedia = (file, roomTypeId) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("room_type_id", roomTypeId.toString());
+  
+  return ListingAPIClient.service.post("/media", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+// Get all media assets (for listing or room type)
 export const getMediaAssets = (params) => {
   if (params && typeof params === 'object') {
     const sanitized = {};
@@ -670,3 +700,38 @@ export const updateRoomType = (id, data) => ListingAPIClient.update(`/room-types
 
 // Delete room type
 export const deleteRoomType = (id) => ListingAPIClient.delete(`/room-types/${id}`);
+
+// ===========================================
+// CANCELLATION POLICY MANAGEMENT (Listing Service)
+// ===========================================
+
+// Get all cancellation policies (with optional filters)
+export const getCancellationPolicies = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/cancellation-policies", sanitized)
+      : ListingAPIClient.get("/cancellation-policies");
+  }
+  return ListingAPIClient.get("/cancellation-policies");
+};
+
+// Get cancellation policy by ID
+export const getCancellationPolicyById = (id) => ListingAPIClient.get(`/cancellation-policies/${id}`);
+
+// Get cancellation policy by listing ID
+export const getCancellationPolicyByListingId = (listingId) => ListingAPIClient.get(`/cancellation-policies/listing/${listingId}`);
+
+// Create cancellation policy
+export const createCancellationPolicy = (data) => ListingAPIClient.create("/cancellation-policies", data);
+
+// Update cancellation policy
+export const updateCancellationPolicy = (id, data) => ListingAPIClient.update(`/cancellation-policies/${id}`, data);
+
+// Delete cancellation policy
+export const deleteCancellationPolicy = (id) => ListingAPIClient.delete(`/cancellation-policies/${id}`);

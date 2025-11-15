@@ -1,15 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Radio } from "@mui/material";
 
-const Calendar = () => {
-  const [activeType, setActiveType] = useState(1);
-  const [startDate, setStartDate] = useState(new DateObject());
-  const [endDate, setEndDate] = useState(new DateObject());
-  const [events, setEvents] = useState([{ title: "Event" }]);
+const Calendar = ({ roomTypeData, updateRoomTypeData }) => {
+  // Calendar type: 1 = Open Calendar, 2 = Blocked Calendar
+  const activeType = roomTypeData?.calendar_type || 1;
+  
+  // Start and end dates for date range selection
+  const startDate = roomTypeData?.calendar_start_date 
+    ? new DateObject(roomTypeData.calendar_start_date)
+    : new DateObject();
+  const endDate = roomTypeData?.calendar_end_date
+    ? new DateObject(roomTypeData.calendar_end_date)
+    : new DateObject();
+  
+  // Blocked/available dates (array of date strings)
+  const blockedDates = roomTypeData?.blocked_dates || [];
+  const availableDates = roomTypeData?.available_dates || [];
+  
+  const [events, setEvents] = useState([]);
+  
+  // Update events when calendar data changes
+  useEffect(() => {
+    const calendarEvents = [];
+    
+    // Add start/end date range event if set
+    if (roomTypeData?.calendar_start_date && roomTypeData?.calendar_end_date) {
+      calendarEvents.push({
+        title: activeType === 1 ? "Open Calendar Period" : "Blocked Calendar Period",
+        start: roomTypeData.calendar_start_date,
+        end: roomTypeData.calendar_end_date,
+        backgroundColor: activeType === 1 ? "#4CAF50" : "#F44336",
+      });
+    }
+    
+    // Add blocked dates as events (only if calendar type is Open)
+    if (activeType === 1 && blockedDates.length > 0) {
+      blockedDates.forEach(date => {
+        calendarEvents.push({
+          title: "Blocked",
+          start: date,
+          backgroundColor: "#F44336",
+          display: "background",
+        });
+      });
+    }
+    
+    // Add available dates as events (only if calendar type is Blocked)
+    if (activeType === 2 && availableDates.length > 0) {
+      availableDates.forEach(date => {
+        calendarEvents.push({
+          title: "Available",
+          start: date,
+          backgroundColor: "#4CAF50",
+          display: "background",
+        });
+      });
+    }
+    
+    setEvents(calendarEvents);
+  }, [activeType, roomTypeData?.calendar_start_date, roomTypeData?.calendar_end_date, blockedDates, availableDates]);
 
   const calendarTypes = [
     {
@@ -40,10 +93,9 @@ const Calendar = () => {
               className="flex-shrink-0" 
               checked={activeType === type.id}
               onChange={() => {
-                setActiveType(type.id);
-                setEvents([{ ...events[0], title: type.label }]);
+                updateRoomTypeData({ calendar_type: type.id });
               }}
-              name="discount-option"
+              name="calendar-type"
               value={type.id}
             />
             <div className="flex-grow-1">
@@ -63,8 +115,8 @@ const Calendar = () => {
             containerClassName="custom_container-picker"
             value={startDate}
             onChange={(date) => {
-              setStartDate(date);
-              setEvents([{ ...events[0], start: date.format("YYYY-MM-DD") }]);
+              const dateString = date ? date.format("YYYY-MM-DD") : null;
+              updateRoomTypeData({ calendar_start_date: dateString });
             }}
             placeholder="Start Date"
             numberOfMonths={1}
@@ -81,11 +133,8 @@ const Calendar = () => {
             containerClassName="custom_container-picker"
             value={endDate}
             onChange={(date) => {
-              setEndDate(date);
-              const endDateString = new DateObject(date)
-                .add(1, "day")
-                .format("YYYY-MM-DD");
-              setEvents([{ ...events[0], end: endDateString }]);
+              const dateString = date ? date.format("YYYY-MM-DD") : null;
+              updateRoomTypeData({ calendar_end_date: dateString });
             }}
             placeholder="End Date"
             numberOfMonths={1}

@@ -118,12 +118,181 @@ export const validateStep = (step, listingData, uploadedImages = [], existingIma
       }
       return true;
 
-    case 4: // Amenities
-      // Amenities are optional
+    case 4: // Amenities (property) or Listing Details (non-property)
+      if (isNonProperty) {
+        // Non-property: Listing Details validation
+        const listingDetails = listingData.listingDetails || {};
+        
+        // Validate event days if multi-day event
+        if (listingDetails.is_multi_day) {
+          if (!listingDetails.event_days || !Array.isArray(listingDetails.event_days) || listingDetails.event_days.length === 0) {
+            toast.error("Please add at least one event day for multi-day events");
+            return false;
+          }
+          // Validate each event day has required fields
+          const invalidDays = listingDetails.event_days.some((day, index) => {
+            if (!day.date || !day.date.trim()) {
+              toast.error(`Please enter event date for Day ${index + 1}`);
+              return true;
+            }
+            if (!day.start_time || !day.start_time.trim()) {
+              toast.error(`Please enter event start time for Day ${index + 1}`);
+              return true;
+            }
+            if (!day.end_time || !day.end_time.trim()) {
+              toast.error(`Please enter event end time for Day ${index + 1}`);
+              return true;
+            }
+            return false;
+          });
+          if (invalidDays) {
+            return false;
+          }
+        }
+        
+        // Cancellation policy is optional but recommended
+        // Other fields are optional
+      } else {
+        // Property: Amenities are optional
+      }
       return true;
 
-    case 5: // FAQs
-      // FAQs are optional
+    case 5: // Listing Price (non-property) or FAQs (property)
+      if (isNonProperty) {
+        // Non-property: Listing Price validation
+        const listingPrice = listingData.listingPrice || {};
+        
+        // Validate ticket prices
+        if (!listingPrice.ticket_prices || !Array.isArray(listingPrice.ticket_prices) || listingPrice.ticket_prices.length === 0) {
+          toast.error("Please add at least one ticket price");
+          return false;
+        }
+        
+        // Validate each ticket price has category and price
+        const invalidTicketPrices = listingPrice.ticket_prices.some((ticket, index) => {
+          if (!ticket.category || !ticket.category.trim()) {
+            toast.error(`Please select a ticket price category for Ticket ${index + 1}`);
+            return true;
+          }
+          if (!ticket.price || ticket.price === "" || ticket.price === null || ticket.price === undefined) {
+            toast.error(`Please enter a price for Ticket ${index + 1}`);
+            return true;
+          }
+          const parsedPrice = parseFloat(ticket.price);
+          if (isNaN(parsedPrice) || parsedPrice <= 0) {
+            toast.error(`Please enter a valid price for Ticket ${index + 1} (must be greater than 0)`);
+            return true;
+          }
+          return false;
+        });
+        if (invalidTicketPrices) {
+          return false;
+        }
+        
+        // Validate base prices by day if enabled
+        if (listingPrice.base_prices_by_day_of_week && listingPrice.base_prices_by_day) {
+          const dayPrices = listingPrice.base_prices_by_day;
+          const hasInvalidPrice = Object.keys(dayPrices).some((day) => {
+            const price = dayPrices[day];
+            if (price !== null && price !== undefined && price !== "") {
+              const parsedPrice = parseFloat(price);
+              if (isNaN(parsedPrice) || parsedPrice <= 0) {
+                toast.error(`Please enter a valid price for ${day} (must be greater than 0)`);
+                return true;
+              }
+            }
+            return false;
+          });
+          if (hasInvalidPrice) {
+            return false;
+          }
+        }
+        
+        // Validate guest prices if enabled
+        if (listingPrice.additional_prices_by_guests) {
+          if (!listingPrice.guest_prices || !Array.isArray(listingPrice.guest_prices) || listingPrice.guest_prices.length === 0) {
+            toast.error("Please add at least one guest price range when 'Additional Base Prices by Number of Guests' is enabled");
+            return false;
+          }
+          const invalidGuestPrices = listingPrice.guest_prices.some((guestPrice, index) => {
+            if (!guestPrice.guest_start || guestPrice.guest_start === "" || guestPrice.guest_start === null) {
+              toast.error(`Please enter guest start range for Guest Price ${index + 1}`);
+              return true;
+            }
+            if (!guestPrice.guest_end || guestPrice.guest_end === "" || guestPrice.guest_end === null) {
+              toast.error(`Please enter guest end range for Guest Price ${index + 1}`);
+              return true;
+            }
+            if (!guestPrice.price || guestPrice.price === "" || guestPrice.price === null || guestPrice.price === undefined) {
+              toast.error(`Please enter a price for Guest Price ${index + 1}`);
+              return true;
+            }
+            const parsedStart = parseInt(guestPrice.guest_start);
+            const parsedEnd = parseInt(guestPrice.guest_end);
+            const parsedPrice = parseFloat(guestPrice.price);
+            if (isNaN(parsedStart) || parsedStart < 1) {
+              toast.error(`Please enter a valid guest start range for Guest Price ${index + 1} (must be at least 1)`);
+              return true;
+            }
+            if (isNaN(parsedEnd) || parsedEnd < parsedStart) {
+              toast.error(`Please enter a valid guest end range for Guest Price ${index + 1} (must be greater than start range)`);
+              return true;
+            }
+            if (isNaN(parsedPrice) || parsedPrice <= 0) {
+              toast.error(`Please enter a valid price for Guest Price ${index + 1} (must be greater than 0)`);
+              return true;
+            }
+            return false;
+          });
+          if (invalidGuestPrices) {
+            return false;
+          }
+        }
+      } else {
+        // Property: FAQs are optional
+      }
+      return true;
+
+    case 6: // FAQs (non-property) or skipped for property
+      if (isNonProperty) {
+        // Non-property: FAQs are optional
+      }
+      return true;
+
+    case 7: // Calendar (non-property only)
+      if (isNonProperty) {
+        // Non-property: Calendar validation
+        const calendar = listingData.calendar || {};
+        
+        // Calendar type must be set (defaults to 1 if not set)
+        if (!calendar.calendar_type || (calendar.calendar_type !== 1 && calendar.calendar_type !== 2)) {
+          toast.error("Please select a calendar type");
+          return false;
+        }
+        
+        // If calendar start and end dates are provided, validate them
+        if (calendar.calendar_start_date && calendar.calendar_end_date) {
+          const startDate = new Date(calendar.calendar_start_date);
+          const endDate = new Date(calendar.calendar_end_date);
+          
+          if (isNaN(startDate.getTime())) {
+            toast.error("Please enter a valid start date");
+            return false;
+          }
+          
+          if (isNaN(endDate.getTime())) {
+            toast.error("Please enter a valid end date");
+            return false;
+          }
+          
+          if (endDate < startDate) {
+            toast.error("End date must be after or equal to start date");
+            return false;
+          }
+        }
+        
+        // Blocked/available dates are optional
+      }
       return true;
 
     default:

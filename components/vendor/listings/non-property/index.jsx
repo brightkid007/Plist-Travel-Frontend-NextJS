@@ -34,36 +34,37 @@ const index = ({ isProperty = false }) => {
   const [subcategories, setSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
 
+  const loadCategories = async () => {
+    try {
+      // Load categories for tour, event, and activity types
+      const [tourRes, eventRes, activityRes, subcatRes] = await Promise.all([
+        getListingCategories({ type: "tour" }),
+        getListingCategories({ type: "event" }),
+        getListingCategories({ type: "activity" }),
+        getListingSubcategories(),
+      ]);
+      
+      // Combine all non-property categories
+      const allCategories = [
+        ...(tourRes?.data || tourRes || []),
+        ...(eventRes?.data || eventRes || []),
+        ...(activityRes?.data || activityRes || []),
+      ];
+      
+      // Remove duplicates based on ID
+      const uniqueCategories = allCategories.filter((cat, index, self) =>
+        index === self.findIndex((c) => c.id === cat.id)
+      );
+      
+      setCategories(uniqueCategories);
+      setSubcategories(subcatRes?.data || subcatRes || []);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  };
+
   // Load categories and subcategories (filter for non-property types)
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        // Load categories for tour, event, and activity types
-        const [tourRes, eventRes, activityRes, subcatRes] = await Promise.all([
-          getListingCategories({ type: "tour" }),
-          getListingCategories({ type: "event" }),
-          getListingCategories({ type: "activity" }),
-          getListingSubcategories(),
-        ]);
-        
-        // Combine all non-property categories
-        const allCategories = [
-          ...(tourRes?.data || tourRes || []),
-          ...(eventRes?.data || eventRes || []),
-          ...(activityRes?.data || activityRes || []),
-        ];
-        
-        // Remove duplicates based on ID
-        const uniqueCategories = allCategories.filter((cat, index, self) =>
-          index === self.findIndex((c) => c.id === cat.id)
-        );
-        
-        setCategories(uniqueCategories);
-        setSubcategories(subcatRes?.data || subcatRes || []);
-      } catch (error) {
-        console.error("Error loading categories:", error);
-      }
-    };
     loadCategories();
   }, []);
 
@@ -237,245 +238,245 @@ const index = ({ isProperty = false }) => {
   return (
     <VendorDashboardLayout>
       <div className="row y-gap-20 justify-between items-center mb-5">
-            <div className="col-md-auto">
-              <h1 className="text-30 lh-14 fw-600">
-                Non-Property Listings Management
-              </h1>
-              <div className="text-15 text-light-1">
-                Manage your non-property and service listings.
-              </div>
-            </div>
-            <div className="col-md-auto d-flex justify-content-end">
-              <button
-                className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
-                onClick={() => router.push("/vendor/listings/select/non-property")}
-              >
-                <i className="icon-plus mr-10"></i> Add New{" "}
-                {isProperty ? "Property" : "Listing"}
-              </button>
-            </div>
+        <div className="col-md-auto">
+          <h1 className="text-30 lh-14 fw-600">
+            Non-Property Listings Management
+          </h1>
+          <div className="text-15 text-light-1">
+            Manage your non-property and service listings.
           </div>
+        </div>
+        <div className="col-md-auto d-flex justify-content-end">
+          <button
+            className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
+            onClick={() => router.push("/vendor/listings/select/non-property")}
+          >
+            <i className="icon-plus mr-10"></i> Add New{" "}
+            {isProperty ? "Property" : "Listing"}
+          </button>
+        </div>
+      </div>
 
-          <div className="row y-gap-10 x-gap-10 items-center mb-5">
-            <div className="col-sm-auto d-flex">
-              <div className="position-relative d-flex items-center w-180 sm:w-full">
-                <input
-                  type="text"
-                  placeholder="Search listings..."
-                  className="border-light bg-white rounded-8 px-10 py-5 pl-30"
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange("search", e.target.value)}
-                />
-                <i
-                  className="icon-search text-light-1 position-absolute"
-                  style={{
-                    left: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                  }}
-                ></i>
-              </div>
-            </div>
-            <div className="col-sm-auto">
-              <select
-                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
-                value={filters.status}
-                onChange={(e) => handleFilterChange("status", e.target.value)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="submitted">Submitted</option>
-                <option value="approved">Active</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div className="col-sm-auto">
-              <select
-                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
-                value={filters.type}
-                onChange={(e) => handleFilterChange("type", e.target.value)}
-              >
-                <option value="all">All Types</option>
-                <option value="tour">Tour</option>
-                <option value="event">Event</option>
-                <option value="activity">Activity</option>
-                <option value="flight">Flight</option>
-                <option value="ride">Ride</option>
-              </select>
-            </div>
-
-            <div className="col-sm-auto">
-              <select
-                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
-                value={filters.category_id}
-                onChange={(e) => {
-                  handleFilterChange("category_id", e.target.value);
-                }}
-              >
-                <option value="all">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-sm-auto">
-              <select
-                className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
-                value={filters.subcategory_id}
-                onChange={(e) => handleFilterChange("subcategory_id", e.target.value)}
-                disabled={!filters.category_id || filters.category_id === "all"}
-              >
-                <option value="all">All Subcategories</option>
-                {filteredSubcategories.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-sm-auto ms-auto">
-              <button
-                className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full"
-                onClick={() => {
-                  setFilters({
-                    search: "",
-                    status: "all",
-                    type: "all",
-                    category_id: "all",
-                    subcategory_id: "all",
-                  });
-                }}
-              >
-                Clear Filters
-              </button>
-            </div>
+      <div className="row y-gap-10 x-gap-10 items-center mb-5">
+        <div className="col-sm-auto d-flex">
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search listings..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={filters.search}
+              onChange={(e) => handleFilterChange("search", e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
           </div>
+        </div>
+        <div className="col-sm-auto">
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+            value={filters.status}
+            onChange={(e) => handleFilterChange("status", e.target.value)}
+          >
+            <option value="all">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="submitted">Submitted</option>
+            <option value="approved">Active</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
 
-          <div className="bg-white rounded-8 border-light px-15 py-5">
-            <div className="overflow-scroll scroll-bar-1">
-              <table className="table-2 col-12">
-                <thead>
-                  <tr className="text-light-1 fw-600">
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
+        <div className="col-sm-auto">
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+            value={filters.type}
+            onChange={(e) => handleFilterChange("type", e.target.value)}
+          >
+            <option value="all">All Types</option>
+            <option value="tour">Tour</option>
+            <option value="event">Event</option>
+            <option value="activity">Activity</option>
+            <option value="flight">Flight</option>
+            <option value="ride">Ride</option>
+          </select>
+        </div>
+
+        <div className="col-sm-auto">
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+            value={filters.category_id}
+            onChange={(e) => {
+              handleFilterChange("category_id", e.target.value);
+            }}
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-sm-auto">
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+            value={filters.subcategory_id}
+            onChange={(e) => handleFilterChange("subcategory_id", e.target.value)}
+            disabled={!filters.category_id || filters.category_id === "all"}
+          >
+            <option value="all">All Subcategories</option>
+            {filteredSubcategories.map((sub) => (
+              <option key={sub.id} value={sub.id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-sm-auto ms-auto">
+          <button
+            className="button -md px-15 py-10 fw-400 text-14 bg-white border-light rounded-8 sm:w-full"
+            onClick={() => {
+              setFilters({
+                search: "",
+                status: "all",
+                type: "all",
+                category_id: "all",
+                subcategory_id: "all",
+              });
+            }}
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-8 border-light px-15 py-5">
+        <div className="overflow-scroll scroll-bar-1">
+          <table className="table-2 col-12">
+            <thead>
+              <tr className="text-light-1 fw-600">
+                <th>Name</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-40">
+                    <div className="d-flex justify-center items-center">
+                      <CircularProgress />
+                      <span className="ml-10 text-14">Loading listings...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : listings.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-40">
+                    <div className="d-flex flex-column items-center justify-center">
+                      <span className="material-symbols-outlined text-48 text-light-1 mb-10">
+                        tour
+                      </span>
+                      <div className="text-16 text-light-1">No listings found</div>
+                      <div className="text-14 text-light-1 mt-5">
+                        Click "Add New Listing" to create your first listing
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                listings.map((listing) => (
+                  <tr key={listing.id}>
+                    <td className="align-middle">{listing.title}</td>
+                    <td className="align-middle">{getTypeLabel(listing.type)}</td>
+                    <td className="align-middle">
+                      {listing.category?.name || "-"}
+                    </td>
+                    <td className="align-middle">
+                      {getStatusBadge(listing.status)}
+                    </td>
+                    <td className="align-middle text-14">
+                      {listing.created_at
+                        ? new Date(listing.created_at).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td className="align-middle">
+                      <span
+                        className="material-symbols-outlined cursor-pointer"
+                        onClick={(event) => {
+                          setAnchorEl(event.currentTarget);
+                          setSelectedListingId(listing.id);
+                        }}
+                      >
+                        more_horiz
+                      </span>
+                      <Menu
+                        id="more-menu"
+                        anchorEl={anchorEl}
+                        open={showMoreMenu && selectedListingId === listing.id}
+                        onClose={() => {
+                          setAnchorEl(null);
+                          setSelectedListingId(null);
+                        }}
+                      >
+                        {listing.status === "draft" && (
+                          <MenuItem
+                            onClick={() => {
+                              handleSubmit(listing.id);
+                            }}
+                            className="text-12"
+                            disabled={submitting && listingToSubmit?.id === listing.id}
+                          >
+                            {submitting && listingToSubmit?.id === listing.id ? "Submitting..." : "Submit"}
+                          </MenuItem>
+                        )}
+                        <MenuItem
+                          onClick={() => {
+                            router.push(`/vendor/property/${listing.id}/edit?type=${listing.type}`);
+                            setAnchorEl(null);
+                            setSelectedListingId(null);
+                          }}
+                          className="text-12"
+                        >
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            handleDeleteClick(listing.id);
+                          }}
+                          className="text-12 text-red-1"
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="6" className="text-center py-40">
-                        <div className="d-flex justify-center items-center">
-                          <CircularProgress />
-                          <span className="ml-10 text-14">Loading listings...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : listings.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="text-center py-40">
-                        <div className="d-flex flex-column items-center justify-center">
-                          <span className="material-symbols-outlined text-48 text-light-1 mb-10">
-                            tour
-                          </span>
-                          <div className="text-16 text-light-1">No listings found</div>
-                          <div className="text-14 text-light-1 mt-5">
-                            Click "Add New Listing" to create your first listing
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    listings.map((listing) => (
-                      <tr key={listing.id}>
-                        <td className="align-middle">{listing.title}</td>
-                        <td className="align-middle">{getTypeLabel(listing.type)}</td>
-                        <td className="align-middle">
-                          {listing.category?.name || "-"}
-                        </td>
-                        <td className="align-middle">
-                          {getStatusBadge(listing.status)}
-                        </td>
-                        <td className="align-middle text-14">
-                          {listing.created_at
-                            ? new Date(listing.created_at).toLocaleDateString()
-                            : "-"}
-                        </td>
-                        <td className="align-middle">
-                          <span
-                            className="material-symbols-outlined cursor-pointer"
-                            onClick={(event) => {
-                              setAnchorEl(event.currentTarget);
-                              setSelectedListingId(listing.id);
-                            }}
-                          >
-                            more_horiz
-                          </span>
-                          <Menu
-                            id="more-menu"
-                            anchorEl={anchorEl}
-                            open={showMoreMenu && selectedListingId === listing.id}
-                            onClose={() => {
-                              setAnchorEl(null);
-                              setSelectedListingId(null);
-                            }}
-                          >
-                            {listing.status === "draft" && (
-                              <MenuItem
-                                onClick={() => {
-                                  handleSubmit(listing.id);
-                                }}
-                                className="text-12"
-                                disabled={submitting && listingToSubmit?.id === listing.id}
-                              >
-                                {submitting && listingToSubmit?.id === listing.id ? "Submitting..." : "Submit"}
-                              </MenuItem>
-                            )}
-                            <MenuItem
-                              onClick={() => {
-                                router.push(`/vendor/property/${listing.id}/edit`);
-                                setAnchorEl(null);
-                                setSelectedListingId(null);
-                              }}
-                              className="text-12"
-                            >
-                              Edit
-                            </MenuItem>
-                            <MenuItem
-                              onClick={() => {
-                                handleDeleteClick(listing.id);
-                              }}
-                              className="text-12 text-red-1"
-                            >
-                              Delete
-                            </MenuItem>
-                          </Menu>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-          <DeleteConfirmationModal
-            open={deleteModalOpen}
-            onClose={handleDeleteCancel}
-            onConfirm={handleDeleteConfirm}
-            title="Delete Listing"
-            message={`Are you sure you want to delete the listing "${listingToDelete?.title || `#${listingToDelete?.id}`}"?`}
-            itemName={listingToDelete?.title || `Listing #${listingToDelete?.id}`}
-            loading={deleting}
-            confirmLabel="Delete"
-            confirmingLabel="Deleting..."
-          />
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Listing"
+        message={`Are you sure you want to delete the listing "${listingToDelete?.title || `#${listingToDelete?.id}`}"?`}
+        itemName={listingToDelete?.title || `Listing #${listingToDelete?.id}`}
+        loading={deleting}
+        confirmLabel="Delete"
+        confirmingLabel="Deleting..."
+      />
     </VendorDashboardLayout>
   );
 };

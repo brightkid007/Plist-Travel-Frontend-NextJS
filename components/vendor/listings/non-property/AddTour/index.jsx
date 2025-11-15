@@ -3,10 +3,13 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Description from "./Description";
 import Image from "./Image";
 import Location from "./Location";
+import ListingDetails from "./ListingDetails";
+import ListingPrice from "./ListingPrice";
 import Amenities from "../../AddListing/Amenities";
 import { useRouter } from "next/navigation";
 import VendorDashboardLayout from "../../../common/layout";
 import FAQs from "../../AddListing/FAQs";
+import Calendar from "../common/Calendar";
 import { createListing, updateListing, createAddress, getListingCategories, getListingSubcategories, getAmenities, uploadMedia, createFAQ, getListingById, getFAQs, getMediaAssets, deleteFAQ } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
@@ -85,10 +88,7 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         const listing = listingRes?.data || listingRes;
 
         if (listing) {
-          // Set type from listing data
-          if (listing.type) {
-            setListingType(listing.type);
-          }
+          // Type is already set from props, no need to set listingType state
 
           setListingData((prev) => ({
             ...prev,
@@ -406,27 +406,46 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     },
     {
       id: 4,
-      name: "Amenities",
+      name: "Listing Details",
       content: (
-        <Amenities
-          amenitiesList={amenitiesList}
-          selectedAmenities={listingData.amenities || []}
-          onUpdate={handleAmenitiesUpdate}
-          accessibilityInfo={listingData.accessibilityInfo || ""}
-          isAccessibilityEnabled={listingData.isAccessibilityEnabled || false}
-          onAccessibilityChange={handleAccessibilityInfoChange}
-          onAccessibilityEnabledChange={handleAccessibilityEnabledChange}
-        />
+        <div>
+          <ListingDetails bookingType={listingData.booking_type} />
+          <div className="mt-20">
+            <Amenities
+              amenitiesList={amenitiesList}
+              selectedAmenities={listingData.amenities || []}
+              onUpdate={handleAmenitiesUpdate}
+              accessibilityInfo={listingData.accessibilityInfo || ""}
+              isAccessibilityEnabled={listingData.isAccessibilityEnabled || false}
+              onAccessibilityChange={handleAccessibilityInfoChange}
+              onAccessibilityEnabledChange={handleAccessibilityEnabledChange}
+            />
+          </div>
+        </div>
       ),
     },
     {
       id: 5,
+      name: "Listing Price",
+      content: (
+        <ListingPrice />
+      ),
+    },
+    {
+      id: 6,
       name: "FAQs",
       content: (
         <FAQs
           faqs={listingData.faqs || []}
           onUpdate={(faqs) => updateListingData("faqs", faqs)}
         />
+      ),
+    },
+    {
+      id: 7,
+      name: "Calendar",
+      content: (
+        <Calendar />
       ),
     },
   ], [

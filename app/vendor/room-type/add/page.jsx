@@ -13,8 +13,9 @@ const index = () => {
   const searchParams = useSearchParams();
   const subtype = searchParams.get("subtype");
   const listingId = searchParams.get("listingId");
+  const roomTypeId = searchParams.get("roomTypeId");
 
-  return <AddRoomType listingId={listingId} subtype={subtype} />;
+  return <AddRoomType listingId={listingId} subtype={subtype} roomTypeId={roomTypeId} />;
 };
 
 export default dynamic(() => Promise.resolve(index), {

@@ -145,8 +145,20 @@ const ListingDetails = ({ bookingType, roomTypeData, updateRoomTypeData }) => {
         />
       </div>
       <div className="col-12 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Cancellation Policy</h1>
-        <CancellationPolicy />
+        <h1 className="text-14 lh-12 fw-500">
+          Cancellation Policy <span className="text-red-1">*</span>
+        </h1>
+        <CancellationPolicy 
+          listingId={roomTypeData?.listing_id}
+          selectedPolicyId={roomTypeData?.cancellation_policy_id || (roomTypeData?.cancellation_policy ? parseInt(roomTypeData.cancellation_policy) : null)}
+          onPolicyChange={(policyId) => {
+            // Store as both cancellation_policy_id (for future model update) and cancellation_policy (current model)
+            updateRoomTypeData({ 
+              cancellation_policy_id: policyId,
+              cancellation_policy: policyId ? String(policyId) : null
+            });
+          }}
+        />
       </div>
       <div className="col-md-3 col-sm-6 mt-5">
         <h1 className="text-14 lh-12 fw-500">Smoking Allowed</h1>

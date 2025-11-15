@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import FormInput from "@/components/common/form/FormInput";
-import { Alert, Snackbar } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { getMyListings } from "@/helpers/backend_helper";
+import { Alert, Snackbar, Checkbox } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getMyListings, getListingById, getMediaAssets } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import ImageUploadForm from "@/components/vendor/common/ImageUploadForm";
+import ImageGallery from "@/components/vendor/listings/common/ImageGallery";
 
 const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeData, updateRoomTypeData }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const roomTypeId = searchParams.get("roomTypeId");
   // Use shared state from parent, with local state as fallback
   const maxAdults = roomTypeData?.occupancy_adults || 2;
   const maxChildren = roomTypeData?.occupancy_children || 1;
@@ -21,37 +24,86 @@ const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeDa
   const [propertyListings, setPropertyListings] = useState([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState(listingId ? String(listingId) : "");
   const [loading, setLoading] = useState(false);
+  const [listingAmenities, setListingAmenities] = useState([]); // Amenities from the selected listing
+  const [loadingListingDetails, setLoadingListingDetails] = useState(false);
+  const [existingImages, setExistingImages] = useState([]); // Existing images from backend
+  const [loadingImages, setLoadingImages] = useState(false);
 
-  const router = useRouter();
+  // Load listing details including amenities when a listing is selected
+  const loadListingDetails = async (listingId) => {
+    if (!listingId) {
+      setListingAmenities([]);
+      updateRoomTypeData({ amenities: [] });
+      return;
+    }
+
+    try {
+      setLoadingListingDetails(true);
+      const response = await getListingById(listingId);
+      const listing = response?.data || response;
+
+      if (listing && listing.amenity && Array.isArray(listing.amenity)) {
+        // Extract amenities from the listing
+        const amenities = listing.amenity.map((a) => ({
+          id: a.id,
+          name: a.name,
+        }));
+        setListingAmenities(amenities);
+      } else {
+        setListingAmenities([]);
+        updateRoomTypeData({ amenities: [] });
+      }
+    } catch (error) {
+      console.error("Error loading listing details:", error);
+      toast.error(error?.message || "Failed to load listing amenities");
+      setListingAmenities([]);
+    } finally {
+      setLoadingListingDetails(false);
+    }
+  };
 
   // Helper function to handle property selection and routing
-  const handlePropertySelection = (listings, targetListingId) => {
+  const handlePropertySelection = async (listings, targetListingId) => {
     if (targetListingId) {
       setSelectedPropertyId(String(targetListingId));
       const foundProperty = listings.find((p) => p.id === targetListingId);
       setProperty(foundProperty || null);
       updateRoomTypeData({ listing_id: targetListingId });
 
+      // Load listing details including amenities
+      await loadListingDetails(targetListingId);
+
+      // Build URL params, preserving roomTypeId if it exists
+      const queryParams = new URLSearchParams();
+      queryParams.set("subtype", foundProperty && foundProperty.subtype !== subtype ? foundProperty.subtype : subtype);
+      queryParams.set("listingId", foundProperty?.id || targetListingId);
+      if (roomTypeId) {
+        queryParams.set("roomTypeId", roomTypeId);
+      }
+
       // Redirect if property subtype doesn't match current subtype
       if (
         foundProperty &&
         (foundProperty.subtype !== subtype)
       ) {
-        router.push(
-          `/vendor/room-type/add?subtype=${foundProperty.subtype}&listingId=${foundProperty.id}`
-        );
+        router.push(`/vendor/room-type/add?${queryParams.toString()}`);
         return true; // Indicate redirect happened
       }
-      router.push(
-        `/vendor/room-type/add?subtype=${subtype}&listingId=${targetListingId}`
-      );
+      router.push(`/vendor/room-type/add?${queryParams.toString()}`);
     } else {
-      // Clear selection - remove listingId from URL
+      // Clear selection - remove listingId from URL but preserve roomTypeId
       setSelectedPropertyId("");
       setProperty(null);
-      updateRoomTypeData({ listing_id: null });
-      // Remove listingId from URL if it exists
-      router.push(`/vendor/room-type/add?subtype=${subtype}`);
+      setListingAmenities([]);
+      updateRoomTypeData({ listing_id: null, amenities: [] });
+      
+      // Build URL params, preserving roomTypeId if it exists
+      const queryParams = new URLSearchParams();
+      queryParams.set("subtype", subtype);
+      if (roomTypeId) {
+        queryParams.set("roomTypeId", roomTypeId);
+      }
+      router.push(`/vendor/room-type/add?${queryParams.toString()}`);
       return true; // Indicate redirect happened
     }
     return false; // No redirect
@@ -65,8 +117,92 @@ const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeDa
       handlePropertySelection(propertyListings, listingId);
     } else {
       setProperty(null);
+      setListingAmenities([]);
     }
   }, [listingId, subtype]);
+
+  // Load listing details when listingId changes
+  useEffect(() => {
+    if (listingId) {
+      loadListingDetails(listingId);
+    } else {
+      setListingAmenities([]);
+      updateRoomTypeData({ amenities: [] });
+    }
+  }, [listingId]);
+
+  // Load existing images when editing (roomTypeId exists)
+  useEffect(() => {
+    if (roomTypeId) {
+      loadExistingImages();
+    } else {
+      setExistingImages([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomTypeId]);
+
+  const loadExistingImages = async () => {
+    if (!roomTypeId) return;
+
+    try {
+      setLoadingImages(true);
+      const response = await getMediaAssets({ room_type_id: roomTypeId, type: "image" });
+      const mediaData = response?.data || response || [];
+      const images = Array.isArray(mediaData) ? mediaData : [];
+      
+      // Transform to include id for deletion tracking
+      const formattedImages = images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        isExisting: true, // Flag to identify existing images
+      }));
+      
+      setExistingImages(formattedImages);
+    } catch (error) {
+      console.error("Error loading existing images:", error);
+      // Don't show error toast, just log it - images might not exist yet
+      setExistingImages([]);
+    } finally {
+      setLoadingImages(false);
+    }
+  };
+
+  // Handle existing images change (track deletions instead of deleting immediately)
+  const handleExistingImagesChange = (updatedExisting) => {
+    // Find removed images and add to deletion list
+    const removedImages = existingImages.filter(
+      (img) => !updatedExisting.find((u) => u.id === img.id)
+    );
+    
+    if (removedImages.length > 0) {
+      // Update local state
+      setExistingImages(updatedExisting);
+      
+      // Add removed image IDs to deletion list
+      const currentToDelete = roomTypeData?.imagesToDelete || [];
+      const removedIds = removedImages.map((img) => img.id);
+      const newToDelete = [
+        ...currentToDelete,
+        ...removedIds.filter((id) => !currentToDelete.includes(id))
+      ];
+      updateRoomTypeData({ imagesToDelete: newToDelete });
+    } else {
+      // Just update state if no deletions
+      setExistingImages(updatedExisting);
+    }
+  };
+
+  // Handle custom existing image removal for room types (track deletion, don't delete immediately)
+  const handleExistingImageRemove = (imageId, index) => {
+    if (!imageId) return;
+
+    // Remove from existing images display
+    const imageToRemove = existingImages.find((img) => img.id === imageId);
+    if (imageToRemove) {
+      const updatedExisting = existingImages.filter((img) => img.id !== imageId);
+      handleExistingImagesChange(updatedExisting);
+    }
+  };
 
   const loadPropertyListings = async () => {
     setLoading(true);
@@ -104,6 +240,7 @@ const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeDa
         <div className="col-sm-6 mt-5">
           <h1 className="text-14 lh-1 fw-500">
             Property
+            <span className="text-red-1">*</span>
             {loading && (
               <span className="text-12 text-light-1 ml-10 align-middle">(Loading...)</span>
             )}
@@ -160,7 +297,11 @@ const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeDa
           </Snackbar>
         </div>
         <FormInput
-          label="Room Type"
+          label={
+            <>
+              Room Type <span className="text-red-1">*</span>
+            </>
+          }
           type="text"
           name="name"
           placeholder="Hotel ABC Executive Suite"
@@ -202,8 +343,54 @@ const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeDa
           value={maxOccupancy}
           readOnly={true}
         />
+        <div className="col-12 mt-5">
+          <h1 className="text-14 lh-12 fw-500">
+            Amenities
+            {loadingListingDetails && (
+              <span className="text-12 text-light-1 ml-10 align-middle">(Loading...)</span>
+            )}
+          </h1>
+          {!selectedPropertyId ? (
+            <div className="text-14 text-light-1 mt-10">
+              Please select a property to see its amenities
+            </div>
+          ) : listingAmenities.length === 0 ? (
+            <div className="text-14 text-light-1 mt-10">
+              No amenities available for this property
+            </div>
+          ) : (
+            <div className="row mt-10">
+              {listingAmenities.map((amenity) => {
+                const isSelected = roomTypeData?.amenities?.includes(amenity.id) || false;
+                return (
+                  <div key={amenity.id} className="col-sm-6 form-checkbox d-flex items-center mt-5">
+                    <Checkbox
+                      className="px-0 py-0"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const currentAmenities = roomTypeData?.amenities || [];
+                        let newAmenities;
+                        if (e.target.checked) {
+                          newAmenities = [...currentAmenities, amenity.id];
+                        } else {
+                          newAmenities = currentAmenities.filter((id) => id !== amenity.id);
+                        }
+                        updateRoomTypeData({ amenities: newAmenities });
+                      }}
+                    />
+                    <div className="text-14 fw-500 ml-5">{amenity.name}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
         <FormInput
-          label="Description"
+          label={
+            <>
+              Description <span className="text-red-1">*</span>
+            </>
+          }
           rows={3}
           type="textarea"
           name="description"
@@ -214,46 +401,20 @@ const BasicInfo = ({ bookingType, setBookingType, listingId, subtype, roomTypeDa
         />
         <div className="col-12">
           <h1 className="text-14 lh-12 fw-500">Photos</h1>
-          <div className="border-light rounded-8 px-15 py-15 mt-10">
-            <ImageUploadForm 
-              onFileSelect={(file) => {
-                const currentImages = roomTypeData?.images || [];
-                updateRoomTypeData({ images: [...currentImages, file] });
-              }} 
-              multiple={true} 
-            />
-          </div>
-          {roomTypeData?.images && roomTypeData.images.length > 0 && (
-            <div className="mt-10">
-              <div className="text-14 fw-500 mb-10">
-                Selected Images ({roomTypeData.images.length})
-              </div>
-              <div className="d-flex flex-wrap y-gap-10 x-gap-10">
-                {roomTypeData.images.map((image, index) => (
-                  <div key={index} className="position-relative">
-                    <div className="border-light rounded-8 overflow-hidden">
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Room image ${index + 1}`}
-                        className="w-full h-120 object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newImages = roomTypeData.images.filter((_, i) => i !== index);
-                        updateRoomTypeData({ images: newImages });
-                      }}
-                      className="absolute bg-red-1 text-white rounded-full size-25 flex-center cursor-pointer border-none"
-                      style={{ top: "10px", right: "10px" }}
-                    >
-                      <span className="material-symbols-outlined text-14">close</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {loadingImages && (
+            <div className="text-14 text-light-1 mt-10 mb-10">Loading existing images...</div>
           )}
+          <ImageGallery
+            images={roomTypeData?.images || []}
+            existingImages={existingImages}
+            onImagesChange={(newImages) => updateRoomTypeData({ images: newImages })}
+            onExistingImagesChange={handleExistingImagesChange}
+            listingId={roomTypeId} // Pass roomTypeId for conditional rendering
+            title="" // Hide title since we're using our own above
+            showUploadForm={true}
+            multiple={true}
+            onExistingImageRemove={handleExistingImageRemove}
+          />
         </div>
         <div className="col-sm-6 mt-5">
           <h1 className="text-14 lh-12 fw-500">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import ImageUploadForm from "@/components/vendor/common/ImageUploadForm";
 import { deleteMediaAsset } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import { getImageUrl } from "@/utils/imageUtils";
 import ImageGrid from "./ImageGrid";
 
 /**
@@ -16,6 +17,7 @@ import ImageGrid from "./ImageGrid";
  * @param {string} props.title - Title for the gallery section (default: "Photos")
  * @param {boolean} props.showUploadForm - Whether to show the upload form (default: true)
  * @param {boolean} props.multiple - Whether to allow multiple file selection (default: true)
+ * @param {Function} props.onExistingImageRemove - Optional custom handler for existing image removal (receives imageId, index). If provided, overrides default delete behavior and onExistingImagesChange will be called after.
  */
 const ImageGallery = ({
   images = [],
@@ -26,6 +28,7 @@ const ImageGallery = ({
   title = "Photos",
   showUploadForm = true,
   multiple = true,
+  onExistingImageRemove,
 }) => {
   const [deletingImageId, setDeletingImageId] = useState(null);
 
@@ -48,9 +51,23 @@ const ImageGallery = ({
     }
   };
 
-  // Handle removing existing images (by ID, requires API call)
+  // Handle removing existing images (by ID, requires API call or custom handler)
   const handleExistingImageRemove = async (imageId, index) => {
-    if (!imageId || !listingId) return;
+    if (!imageId) return;
+
+    // If custom handler is provided, use it instead of default delete behavior
+    if (onExistingImageRemove) {
+      onExistingImageRemove(imageId, index);
+      // Custom handler should manage state, but we can notify parent of change
+      const updatedExisting = existingImages.filter((img) => img.id !== imageId);
+      if (onExistingImagesChange) {
+        onExistingImagesChange(updatedExisting);
+      }
+      return;
+    }
+
+    // Default behavior: delete immediately via API
+    if (!listingId) return;
 
     try {
       setDeletingImageId(imageId);
@@ -69,23 +86,6 @@ const ImageGallery = ({
     }
   };
 
-  // Get image URL helper function
-  const getImageUrl = (image) => {
-    // If it's a file object, create object URL
-    if (image instanceof File) {
-      return URL.createObjectURL(image);
-    }
-    // If it's an existing image with URL, use the full URL
-    if (image.url) {
-      // Check if URL is already complete or needs base URL
-      if (image.url.startsWith("http://") || image.url.startsWith("https://")) {
-        return image.url;
-      }
-      // Construct full URL from relative path
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081"}${image.url}`;
-    }
-    return null;
-  };
 
   return (
     <div className="row y-gap-20 x-gap-10">

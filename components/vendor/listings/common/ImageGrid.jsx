@@ -23,12 +23,13 @@ const ImageGrid = ({
   if (images.length === 0) {
     return null;
   }
-
+  
   return (
     <div className="col-12">
       {title && <h2 className="text-16 lh-14 fw-500 mb-10">{title}</h2>}
       <div className="d-flex flex-wrap x-gap-15 y-gap-15">
         {images.map((image, index) => (
+          console.log("image", image),
           <ImageItem
             key={image.id || index}
             image={image}

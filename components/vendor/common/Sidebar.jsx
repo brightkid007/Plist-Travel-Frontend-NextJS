@@ -56,11 +56,11 @@ const Sidebar = () => {
         },
       ],
     },
-    {
-      icon: "/img/dashboard/sidebar/sneakers.svg",
-      title: "User Management",
-      href: "/vendor/user",
-    },
+    // {
+    //   icon: "/img/dashboard/sidebar/sneakers.svg",
+    //   title: "User Management",
+    //   href: "/vendor/user",
+    // },
     {
       icon: "/img/dashboard/sidebar/taxi.svg",
       title: "Messaging & Communication",
