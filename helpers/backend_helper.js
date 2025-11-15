@@ -6,6 +6,7 @@ import {
   CommunicationAPIClient,
   PricingAPIClient,
   PaymentAPIClient,
+  ReviewAPIClient,
   setAuthorization,
   clearAuthorization
 } from "./api_helper";
@@ -735,3 +736,89 @@ export const updateCancellationPolicy = (id, data) => ListingAPIClient.update(`/
 
 // Delete cancellation policy
 export const deleteCancellationPolicy = (id) => ListingAPIClient.delete(`/cancellation-policies/${id}`);
+
+// ===========================================
+// REVIEW & RATING (Review-Rating Service)
+// ===========================================
+
+// Get all reviews (vendor can see reviews for their listings)
+export const getReviews = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ReviewAPIClient.get("/reviews", sanitized)
+      : ReviewAPIClient.get("/reviews");
+  }
+  return ReviewAPIClient.get("/reviews");
+};
+
+// Get review by ID
+export const getReviewById = (id) => ReviewAPIClient.get(`/reviews/${id}`);
+
+// Get reviews by listing ID
+export const getReviewsByListingId = (listingId, params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ReviewAPIClient.get(`/reviews/by-listing/${listingId}`, sanitized)
+      : ReviewAPIClient.get(`/reviews/by-listing/${listingId}`);
+  }
+  return ReviewAPIClient.get(`/reviews/by-listing/${listingId}`);
+};
+
+// Create review
+export const createReview = (data) => ReviewAPIClient.create("/reviews", data);
+
+// Update review
+export const updateReview = (id, data) => ReviewAPIClient.update(`/reviews/${id}`, data);
+
+// Delete review
+export const deleteReview = (id) => ReviewAPIClient.delete(`/reviews/${id}`);
+
+// ===========================================
+// REVIEW REPLY (Review-Rating Service)
+// ===========================================
+
+// Create review reply (general)
+export const createReviewReply = (data) => ReviewAPIClient.create("/review-replies", data);
+
+// Create review reply with comment only
+export const createReviewReplyComment = (data) => ReviewAPIClient.create("/review-replies/comment", data);
+
+// Create review reply with ratings (for rating guests)
+export const createReviewReplyRating = (data) => ReviewAPIClient.create("/review-replies/rating", data);
+
+// Get review replies
+export const getReviewReplies = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ReviewAPIClient.get("/review-replies", sanitized)
+      : ReviewAPIClient.get("/review-replies");
+  }
+  return ReviewAPIClient.get("/review-replies");
+};
+
+// Get review reply by ID
+export const getReviewReplyById = (id) => ReviewAPIClient.get(`/review-replies/${id}`);
+
+// Update review reply
+export const updateReviewReply = (id, data) => ReviewAPIClient.update(`/review-replies/${id}`, data);
+
+// Delete review reply
+export const deleteReviewReply = (id) => ReviewAPIClient.delete(`/review-replies/${id}`);
