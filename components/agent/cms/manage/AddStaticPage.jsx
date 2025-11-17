@@ -5,7 +5,6 @@ import AgentDashboardLayout from "../../common/layout";
 import FormInput from "@/components/common/form/FormInput";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import "react-quill/dist/quill.snow.css";
 import "./custom.css";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
