@@ -8,7 +8,7 @@ import { Eye, Edit, Trash2, MailX } from "lucide-react";
 import { MailOutline } from "@mui/icons-material";
 import { getEmailTemplates, deleteEmailTemplate } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
@@ -417,7 +417,7 @@ const index = () => {
         </div>
       </Dialog>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

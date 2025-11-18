@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { getMyListings, deleteListing, updateListing, getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const index = ({ isProperty = false }) => {
   const [listings, setListings] = useState([]);
@@ -466,7 +466,7 @@ const index = ({ isProperty = false }) => {
         </div>
       </div>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

@@ -17,10 +17,10 @@ const Filter = ({ filters = {}, onFilterChange }) => {
           getListingCategories(),
           getListingSubcategories(),
         ]);
-        
+
         const categoriesData = categoriesRes?.data || categoriesRes || [];
         setCategories(Array.isArray(categoriesData) ? categoriesData : []);
-        
+
         const subcategoriesData = subcategoriesRes?.data || subcategoriesRes || [];
         setSubcategories(Array.isArray(subcategoriesData) ? subcategoriesData : []);
       } catch (error) {
@@ -51,36 +51,19 @@ const Filter = ({ filters = {}, onFilterChange }) => {
   // Filter subcategories based on selected category
   const filteredSubcategories = filters.listing_category_id && filters.listing_category_id !== "all"
     ? subcategories.filter(
-        (sub) => (sub.listing_category_id || sub.category_id) === parseInt(filters.listing_category_id, 10)
-      )
+      (sub) => (sub.listing_category_id || sub.category_id) === parseInt(filters.listing_category_id, 10)
+    )
     : subcategories;
 
-  // Determine status based on dates and is_active
-  const getStatusValue = () => {
-    if (filters.is_active !== undefined && filters.is_active !== "all") {
-      return filters.is_active === "true" || filters.is_active === true ? "active" : "inactive";
-    }
-    return filters.status || "all";
-  };
 
   return (
     <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
       <div className="col-sm-auto">
         <select
           className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
-          value={getStatusValue()}
+          value={filters.status}
           onChange={(e) => {
-            const status = e.target.value;
-            if (status === "all") {
-              handleFilterChange("is_active", "all");
-              handleFilterChange("status", "all");
-            } else if (status === "active") {
-              handleFilterChange("is_active", "true");
-            } else if (status === "inactive") {
-              handleFilterChange("is_active", "false");
-            } else {
-              handleFilterChange("status", status);
-            }
+            handleFilterChange("status", e.target.value)
           }}
         >
           <option value="all">All Statuses</option>
@@ -91,14 +74,28 @@ const Filter = ({ filters = {}, onFilterChange }) => {
 
       <div className="col-sm-auto">
         <select
+          className="form-select rounded-8 border-light justify-between py-10 px-15 w-140 sm:w-full text-14"
+          value={filters.listing_type || "all"}
+          onChange={(e) => handleFilterChange("listing_type", e.target.value)}
+        >
+          <option value="all">All Types</option>
+          <optgroup label="Property List">
+            <option value="property">Property</option>
+          </optgroup>
+          <optgroup label="Non-Property List">
+            <option value="tour">Tour</option>
+            <option value="activity">Activity</option>
+            <option value="event">Event</option>
+          </optgroup>
+        </select>
+      </div>
+      <div className="col-sm-auto">
+        <select
           className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
           value={filters.listing_category_id || "all"}
           onChange={(e) => {
             handleFilterChange("listing_category_id", e.target.value);
-            // Reset subcategory when category changes
-            handleFilterChange("listing_subcategory_id", "all");
           }}
-          disabled={loading}
         >
           <option value="all">All Categories</option>
           {categories.map((cat) => (
@@ -113,7 +110,6 @@ const Filter = ({ filters = {}, onFilterChange }) => {
           className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
           value={filters.listing_subcategory_id || "all"}
           onChange={(e) => handleFilterChange("listing_subcategory_id", e.target.value)}
-          disabled={loading || !filters.listing_category_id || filters.listing_category_id === "all"}
         >
           <option value="all">All Sub Categories</option>
           {filteredSubcategories.map((sub) => (
@@ -150,24 +146,6 @@ const Filter = ({ filters = {}, onFilterChange }) => {
             placeholder="Date To"
           />
         </div>
-      </div>
-
-      <div className="col-sm-auto">
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 w-140 sm:w-full text-14"
-          value={filters.listing_type || "all"}
-          onChange={(e) => handleFilterChange("listing_type", e.target.value)}
-        >
-          <option value="all">All Types</option>
-          <optgroup label="Property List">
-            <option value="property">Property</option>
-          </optgroup>
-          <optgroup label="Non-Property List">
-            <option value="tour">Tour</option>
-            <option value="activity">Activity</option>
-            <option value="event">Event</option>
-          </optgroup>
-        </select>
       </div>
     </div>
   );

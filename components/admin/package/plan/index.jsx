@@ -10,7 +10,7 @@ import BothPlan from "./BothPlan";
 import { useEffect, useState } from "react";
 import { getPackagePlans, deletePackagePlan } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { CircularProgress } from "@mui/material";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -184,7 +184,7 @@ const index = () => {
         {paymentModel.find((item) => item.value === selectedModel)["content"]}
       </div>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

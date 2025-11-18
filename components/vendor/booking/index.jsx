@@ -1,22 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import BookingCard from "./BookingCard";
 import VendorDashboardLayout from "../common/layout";
 import BookingList from "./BookingList";
 import svgIcon from "@/components/data/svgIcon";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Filter from "../common/Filter";
+import { getVendorBookings, getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
 
 const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [anchorEl, setAnchorEl] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const showBookingMenu = Boolean(anchorEl);
 
   const tabs = [
@@ -24,44 +30,237 @@ const index = () => {
     { label: "Upcoming", value: "upcoming" },
     { label: "Past", value: "past" },
     { label: "Cancelled", value: "cancelled" },
-    { label: "Walk-in", value: "walk-in" },
+    // { label: "Walk-in", value: "walk-in" },
   ];
-  const data = [
-    {
-      title: "Total Bookings",
-      amount: "432",
-      improve: "+8.2% from last month",
-      icon: (
-        <span className="material-symbols-outlined text-blue-1">
-          calendar_today
-        </span>
-      ),
-    },
-    {
-      title: "Confirmed",
-      amount: "356",
-      improve: "82.4% of total bookings",
-      icon: (
-        <span className="material-symbols-outlined text-green-3">check</span>
-      ),
-    },
-    {
-      title: "Pending",
-      amount: "48",
-      improve: "11.1% of total bookings",
-      icon: (
-        <span className="material-symbols-outlined text-yellow-1">
-          calendar_today
-        </span>
-      ),
-    },
-    {
-      title: "Cancelled",
-      amount: "28",
-      improve: "6.5% of total bookings",
-      icon: <span className="material-symbols-outlined text-red-1">close</span>,
-    },
-  ];
+
+  // Load categories and subcategories for filter mapping
+  useEffect(() => {
+    const loadFilterData = async () => {
+      try {
+        const [categoriesRes, subcategoriesRes] = await Promise.all([
+          getListingCategories(),
+          getListingSubcategories(),
+        ]);
+
+        const categoriesData = categoriesRes?.data || categoriesRes || [];
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+
+        const subcategoriesData = subcategoriesRes?.data || subcategoriesRes || [];
+        setSubcategories(Array.isArray(subcategoriesData) ? subcategoriesData : []);
+      } catch (error) {
+        console.error("Error loading filter data:", error);
+      }
+    };
+    loadFilterData();
+  }, []);
+
+  // Fetch bookings from backend
+  const loadBookings = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Map filter keys to API parameter names
+      const params = {};
+
+      // Status filter
+      if (filters.status && filters.status !== "all") {
+        params.status = filters.status;
+      } else if (filters.is_active && filters.is_active !== "all") {
+        // Map is_active to status
+        if (filters.is_active === "true") {
+          params.status = "confirmed";
+        } else if (filters.is_active === "false") {
+          params.status = "pending";
+        }
+      }
+
+      // Map tab to status filter (only for cancelled, others filtered on frontend)
+      if (activeTab === "cancelled") {
+        params.status = "cancelled";
+      }
+
+      // Listing type filter
+      if (filters.listing_type && filters.listing_type !== "all") {
+        params.type = filters.listing_type;
+      }
+
+      // Category filter - send category ID directly
+      if (filters.listing_category_id && filters.listing_category_id !== "all") {
+        params.categoryId = filters.listing_category_id;
+      }
+
+      // Date filters
+      if (filters.date_from) {
+        params.startDate = filters.date_from;
+      }
+      if (filters.date_to) {
+        params.endDate = filters.date_to;
+      }
+
+      // Search filter
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      // Subcategory filter - send subcategory ID directly
+      if (filters.listing_subcategory_id && filters.listing_subcategory_id !== "all") {
+        params.subcategoryId = filters.listing_subcategory_id;
+      }
+
+      const response = await getVendorBookings(params);
+      let bookingsData = response?.data?.bookings || response?.bookings || [];
+
+      // Filter by tab on frontend
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (activeTab === "upcoming") {
+        // Upcoming bookings are those with startDate in the future
+        bookingsData = bookingsData.filter((booking) => {
+          if (!booking.startDate) return false;
+          const startDate = new Date(booking.startDate);
+          startDate.setHours(0, 0, 0, 0);
+          return startDate >= today;
+        });
+      } else if (activeTab === "past") {
+        // Past bookings are those with endDate in the past
+        bookingsData = bookingsData.filter((booking) => {
+          if (!booking.endDate) return false;
+          const endDate = new Date(booking.endDate);
+          endDate.setHours(0, 0, 0, 0);
+          return endDate < today;
+        });
+      } else if (activeTab === "walk-in") {
+        // Walk-in bookings - this might need special handling based on your business logic
+        // For now, we'll filter by a specific flag or status if available
+        // You may need to add a walk_in field to the booking model
+      }
+
+      setBookings(bookingsData);
+    } catch (error) {
+      console.error("Error loading bookings:", error);
+      toast.error("Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab, filters, searchTerm]);
+
+  useEffect(() => {
+    loadBookings();
+  }, [loadBookings]);
+
+  // Calculate summary statistics
+  const summary = useMemo(() => {
+    const total = bookings.length;
+    const confirmed = bookings.filter((b) => b.status === "confirmed").length;
+    const pending = bookings.filter((b) => b.status === "pending").length;
+    const cancelled = bookings.filter((b) => b.status === "cancelled").length;
+
+    return {
+      total,
+      confirmed,
+      pending,
+      cancelled,
+    };
+  }, [bookings]);
+
+  // Prepare card data
+  const cardData = useMemo(() => {
+    const total = summary.total;
+    const confirmed = summary.confirmed;
+    const pending = summary.pending;
+    const cancelled = summary.cancelled;
+
+    return [
+      {
+        title: "Total Bookings",
+        amount: total.toString(),
+        improve: `${total > 0 ? "100%" : "0%"} of all bookings`,
+        icon: (
+          <span className="material-symbols-outlined text-blue-1">
+            calendar_today
+          </span>
+        ),
+      },
+      {
+        title: "Confirmed",
+        amount: confirmed.toString(),
+        improve: total > 0 ? `${((confirmed / total) * 100).toFixed(1)}% of total bookings` : "0% of total bookings",
+        icon: (
+          <span className="material-symbols-outlined text-green-3">check</span>
+        ),
+      },
+      {
+        title: "Pending",
+        amount: pending.toString(),
+        improve: total > 0 ? `${((pending / total) * 100).toFixed(1)}% of total bookings` : "0% of total bookings",
+        icon: (
+          <span className="material-symbols-outlined text-yellow-1">
+            calendar_today
+          </span>
+        ),
+      },
+      {
+        title: "Cancelled",
+        amount: cancelled.toString(),
+        improve: total > 0 ? `${((cancelled / total) * 100).toFixed(1)}% of total bookings` : "0% of total bookings",
+        icon: <span className="material-symbols-outlined text-red-1">close</span>,
+      },
+    ];
+  }, [summary]);
+
+  // Filter and transform bookings for BookingList
+  const filteredBookings = useMemo(() => {
+    // Search is already handled by API, so we just transform the data
+    // Transform to BookingList format
+    return bookings.map((booking) => {
+      const startDate = booking.startDate
+        ? new Date(booking.startDate).toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        })
+        : "";
+      const endDate = booking.endDate
+        ? new Date(booking.endDate).toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        })
+        : "";
+      const exeTime = startDate && endDate ? `${startDate} ~ ${endDate}` : "";
+
+      const orderDate = booking.orderDate
+        ? new Date(booking.orderDate).toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        })
+        : "";
+
+      return {
+        id: booking.id,
+        image: "/img/testimonials/1/4.png", // Default image, can be replaced with listing image
+        name: booking.listingName || "N/A",
+        type: booking.listingType || "N/A",
+        category: booking.category || "N/A",
+        subcategory: booking.subcategory || "N/A",
+        orderDate: orderDate,
+        exeTime: exeTime,
+        totalPrice: `$${booking.totalPrice || 0}`,
+        paid: `$${booking.amountPaid || 0}`,
+        status: booking.status
+          ? booking.status.charAt(0).toUpperCase() + booking.status.slice(1)
+          : "Pending",
+        booking: booking, // Store full booking data for reference
+      };
+    });
+  }, [bookings, searchTerm]);
+
+  // Handle filter changes from Filter component
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
 
   return (
     <VendorDashboardLayout>
@@ -116,9 +315,8 @@ const index = () => {
         {tabs.map((item) => (
           <div className="col-auto px-5" key={item.value}>
             <button
-              className={`text-14 px-10 fw-500 py-5 rounded-8 ${
-                activeTab === item.value ? "bg-white" : "text-light-1"
-              }`}
+              className={`text-14 px-10 fw-500 py-5 rounded-8 ${activeTab === item.value ? "bg-white" : "text-light-1"
+                }`}
               onClick={() => setActiveTab(item.value)}
             >
               {item.label}
@@ -127,9 +325,9 @@ const index = () => {
         ))}
       </div>
 
-      <Filter />
+      <Filter filters={filters} onFilterChange={handleFilterChange} />
 
-      <BookingCard data={data} />
+      <BookingCard data={cardData} />
 
       <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100 mt-20">
         <div className="row y-gap-20 x-gap-10 justify-between items-center mb-10">
@@ -138,6 +336,8 @@ const index = () => {
               type="text"
               placeholder="Search booking..."
               className="border-light bg-white rounded-8 px-10 py-10 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
             <i
               className="icon-search text-light-1 position-absolute"
@@ -155,7 +355,11 @@ const index = () => {
           </div>
         </div>
 
-        <BookingList />
+        <BookingList 
+          bookings={filteredBookings} 
+          loading={loading} 
+          onRefresh={loadBookings}
+        />
       </div>
     </VendorDashboardLayout>
   );

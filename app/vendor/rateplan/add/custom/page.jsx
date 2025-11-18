@@ -7,11 +7,7 @@ export const metadata = {
 };
 
 const index = () => {
-  return (
-    <>
-      <DashboardPage type={"custom"} />
-    </>
-  );
+  return <DashboardPage type={"custom"} />;
 };
 
 export default dynamic(() => Promise.resolve(index), {

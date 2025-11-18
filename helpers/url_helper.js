@@ -48,6 +48,9 @@ export const GET_ADMIN_PAYOUTS = "/admin/payouts";
 export const PROCESS_PAYOUT = "/admin/payouts";
 export const GET_FINANCIAL_ANALYTICS = "/admin/financial/analytics";
 export const GET_TRANSACTIONS = "/transactions";
+export const GET_TRANSACTION_BY_ID = "/transactions";
+export const DOWNLOAD_TRANSACTION_INVOICE = "/transactions"; // Added for downloading invoice
+export const DOWNLOAD_ALL_INVOICES = "/transactions/invoices/all"; // Added for downloading all invoices as zip
 export const GET_PAYMENT_ANALYTICS = "/analytics";
 export const REFUND_TRANSACTION = "/transactions";
 
@@ -83,11 +86,22 @@ export const CREATE_PACKAGE_PLAN = "/package-plans";
 export const UPDATE_PACKAGE_PLAN = "/package-plans";
 export const DELETE_PACKAGE_PLAN = "/package-plans";
 
+// Rate Plans (Pricing-Loyalty Service)
+export const GET_RATE_PLANS = "/rate-plans";
+export const CREATE_RATE_PLAN = "/rate-plans";
+export const UPDATE_RATE_PLAN = "/rate-plans";
+export const DELETE_RATE_PLAN = "/rate-plans";
+
 // Package Subscriptions (Pricing-Loyalty Service)
 export const GET_PACKAGE_SUBSCRIPTIONS = "/package-subscriptions";
 export const EXPORT_PACKAGE_SUBSCRIPTIONS_PDF = "/package-subscriptions/export";
 export const UPDATE_PACKAGE_SUBSCRIPTION_STATUS = "/package-subscriptions";
 export const UPDATE_PACKAGE_SUBSCRIPTION = "/package-subscriptions";
+
+// Vendor Subscriptions (Payment Service)
+export const INITIATE_SUBSCRIPTION = "/subscription/initiate";
+export const GET_CURRENT_SUBSCRIPTION = "/subscription/current";
+export const UPDATE_VENDOR_SUBSCRIPTION = "/subscription/update";
 
 // System Settings
 export const GET_SYSTEM_SETTINGS = "/admin/settings";
@@ -120,6 +134,13 @@ export const GET_MESSAGE_BY_ID = "/messages";
 export const UPDATE_MESSAGE = "/messages";
 export const DELETE_MESSAGE = "/messages";
 export const GET_MESSAGES_BY_CONVERSATION = "/messages/by-conversation";
+
+// Message Templates (Communication Service)
+export const GET_MESSAGE_TEMPLATES = "/message-templates";
+export const CREATE_MESSAGE_TEMPLATE = "/message-templates";
+export const GET_MESSAGE_TEMPLATE_BY_ID = "/message-templates";
+export const UPDATE_MESSAGE_TEMPLATE = "/message-templates";
+export const DELETE_MESSAGE_TEMPLATE = "/message-templates";
 
 // Notifications (Admin)
 export const GET_ADMIN_NOTIFICATIONS = "/admin/notifications";

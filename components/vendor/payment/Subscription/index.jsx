@@ -1,10 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { CircularProgress } from "@mui/material";
 import svgIcon from "@/components/data/svgIcon";
 import SubscriptionPlan from "./SubscriptionPlan";
 import FeeBookingPlan from "./FeeBookingPlan";
 import BothPlan from "./BothPlan";
+import { getPackagePlans, getCurrentSubscription } from "@/helpers/backend_helper";
 
 const index = () => {
+  const [loading, setLoading] = useState(true);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [feePlans, setFeePlans] = useState([]);
+  const [bothPlans, setBothPlans] = useState([]);
+  const [currentPlan, setCurrentPlan] = useState(0);
+  const [selectedModel, setSelectedModel] = useState("subscription");
+
+  useEffect(() => {
+    loadAllPlans();
+  }, []);
+
+  const loadAllPlans = async () => {
+    try {
+      setLoading(true);
+
+      // Run both API calls in parallel for better performance
+      const [planRes, currentRes] = await Promise.all([
+        getPackagePlans({ status: "Active" }).catch(() => ({ plans: [] })),
+        getCurrentSubscription().catch(() => ({ data: null })),
+      ]);
+
+      setSubscriptionPlans(planRes?.plans?.filter((plan) => plan.model === "subscription") || []);
+      setFeePlans(planRes?.plans?.filter((plan) => plan.model === "fee-per-booking") || []);
+      setBothPlans(planRes?.plans?.filter((plan) => plan.model === "both") || []);
+      
+      const planId = parseInt(currentRes?.data?.subscription?.plan_code || currentRes?.subscription?.plan_code, 10) || 0;
+      setCurrentPlan(planId);
+      setSelectedModel(planRes?.plans?.find((p) => p.id === planId)?.model || "subscription");
+    } catch (error) {
+      console.error("Error loading plans:", error);
+      toast.error(error?.message || "Failed to load subscription plans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshCurrentPlan = async () => {
+    try {
+      const currentRes = await getCurrentSubscription().catch(() => ({ data: null }));
+      const planId = parseInt(currentRes?.data?.subscription?.plan_code || currentRes?.subscription?.plan_code, 10) || 0;
+      setCurrentPlan(planId);
+      
+      // Also update selectedModel if needed
+      const allPlans = [...subscriptionPlans, ...feePlans, ...bothPlans];
+      const planModel = allPlans.find((p) => p.id === planId)?.model;
+      if (planModel) {
+        setSelectedModel(planModel);
+      }
+    } catch (error) {
+      console.error("Error refreshing current plan:", error);
+    }
+  };
+
   const paymentModel = [
     {
       title: "Subscription Plan",
@@ -15,7 +71,7 @@ const index = () => {
           {svgIcon.subscription_plan}
         </div>
       ),
-      content: <SubscriptionPlan />,
+      content: <SubscriptionPlan plans={subscriptionPlans} currentPlan={currentPlan} loading={loading} />,
     },
     {
       title: "Fee Per Booking",
@@ -26,7 +82,7 @@ const index = () => {
           {svgIcon.fee_model}
         </div>
       ),
-      content: <FeeBookingPlan />,
+      content: <FeeBookingPlan plans={feePlans} currentPlan={currentPlan} loading={loading} onPlanUpdate={refreshCurrentPlan} />,
     },
     {
       title: "Both",
@@ -37,10 +93,9 @@ const index = () => {
           {svgIcon.subscription_plan} + {svgIcon.fee_model}
         </div>
       ),
-      content: <BothPlan />,
+      content: <BothPlan plans={bothPlans} currentPlan={currentPlan} loading={loading} />,
     },
   ];
-  const [selectedModel, setSelectedModel] = useState("subscription");
 
   return (
     <>
@@ -66,7 +121,7 @@ const index = () => {
               >
                 {item.icon}
                 <h3 className="text-14 lh-1 fw-500 mt-15 mb-5">{item.title}</h3>
-                <div className="text-12 lh-1 text-light-1 mb-10">
+                <div className="text-12 lh-1 text-light-1 mb-10 text-center">
                   {item.description}
                 </div>
               </div>

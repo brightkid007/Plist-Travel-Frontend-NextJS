@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Menu as MuiMenu, MenuItem, CircularProgress } from "@mui/material";
 import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "react-toastify";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { 
   getAdminCommissions, 
   deleteAdminCommission, 
@@ -322,7 +322,7 @@ const index = () => {
         </div>
       </div>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

@@ -17,7 +17,7 @@ import {
 } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { usePermissions } from "@/hooks/usePermissions";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const index = () => {
   const { hasPermission } = usePermissions();
@@ -666,7 +666,7 @@ const index = () => {
         </div>
       </Dialog>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
