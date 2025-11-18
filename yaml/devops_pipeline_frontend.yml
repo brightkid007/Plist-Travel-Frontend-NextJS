@@ -12,7 +12,21 @@ parameters:
   - production
 
 variables:
-- group: TravelSaaSConfig
+  - group: TravelSaaSConfig
+  - name: NEXT_PUBLIC_AUTH_SERVICE_URL
+    value: $(AUTH_SERVICE_URL)
+  - name: NEXT_PUBLIC_LISTING_SERVICE_URL
+    value: $(LISTING_SERVICE_URL)
+  - name: NEXT_PUBLIC_BOOKING_SERVICE_URL
+    value: $(BOOKING_SERVICE_URL)
+  - name: NEXT_PUBLIC_PAYMENT_SERVICE_URL
+    value: $(PAYMENT_SERVICE_URL)
+  - name: NEXT_PUBLIC_COMMUNICATION_SERVICE_URL
+    value: $(COMMUNICATION_SERVICE_URL)
+  - name: NEXT_PUBLIC_REVIEW_SERVICE_URL
+    value: $(REVIEW_SERVICE_URL)
+  - name: NEXT_PUBLIC_PRICING_SERVICE_URL
+    value: $(PRICING_SERVICE_URL)
 
 stages:
 - stage: frontend_service_stage
