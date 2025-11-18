@@ -40,7 +40,7 @@ stages:
         az containerapp show --name frontend-service-app --resource-group $(stagingResourceGroup) || \
         az containerapp create \
           --name frontend-service-app \
-          --res ource-group $(stagingResourceGroup) \
+          --resource-group $(stagingResourceGroup) \
           --image $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) \
           --environment $(stagingContainerEnv) \
           --cpu 2.0 \
