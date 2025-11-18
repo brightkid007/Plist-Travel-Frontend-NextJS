@@ -7,6 +7,12 @@ WORKDIR /app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
+# Inject the Mobiscroll private token BEFORE install
+ARG MOBISCROLL_TOKEN
+RUN echo "@mobiscroll:registry=https://npm.mobiscroll.com" >> ~/.npmrc \
+    && echo "//npm.mobiscroll.com/:_authToken=${MOBISCROLL_TOKEN}" >> ~/.npmrc \
+    && echo "legacy-peer-deps=true" >> ~/.npmrc
+
 # Install dependencies
 RUN npm install --legacy-peer-deps
 

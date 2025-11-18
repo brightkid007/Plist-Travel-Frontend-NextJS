@@ -28,7 +28,9 @@ stages:
 
     - script: |
         echo $(acrPassword) | docker login $(acrLoginServer) -u $(acrUsername) --password-stdin
-        docker build -t $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) ../
+        docker build \
+          --build-arg MOBISCROLL_TOKEN=$(MOBISCROLL_TOKEN) \
+          -t $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) ../
         docker push $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId)
       displayName: Build and Push Docker Image
       workingDirectory: $(Build.SourcesDirectory)/yaml
