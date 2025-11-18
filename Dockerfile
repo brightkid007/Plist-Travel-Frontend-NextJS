@@ -9,12 +9,16 @@ RUN echo "@mobiscroll:registry=https://npm.mobiscroll.com" >> ~/.npmrc \
     && echo "//npm.mobiscroll.com/:_authToken=${MOBISCROLL_TOKEN}" >> ~/.npmrc \
     && echo "legacy-peer-deps=true" >> ~/.npmrc
 
-# Important Mobiscroll fixes
-RUN rm -f package-lock.json
-RUN npm config set verify-store-integrity false
+# Fix Mobiscroll EINTEGRITY issues
+RUN rm -f package-lock.json \
+    && npm config set strict-ssl false \
+    && npm config set legacy-peer-deps true \
+    && npm config set prefer-offline false \
+    && npm config set fetch-retries 3 \
+    && npm config set cache-min 0
 
 # Install dependencies
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --force
 
 COPY . .
 
