@@ -1,0 +1,53 @@
+trigger:
+  branches:
+    include:
+      - main
+
+parameters:
+- name: environment
+  type: string
+  default: staging
+  values:
+  - staging
+  - production
+
+variables:
+- group: TravelSaaSConfig
+
+stages:
+- stage: frontend_service_stage
+  displayName: Frontend Service Stage
+  jobs:
+  - job: build_and_deploy_frontend_service
+    displayName: Build and Deploy Frontend Service
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DockerInstaller@0
+      displayName: Install Docker
+
+    - script: |
+        echo $(acrPassword) | docker login $(acrLoginServer) -u $(acrUsername) --password-stdin
+        docker build -t $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) ../
+        docker push $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId)
+      displayName: Build and Push Docker Image
+      workingDirectory: $(Build.SourcesDirectory)/yaml
+
+    - script: |
+        az login --service-principal -u $(spClientId) -p $(spClientSecret) --tenant $(spTenantId)
+        az containerapp show --name frontend-service-app --resource-group $(stagingResourceGroup) || \
+        az containerapp create \
+          --name frontend-service-app \
+          --res ource-group $(stagingResourceGroup) \
+          --image $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) \
+          --environment $(stagingContainerEnv) \
+          --cpu 2.0 \
+          --memory 4.0Gi \
+          --ingress external \
+          --target-port 3000 \
+          --registry-server $(acrLoginServer) \
+          --registry-username $(acrUsername) \
+          --registry-password $(acrPassword) \
+
+        az containerapp update --name frontend-service-app --resource-group $(stagingResourceGroup) --image $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId)
+      displayName: Create or Update Azure Container App
