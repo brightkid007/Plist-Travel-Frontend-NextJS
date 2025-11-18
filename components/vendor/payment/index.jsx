@@ -19,11 +19,11 @@ const index = () => {
       value: "payment-history",
       content: <PaymentHistory key={"payment-history"} />,
     },
-    {
-      label: "Billing Info",
-      value: "billing-info",
-      content: <BillingInfo key={"billing-info"} />,
-    },
+    // {
+    //   label: "Billing Info",
+    //   value: "billing-info",
+    //   content: <BillingInfo key={"billing-info"} />,
+    // },
   ];
 
   return (

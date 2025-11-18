@@ -4,72 +4,58 @@ import AgentDashboardLayout from "../../common/layout";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import Filter from "../../common/Filter";
 import CustomEventCalendar from "../../common/CustomEventCalendar";
+import { getAvailabilities } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
 
 const index = () => {
-  function random(min, max) {
-    return Math.random() * (max - min) + min;
-  }
+  const [availabilities, setAvailabilities] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  function generateRawEvents(startDateStr, days = 80) {
-    const rawEvents = [];
-    const startDate = new Date(startDateStr);
-
-    for (let i = 0; i < days; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      const dateStr = currentDate.toISOString().split("T")[0];
-
-      const availability = Math.round(random(0, 1));
-      const price = Math.round(random(40, 60));
-
-      rawEvents.push(
-        {
-          title: `Availability: ${availability}`,
-          start: dateStr,
-          color: "#ffc107",
-        },
-        { title: `Price: ${price}`, start: dateStr, color: "#6ea8fe" },
-        {
-          title: `Event 1`,
-          start: dateStr + "T09:00:00",
-          end: dateStr + "T12:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 2`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 3`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 4`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 5`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
+  // Fetch availabilities from backend
+  useEffect(() => {
+    const loadAvailabilities = async () => {
+      try {
+        setLoading(true);
+        const response = await getAvailabilities();
+        if (response?.data?.data) {
+          setAvailabilities(response.data.data);
         }
-      );
-    }
+      } catch (error) {
+        console.error("Error loading availabilities:", error);
+        toast.error("Failed to load availability data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return rawEvents;
-  }
+    loadAvailabilities();
+  }, []);
 
-  const events = generateRawEvents("2025-05-30");
+  // Transform availability data into FullCalendar events format
+  const events = useMemo(() => {
+    if (!availabilities || availabilities.length === 0) return [];
+
+    return availabilities.map((availability) => {
+      const date = new Date(availability.date);
+      const dateStr = date.toISOString().split("T")[0];
+      const roomTypeName = availability.room_type?.name || "Room Type";
+      const isAvailable = availability.is_available;
+
+      return {
+        id: availability.id,
+        title: `${roomTypeName}: ${isAvailable ? "Available" : "Not Available"}`,
+        start: dateStr,
+        color: isAvailable ? "#28a745" : "#dc3545",
+        extendedProps: {
+          availability: availability,
+        },
+      };
+    });
+  }, [availabilities]);
 
   function renderEventContent(eventInfo) {
     return <span className="text-14 fw-500 lh-1">{eventInfo.event.title}</span>;
@@ -87,18 +73,24 @@ const index = () => {
       value: "availability",
       content: (
         <div className="px-20">
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin]}
-            initialView="dayGridMonth"
-            weekends={true}
-            headerToolbar={{
-              start: "prev,next,today",
-              center: "title",
-              end: "dayGridMonth,timeGridWeek,timeGridDay",
-            }}
-            events={events}
-            eventContent={renderEventContent}
-          />
+          {loading ? (
+            <div className="d-flex justify-center items-center py-40">
+              <div className="text-16 text-light-1">Loading availability data...</div>
+            </div>
+          ) : (
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin]}
+              initialView="dayGridMonth"
+              weekends={true}
+              headerToolbar={{
+                start: "prev,next,today",
+                center: "title",
+                end: "dayGridMonth,timeGridWeek,timeGridDay",
+              }}
+              events={events}
+              eventContent={renderEventContent}
+            />
+          )}
         </div>
       ),
     },

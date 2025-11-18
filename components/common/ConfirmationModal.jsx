@@ -3,7 +3,7 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { AlertTriangle } from "lucide-react";
 
-const DeleteConfirmationModal = ({ open, onClose, onConfirm, title, message, itemName, loading = false, confirmLabel = "Delete", confirmingLabel = "Deleting..." }) => {
+const ConfirmationModal = ({ open, onClose, onConfirm, title, message, itemName, loading = false, confirmLabel = "Delete", confirmingLabel = "Deleting..." }) => {
   return (
     <Dialog
       open={open}
@@ -44,5 +44,5 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm, title, message, ite
   );
 };
 
-export default DeleteConfirmationModal;
+export default ConfirmationModal;
 

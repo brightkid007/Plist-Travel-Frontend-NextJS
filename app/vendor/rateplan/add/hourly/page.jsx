@@ -7,11 +7,7 @@ export const metadata = {
 };
 
 const index = () => {
-  return (
-    <>
-      <DashboardPage type="hourly" />
-    </>
-  );
+  return <DashboardPage type="hourly" />;
 };
 
 export default dynamic(() => Promise.resolve(index), {

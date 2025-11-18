@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getAdminRoles, createAdminRole, updateAdminRole, deleteAdminRole } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 // Permission structure (CRUD where applicable)
 const PERMISSION_STRUCTURE = [
@@ -387,7 +387,7 @@ const index = () => {
         </div>
       </Dialog>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={() => {
           setDeleteModalOpen(false);

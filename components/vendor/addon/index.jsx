@@ -2,7 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import VendorDashboardLayout from "../common/layout";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { Menu, MenuItem } from "@mui/material";
+import { getAddOnServices, deleteAddOnService, getAddOnServiceById } from "@/helpers/backend_helper";
+import { toast } from "react-toastify";
+import { CircularProgress } from "@mui/material";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -11,40 +16,115 @@ import CustomEventCalendar from "../common/CustomEventCalendar";
 
 const index = () => {
   const router = useRouter();
-  const data = [
-    {
-      description: "Basic Cleaning Package",
-      name: "Standard Cleaning",
-      type: "Residential",
-      basePrice: "$120",
-      hourAvailable: "2 hours",
-      availabilityPerTimeframe: "50",
-    },
-    {
-      description: "Premium Interior Detailing",
-      name: "Car Detailing",
-      type: "Automotive",
-      basePrice: "$250",
-      hourAvailable: "4 hours",
-      availabilityPerTimeframe: "30",
-    },
-    {
-      description: "Full Body Massage",
-      name: "Spa Treatment",
-      type: "Wellness",
-      basePrice: "$90",
-      hourAvailable: "1.5 hours",
-      availabilityPerTimeframe: "80",
-    },
-    {
-      description: "Annual Maintenance Check",
-      name: "HVAC Service",
-      type: "Home Maintenance",
-      basePrice: "$150",
-      hourAvailable: "1 hour",
-      availabilityPerTimeframe: "60",
-    },
-  ];
+  const [addOnServices, setAddOnServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedAddOnServiceId, setSelectedAddOnServiceId] = useState(null);
+  const showMoreMenu = Boolean(anchorEl);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [addOnServiceToDelete, setAddOnServiceToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedServiceForCalendar, setSelectedServiceForCalendar] = useState(null);
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
+
+  // Load add-on services from backend
+  useEffect(() => {
+    loadAddOnServices();
+  }, []);
+
+  const loadAddOnServices = async () => {
+    try {
+      setLoading(true);
+      const response = await getAddOnServices();
+      const servicesData = response?.data || response || [];
+      const servicesArray = Array.isArray(servicesData) ? servicesData : [];
+      
+      // Transform backend data to match UI format
+      const transformedServices = servicesArray.map((service) => {
+        return {
+          id: service.id,
+          name: service.name || "",
+          description: service.name || "", // Use name as description for now (model doesn't have description)
+          type: service.type || "",
+          basePrice: service.base_price ? `$${parseFloat(service.base_price).toFixed(2)}` : "$0.00",
+          hourAvailable: service.hours_available 
+            ? `${parseFloat(service.hours_available)} ${parseFloat(service.hours_available) <= 1 ? "hour" : "hours"}`
+            : "N/A",
+          availabilityPerTimeframe: service.availability_per_timeframe 
+            ? service.availability_per_timeframe.toString()
+            : "N/A",
+          requires_scheduling: service.requires_scheduling || false,
+          // Calendar fields
+          calendar_type: service.calendar_type || 1,
+          calendar_start_date: service.calendar_start_date || null,
+          calendar_end_date: service.calendar_end_date || null,
+          blocked_dates: service.blocked_dates && Array.isArray(service.blocked_dates) ? service.blocked_dates : [],
+          available_dates: service.available_dates && Array.isArray(service.available_dates) ? service.available_dates : [],
+          rawData: service, // Keep raw data for edit
+        };
+      });
+      
+      setAddOnServices(transformedServices);
+    } catch (error) {
+      console.error("Error loading add-on services:", error);
+      if (error?.response?.status === 404 || error?.status === 404) {
+        setAddOnServices([]);
+      } else {
+        toast.error(error?.message || "Failed to load add-on services");
+        setAddOnServices([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMenuOpen = (event, addOnServiceId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedAddOnServiceId(addOnServiceId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedAddOnServiceId(null);
+  };
+
+  const handleDeleteClick = (addOnServiceId) => {
+    const service = addOnServices.find((s) => s.id === addOnServiceId);
+    setAddOnServiceToDelete(service);
+    setDeleteModalOpen(true);
+    handleMenuClose();
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setAddOnServiceToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!addOnServiceToDelete) return;
+
+    try {
+      setDeleting(true);
+      await deleteAddOnService(addOnServiceToDelete.id);
+      toast.success("Add-on service deleted successfully");
+      await loadAddOnServices();
+      setDeleteModalOpen(false);
+      setAddOnServiceToDelete(null);
+    } catch (error) {
+      console.error("Error deleting add-on service:", error);
+      toast.error(error?.message || "Failed to delete add-on service");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleEditClick = (addOnServiceId) => {
+    const service = addOnServices.find((s) => s.id === addOnServiceId);
+    if (service) {
+      router.push(`/vendor/addon/add?id=${addOnServiceId}`);
+    }
+    handleMenuClose();
+  };
 
   return (
     <VendorDashboardLayout>
@@ -80,99 +160,170 @@ const index = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((row, index) => (
-                <tr key={index}>
-                  <td className="align-middle">{row.name}</td>
-                  <td className="align-middle">{row.description}</td>
-                  <td className="align-middle">{row.type}</td>
-                  <td className="align-middle">{row.basePrice}</td>
-                  <td className="align-middle">{row.hourAvailable}</td>
-                  <td className="align-middle">
-                    {row.availabilityPerTimeframe}
-                  </td>
-                  <td className="align-middle">
-                    <span className="material-symbols-outlined">
-                      more_horiz
-                    </span>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-40">
+                    <CircularProgress size={24} />
+                    <span className="text-14 text-light-1 ml-10">Loading add-on services...</span>
                   </td>
                 </tr>
-              ))}
+              ) : addOnServices.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-40">
+                    <div className="text-16 text-light-1">
+                      No add-on services found. Create your first add-on service to get started.
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                addOnServices.map((row) => (
+                  <tr key={row.id}>
+                    <td className="align-middle">{row.name}</td>
+                    <td className="align-middle">{row.description}</td>
+                    <td className="align-middle">{row.type || "N/A"}</td>
+                    <td className="align-middle">{row.basePrice}</td>
+                    <td className="align-middle">{row.hourAvailable}</td>
+                    <td className="align-middle">
+                      {row.availabilityPerTimeframe}
+                    </td>
+                    <td className="align-middle">
+                      <span
+                        className="material-symbols-outlined cursor-pointer"
+                        onClick={(event) => handleMenuOpen(event, row.id)}
+                      >
+                        more_horiz
+                      </span>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={showMoreMenu && selectedAddOnServiceId === row.id}
+                        onClose={handleMenuClose}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "right",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            setSelectedServiceForCalendar(row.id);
+                            handleMenuClose();
+                          }}
+                          className="text-12"
+                        >
+                          View Calendar
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => handleEditClick(row.id)}
+                          className="text-12"
+                        >
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => handleDeleteClick(row.id)}
+                          className="text-12 text-red-1"
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      <AvailableCalendar />
+      <AvailableCalendar 
+        selectedServiceId={selectedServiceForCalendar}
+        onServiceChange={setSelectedServiceForCalendar}
+        addOnServices={addOnServices}
+      />
+
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Add-On Service"
+        message={`Are you sure you want to delete the add-on service "${addOnServiceToDelete?.name || `#${addOnServiceToDelete?.id}`}"?`}
+        itemName={addOnServiceToDelete?.name || `Add-On Service #${addOnServiceToDelete?.id}`}
+        loading={deleting}
+        confirmLabel="Delete"
+        confirmingLabel="Deleting..."
+      />
     </VendorDashboardLayout>
   );
 };
 
-const AvailableCalendar = () => {
-  function random(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-  function generateRawEvents(startDateStr, days = 80) {
-    const rawEvents = [];
-    const startDate = new Date(startDateStr);
+const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices }) => {
+  const [selectedService, setSelectedService] = useState(null);
+  const [events, setEvents] = useState([]);
 
-    for (let i = 0; i < days; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      const dateStr = currentDate.toISOString().split("T")[0];
-
-      const availability = Math.round(random(0, 1));
-      const price = Math.round(random(40, 60));
-
-      rawEvents.push(
-        {
-          title: `Availability: ${availability}`,
-          start: dateStr,
-          color: "#ffc107",
-        },
-        { title: `Price: ${price}`, start: dateStr, color: "#6ea8fe" },
-        {
-          title: `Event 1`,
-          start: dateStr + "T09:00:00",
-          end: dateStr + "T12:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 2`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 3`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 4`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        },
-        {
-          title: `Event 5`,
-          start: dateStr + "T14:00:00",
-          end: dateStr + "T21:00:00",
-          color: "#6ea8fe",
-        }
-      );
+  // Load selected service data
+  useEffect(() => {
+    if (selectedServiceId && addOnServices && addOnServices.length > 0) {
+      const service = addOnServices.find((s) => s.id === selectedServiceId);
+      setSelectedService(service || null);
+      
+      if (service) {
+        generateCalendarEvents(service);
+      }
+    } else {
+      setSelectedService(null);
+      setEvents([]);
     }
+  }, [selectedServiceId, addOnServices]);
 
-    return rawEvents;
-  }
+  const generateCalendarEvents = (service) => {
+    const calendarEvents = [];
+    
+    // Add start/end date range event if set
+    if (service.calendar_start_date && service.calendar_end_date) {
+      const calendarType = service.calendar_type || 1;
+      calendarEvents.push({
+        title: calendarType === 1 ? "Open Calendar Period" : "Blocked Calendar Period",
+        start: service.calendar_start_date,
+        end: service.calendar_end_date,
+        backgroundColor: calendarType === 1 ? "#4CAF50" : "#F44336",
+      });
+    }
+    
+    // Add blocked dates as events (only if calendar type is Open)
+    if (service.calendar_type === 1 && service.blocked_dates && Array.isArray(service.blocked_dates)) {
+      service.blocked_dates.forEach(date => {
+        calendarEvents.push({
+          title: "Blocked",
+          start: date,
+          backgroundColor: "#F44336",
+          display: "background",
+        });
+      });
+    }
+    
+    // Add available dates as events (only if calendar type is Blocked)
+    if (service.calendar_type === 2 && service.available_dates && Array.isArray(service.available_dates)) {
+      service.available_dates.forEach(date => {
+        calendarEvents.push({
+          title: "Available",
+          start: date,
+          backgroundColor: "#4CAF50",
+          display: "background",
+        });
+      });
+    }
+    
+    setEvents(calendarEvents);
+  };
 
-  const events = generateRawEvents("2025-05-30");
+  const [activeTab, setActiveTab] = useState("events");
 
   function renderEventContent(eventInfo) {
     return <span className="text-14 fw-500 lh-1">{eventInfo.event.title}</span>;
   }
 
-  const [activeTab, setActiveTab] = useState("events");
   const tabs = [
     {
       label: "Events",
@@ -184,18 +335,37 @@ const AvailableCalendar = () => {
       value: "availability",
       content: (
         <div className="px-20">
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin]}
-            initialView="dayGridMonth"
-            weekends={true}
-            headerToolbar={{
-              start: "prev,next,today",
-              center: "title",
-              end: "dayGridMonth,timeGridWeek,timeGridDay",
-            }}
-            events={events}
-            eventContent={renderEventContent}
-          />
+          {selectedService ? (
+            <>
+              <div className="mb-20">
+                <h3 className="text-16 fw-600 mb-10">Service: {selectedService.name}</h3>
+                <p className="text-14 text-light-1">
+                  Calendar Type: {selectedService.calendar_type === 1 ? "Open Calendar" : "Blocked Calendar"}
+                  {selectedService.calendar_start_date && selectedService.calendar_end_date && (
+                    <> | Period: {new Date(selectedService.calendar_start_date).toLocaleDateString()} - {new Date(selectedService.calendar_end_date).toLocaleDateString()}</>
+                  )}
+                </p>
+              </div>
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin]}
+                initialView="dayGridMonth"
+                weekends={true}
+                headerToolbar={{
+                  start: "prev,next,today",
+                  center: "title",
+                  end: "dayGridMonth,timeGridWeek,timeGridDay",
+                }}
+                events={events}
+                eventContent={renderEventContent}
+              />
+            </>
+          ) : (
+            <div className="text-center py-40">
+              <p className="text-16 text-light-1">
+                Please select an add-on service from the table above to view its calendar
+              </p>
+            </div>
+          )}
         </div>
       ),
     },
@@ -218,7 +388,13 @@ const AvailableCalendar = () => {
         </div>
       </div>
       <div className="border-light rounded-8 py-20">
-        {tabs.map((item) => item.value == activeTab && item.content)}
+        {tabs.map((item) => (
+          item.value == activeTab && (
+            <div key={item.value}>
+              {item.content}
+            </div>
+          )
+        ))}
       </div>
     </div>
   );

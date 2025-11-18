@@ -10,6 +10,7 @@ import {
   setAuthorization,
   clearAuthorization
 } from "./api_helper";
+import { paymentAPI } from "./api_helper";
 import * as url from "./url_helper";
 
 // Use APIClient for all operations
@@ -202,6 +203,24 @@ export const deleteAdminRole = (id) => AuthAPIClient.delete(`/admin/roles/${id}`
 // BOOKING MANAGEMENT
 // Get all bookings (admin) - using BookingAPIClient
 export const getAdminBookings = (params) => BookingAPIClient.get(url.GET_ADMIN_BOOKINGS, params);
+
+// Get vendor bookings
+export const getVendorBookings = (params) => BookingAPIClient.get("/vendor/my-bookings", params);
+
+// Get vendor booking detail
+export const getVendorBookingDetail = (id) => BookingAPIClient.get(`/vendor/my-bookings/${id}`);
+
+// Update vendor booking
+export const updateVendorBooking = (id, data) => BookingAPIClient.update(`/vendor/my-bookings/${id}`, data);
+
+// Update vendor booking status
+export const updateVendorBookingStatus = (id, status) => BookingAPIClient.patch(`/vendor/my-bookings/${id}/status`, { status });
+
+// Check-in vendor booking
+export const checkInVendorBooking = (id) => BookingAPIClient.service.post(`/vendor/my-bookings/${id}/checkin`);
+
+// Check-out vendor booking
+export const checkOutVendorBooking = (id) => BookingAPIClient.service.post(`/vendor/my-bookings/${id}/checkout`);
 
 // Get booking by ID
 export const getAdminBookingById = (id) => BookingAPIClient.get(`${url.GET_ADMIN_BOOKING_BY_ID}/${id}`);
@@ -454,8 +473,44 @@ export const updateCommissionStatus = (id, is_active) => PricingAPIClient.patch(
 // Get all transactions (admin)
 export const getAdminTransactions = (params) => api.get(url.GET_ADMIN_TRANSACTIONS, params);
 export const getTransactions = (params) => PaymentAPIClient.get(url.GET_TRANSACTIONS, params);
+export const getTransactionById = (id) => PaymentAPIClient.get(`${url.GET_TRANSACTION_BY_ID}/${id}`);
+
+// Download invoice
+export const downloadTransactionInvoice = async (id) => {
+  try {
+    // Use the underlying axios instance directly for blob response
+    const response = await paymentAPI.get(`${url.DOWNLOAD_TRANSACTION_INVOICE}/${id}/invoice`, {
+      responseType: 'blob', // Important for downloading files
+    });
+    return response;
+  } catch (error) {
+    console.error('Error downloading invoice:', error);
+    throw error;
+  }
+};
+
+// Download all invoices as zip
+export const downloadAllInvoices = async (params) => {
+  try {
+    // Use the underlying axios instance directly for blob response
+    const response = await paymentAPI.get(url.DOWNLOAD_ALL_INVOICES, {
+      params,
+      responseType: 'blob', // Important for downloading files
+    });
+    return response;
+  } catch (error) {
+    console.error('Error downloading all invoices:', error);
+    throw error;
+  }
+};
+
 export const getPaymentAnalytics = () => PaymentAPIClient.get(url.GET_PAYMENT_ANALYTICS);
 export const refundTransaction = (id) => PaymentAPIClient.patch(`${url.REFUND_TRANSACTION}/${id}/refund`);
+
+// Vendor Subscriptions (Payment Service)
+export const initiateSubscription = (data) => PaymentAPIClient.create(url.INITIATE_SUBSCRIPTION, data);
+export const getCurrentSubscription = () => PaymentAPIClient.get(url.GET_CURRENT_SUBSCRIPTION);
+export const updateVendorSubscription = (data) => PaymentAPIClient.update(url.UPDATE_VENDOR_SUBSCRIPTION, data);
 
 // Get revenue data
 export const getAdminRevenue = (params) => api.get(url.GET_ADMIN_REVENUE, params);
@@ -604,6 +659,9 @@ export const getConversationById = (id) => CommunicationAPIClient.get(`${url.GET
 // Update conversation
 export const updateConversation = (id, data) => CommunicationAPIClient.update(`${url.UPDATE_CONVERSATION}/${id}`, data);
 
+// Mark conversation as read
+export const markConversationAsRead = (id) => CommunicationAPIClient.update(`${url.UPDATE_CONVERSATION}/${id}/read`);
+
 // Delete conversation
 export const deleteConversation = (id) => CommunicationAPIClient.delete(`${url.DELETE_CONVERSATION}/${id}`);
 
@@ -655,6 +713,25 @@ export const deleteMessage = (id) => CommunicationAPIClient.delete(`${url.DELETE
 export const getMessagesByConversation = (conversationId) => CommunicationAPIClient.get(`${url.GET_MESSAGES_BY_CONVERSATION}/${conversationId}`);
 
 // ===========================================
+// MESSAGE TEMPLATES (Communication Service)
+// ===========================================
+
+// Get all message templates
+export const getMessageTemplates = (params) => CommunicationAPIClient.get(url.GET_MESSAGE_TEMPLATES, params);
+
+// Create new message template
+export const createMessageTemplate = (data) => CommunicationAPIClient.create(url.CREATE_MESSAGE_TEMPLATE, data);
+
+// Get message template by ID
+export const getMessageTemplateById = (id) => CommunicationAPIClient.get(`${url.GET_MESSAGE_TEMPLATE_BY_ID}/${id}`);
+
+// Update message template
+export const updateMessageTemplate = (id, data) => CommunicationAPIClient.update(`${url.UPDATE_MESSAGE_TEMPLATE}/${id}`, data);
+
+// Delete message template
+export const deleteMessageTemplate = (id) => CommunicationAPIClient.delete(`${url.DELETE_MESSAGE_TEMPLATE}/${id}`);
+
+// ===========================================
 // PACKAGE PLANS (Pricing-Loyalty Service)
 // ===========================================
 
@@ -669,6 +746,13 @@ export const getPackageSubscriptions = (params) => PricingAPIClient.get(url.GET_
 export const exportPackageSubscriptionsPdf = (data) => PricingAPIClient.create(url.EXPORT_PACKAGE_SUBSCRIPTIONS_PDF, data);
 export const updatePackageSubscriptionStatus = (id, data) => PricingAPIClient.patch(`${url.UPDATE_PACKAGE_SUBSCRIPTION_STATUS}/${id}/status`, data);
 export const updatePackageSubscription = (id, data) => PricingAPIClient.update(`${url.UPDATE_PACKAGE_SUBSCRIPTION}/${id}`, data);
+
+// Rate Plans (Pricing-Loyalty Service)
+export const getRatePlans = (params) => PricingAPIClient.get(url.GET_RATE_PLANS, params);
+export const getRatePlanById = (id) => PricingAPIClient.get(`${url.GET_RATE_PLANS}/${id}`);
+export const createRatePlan = (data) => PricingAPIClient.create(url.CREATE_RATE_PLAN, data);
+export const updateRatePlan = (id, data) => PricingAPIClient.update(`${url.UPDATE_RATE_PLAN}/${id}`, data);
+export const deleteRatePlan = (id) => PricingAPIClient.delete(`${url.DELETE_RATE_PLAN}/${id}`);
 
 // ===========================================
 // ROOM TYPE MANAGEMENT (Listing Service)
@@ -701,6 +785,38 @@ export const updateRoomType = (id, data) => ListingAPIClient.update(`/room-types
 
 // Delete room type
 export const deleteRoomType = (id) => ListingAPIClient.delete(`/room-types/${id}`);
+
+// ===========================================
+// AVAILABILITY MANAGEMENT (Listing Service)
+// ===========================================
+
+// Get all availabilities (with optional filters: room_type_id, add_on_service_id, date, is_available)
+export const getAvailabilities = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/availability", sanitized)
+      : ListingAPIClient.get("/availability");
+  }
+  return ListingAPIClient.get("/availability");
+};
+
+// Get availability by ID
+export const getAvailabilityById = (id) => ListingAPIClient.get(`/availability/${id}`);
+
+// Create new availability
+export const createAvailability = (data) => ListingAPIClient.create("/availability", data);
+
+// Update availability
+export const updateAvailability = (id, data) => ListingAPIClient.update(`/availability/${id}`, data);
+
+// Delete availability
+export const deleteAvailability = (id) => ListingAPIClient.delete(`/availability/${id}`);
 
 // ===========================================
 // CANCELLATION POLICY MANAGEMENT (Listing Service)
@@ -736,6 +852,38 @@ export const updateCancellationPolicy = (id, data) => ListingAPIClient.update(`/
 
 // Delete cancellation policy
 export const deleteCancellationPolicy = (id) => ListingAPIClient.delete(`/cancellation-policies/${id}`);
+
+// ===========================================
+// ADD-ON SERVICES (Listing Service)
+// ===========================================
+
+// Get all add-on services (with optional filters: listing_id, type, name)
+export const getAddOnServices = (params) => {
+  if (params && typeof params === 'object') {
+    const sanitized = {};
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== "") sanitized[k] = v;
+    });
+    const hasParams = Object.keys(sanitized).length > 0;
+    return hasParams
+      ? ListingAPIClient.get("/add-on-services", sanitized)
+      : ListingAPIClient.get("/add-on-services");
+  }
+  return ListingAPIClient.get("/add-on-services");
+};
+
+// Get add-on service by ID
+export const getAddOnServiceById = (id) => ListingAPIClient.get(`/add-on-services/${id}`);
+
+// Create add-on service
+export const createAddOnService = (data) => ListingAPIClient.create("/add-on-services", data);
+
+// Update add-on service
+export const updateAddOnService = (id, data) => ListingAPIClient.update(`/add-on-services/${id}`, data);
+
+// Delete add-on service
+export const deleteAddOnService = (id) => ListingAPIClient.delete(`/add-on-services/${id}`);
 
 // ===========================================
 // REVIEW & RATING (Review-Rating Service)

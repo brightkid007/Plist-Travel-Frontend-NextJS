@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { getMyListings, deleteListing, updateListing, getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const index = ({ isProperty = true }) => {
   const [listings, setListings] = useState([]);
@@ -30,65 +30,81 @@ const index = ({ isProperty = true }) => {
     category_id: "all",
     subcategory_id: "all",
   });
+  const [allCategories, setAllCategories] = useState([]);
+  const [allSubcategories, setAllSubcategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
 
-  const loadCategories = async () => {
+  const loadAllData = async () => {
     try {
-      const filterParams = { type: 'property' };
-      filterParams.subtype = filters.type;
-      const catRes = await getListingCategories(filterParams);
-      setCategories(catRes?.data || catRes || []);
+      // Load all categories (property type)
+      const catRes = await getListingCategories({ type: 'property' });
+      const allCats = catRes?.data || catRes || [];
+      setAllCategories(allCats);
+
+      // Load all subcategories (property type)
+      const subcatRes = await getListingSubcategories({ type: 'property' });
+      const allSubcats = subcatRes?.data || subcatRes || [];
+      setAllSubcategories(allSubcats);
     } catch (error) {
-      console.error("Error loading categories:", error);
+      console.error("Error loading categories/subcategories:", error);
     }
   };
 
-
-  // Load categories based on selected type filter
+  // Pre-load all categories and subcategories once on mount
   useEffect(() => {
+    loadAllData();
+  }, []);
+
+  // Filter categories on frontend based on type (subtype filter)
+  useEffect(() => {
+    let filtered = [...allCategories];
+
+    // Filter by subtype if not "all"
+    if (filters.type && filters.type !== "all") {
+      filtered = filtered.filter((cat) => cat.subtype === filters.type);
+    }
+
+    setCategories(filtered);
+
+    // Reset category and subcategory filters when type changes
     setFilters((prev) => ({
       ...prev,
       category_id: "all",
       subcategory_id: "all"
     }));
-    loadCategories();
-  }, [filters.type]);
+  }, [filters.type, allCategories]);
 
-  const loadSubcategories = async () => {
-    try {
-      const filterParams = { type: 'property' };
-      filterParams.subtype = filters.type;
-      if (filters.category_id && filters.category_id !== "all") {
-        // Load subcategories for the selected category
-        filterParams.category_id = parseInt(filters.category_id, 10);
-        const subcatRes = await getListingSubcategories(filterParams);
-        const subcats = subcatRes?.data || subcatRes || [];
-        setFilteredSubcategories(subcats);
+  // Filter subcategories on frontend based on category_id and type (subtype filter)
+  useEffect(() => {
+    let filtered = [...allSubcategories];
 
-        // Reset subcategory if it's not in the filtered list
-        if (filters.subcategory_id !== "all") {
-          const subcatExists = subcats.some(
-            (sub) => sub.id === parseInt(filters.subcategory_id, 10)
-          );
-          if (!subcatExists) {
-            setFilters((prev) => ({ ...prev, subcategory_id: "all" }));
-          }
-        }
-      } else {
-        setFilteredSubcategories([]);
+    // Filter by subtype if not "all"
+    if (filters.type && filters.type !== "all") {
+      filtered = filtered.filter((subcat) => subcat.subtype === filters.type);
+    }
+
+    // Filter by category_id if selected
+    if (filters.category_id && filters.category_id !== "all") {
+      const categoryId = parseInt(filters.category_id, 10);
+      filtered = filtered.filter((subcat) => {
+        const subcatCategoryId = subcat.category_id || subcat.listing_category_id;
+        return subcatCategoryId === categoryId;
+      });
+    }
+    console.log(filtered);
+    setFilteredSubcategories(filtered);
+
+    // Reset subcategory if it's not in the filtered list
+    if (filters.subcategory_id !== "all") {
+      const subcatExists = filtered.some(
+        (sub) => sub.id === parseInt(filters.subcategory_id, 10)
+      );
+      if (!subcatExists) {
         setFilters((prev) => ({ ...prev, subcategory_id: "all" }));
       }
-    } catch (error) {
-      console.error("Error loading subcategories:", error);
-      setFilteredSubcategories([]);
     }
-  };
-
-  // Load and filter subcategories based on selected category
-  useEffect(() => {
-    loadSubcategories();
-  }, [filters.category_id, filters.type]);
+  }, [filters.category_id, filters.type, allSubcategories, filters.subcategory_id]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -474,7 +490,7 @@ const index = ({ isProperty = true }) => {
         </div>
       </div>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

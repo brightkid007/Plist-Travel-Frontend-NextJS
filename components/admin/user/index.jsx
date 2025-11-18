@@ -18,7 +18,7 @@ import {
   getAdminRoles,
   isAuthenticated
 } from "@/helpers/backend_helper";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const index = () => {
   const router = useRouter();
@@ -602,7 +602,7 @@ const index = () => {
         </div>
       </Dialog>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteUserCancel}
         onConfirm={handleDeleteUserConfirm}

@@ -6,12 +6,9 @@ export const metadata = {
   description: "Vendor Dashboard for Plist Travel",
 };
 
-const index = () => {
-  return (
-    <>
-      <DashboardPage type="monthly" />
-    </>
-  );
+const index = ({ params }) => {
+  const { id, type } = params;
+  return <DashboardPage ratePlanId={id} type={type} />;
 };
 
 export default dynamic(() => Promise.resolve(index), {

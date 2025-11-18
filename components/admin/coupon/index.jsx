@@ -10,7 +10,7 @@ import DatePicker, { DateObject } from "react-multi-date-picker";
 import FormInput from "@/components/common/form/FormInput";
 import Filter from "../common/Filter";
 import { createAdminCoupon, getAdminCoupons, updateAdminCoupon, deleteAdminCoupon } from "@/helpers/backend_helper";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { toast } from "react-toastify";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -386,7 +386,7 @@ const index = () => {
         </div>
       </Dialog>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

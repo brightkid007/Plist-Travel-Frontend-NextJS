@@ -9,7 +9,7 @@ import Filter from "../common/Filter";
 import BookingList from "./BookingList";
 import { getAdminBookings, deleteBooking, updateBookingStatus, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
@@ -375,7 +375,7 @@ const index = () => {
         />
       </div>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
@@ -387,7 +387,7 @@ const index = () => {
         confirmingLabel="Deleting..."
       />
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={rejectModalOpen}
         onClose={handleRejectCancel}
         onConfirm={handleRejectConfirm}
@@ -399,7 +399,7 @@ const index = () => {
         confirmingLabel="Rejecting..."
       />
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={refundModalOpen}
         onClose={handleRefundCancel}
         onConfirm={handleRefundConfirm}

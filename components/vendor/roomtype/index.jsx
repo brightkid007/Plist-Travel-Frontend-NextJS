@@ -7,7 +7,7 @@ import { Menu, MenuItem } from "@mui/material";
 import { getRoomTypes, deleteRoomType, getMyListings } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const index = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -488,7 +488,7 @@ const index = () => {
         </div>
       </div>
 
-      <DeleteConfirmationModal
+      <ConfirmationModal
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

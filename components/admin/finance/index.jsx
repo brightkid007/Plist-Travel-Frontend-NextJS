@@ -8,7 +8,7 @@ import { CircularProgress, Menu, MenuItem } from "@mui/material";
 import DashboardCard from "./components/DashboardCard";
 import { getTransactions, getPaymentAnalytics, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { usePermissions } from "@/hooks/usePermissions";
 
 const index = () => {
@@ -296,7 +296,7 @@ const index = () => {
           </div>
         </div>
 
-        <DeleteConfirmationModal
+        <ConfirmationModal
           open={refundModalOpen}
           onClose={() => {
             setRefundModalOpen(false);

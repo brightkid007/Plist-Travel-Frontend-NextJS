@@ -8,9 +8,9 @@ import { Dialog, CircularProgress } from "@mui/material";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import FormInput from "@/components/common/form/FormInput";
 import Filter from "../common/Filter";
-import { 
-  getMyCoupons, 
-  createVendorCoupon, 
+import {
+  getMyCoupons,
+  createVendorCoupon,
   updateVendorCoupon,
   getMyListings,
   getListingCategories,
@@ -26,33 +26,42 @@ const index = () => {
   const [submitting, setSubmitting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({});
+  const [listings, setListings] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState([]);
 
   const loadCoupons = async (filterParams = {}) => {
     try {
       setLoading(true);
       // Build query parameters from filters
       const params = {};
-      
+
       if (filterParams.is_active && filterParams.is_active !== "all") {
         params.is_active = filterParams.is_active === "true" || filterParams.is_active === true;
       }
-      
+
       if (filterParams.listing_category_id && filterParams.listing_category_id !== "all") {
         params.listing_category_id = filterParams.listing_category_id;
       }
-      
+
       if (filterParams.listing_subcategory_id && filterParams.listing_subcategory_id !== "all") {
         params.listing_subcategory_id = filterParams.listing_subcategory_id;
       }
-      
+
       if (filterParams.listing_type && filterParams.listing_type !== "all") {
         params.listing_type = filterParams.listing_type;
       }
-      
+
+      if (filterParams.listing_id && filterParams.listing_id !== "all") {
+        params.listing_id = filterParams.listing_id;
+      }
+
       if (filterParams.date_from) {
         params.date_from = filterParams.date_from;
       }
-      
+
       if (filterParams.date_to) {
         params.date_to = filterParams.date_to;
       }
@@ -76,19 +85,120 @@ const index = () => {
 
   useEffect(() => {
     loadCoupons(filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey]);
 
-  const handleFilterChange = (newFilters) => {
-    // Clean up "all" values
-    const cleanedFilters = {};
-    Object.keys(newFilters).forEach((key) => {
-      if (newFilters[key] !== "all" && newFilters[key] !== "" && newFilters[key] !== null && newFilters[key] !== undefined) {
-        cleanedFilters[key] = newFilters[key];
-      }
-    });
-    setFilters(cleanedFilters);
+  const loadCategoryData = async () => {
+    try {
+      const [categoriesRes, subcategoriesRes] = await Promise.all([
+        getListingCategories(),
+        getListingSubcategories(),
+      ]);
+
+      const categoriesData = categoriesRes?.data || categoriesRes || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+
+      const subcategoriesData = subcategoriesRes?.data || subcategoriesRes || [];
+      setSubcategories(Array.isArray(subcategoriesData) ? subcategoriesData : []);
+    } catch (error) {
+      console.error("Error loading filter data:", error);
+    }
   };
+
+  // Load listings, categories, and subcategories for filters
+  useEffect(() => {
+    loadCategoryData();
+  }, []);
+
+  // Clear subtype when listing_type changes to non-property
+  useEffect(() => {
+    if (filters.listing_type !== "property") {
+      setFilters(prev => ({ ...prev, listing_subtype: "" }));
+    }
+    // Reset category and subcategory when listing type changes (but keep listing_id if it matches)
+    setFilters(prev => ({
+      ...prev,
+      listing_category_id: "",
+      listing_subcategory_id: "",
+    }));
+  }, [filters.listing_type]);
+
+  // Reset category and subcategory when subtype changes (for property type)
+  useEffect(() => {
+    if (filters.listing_type === "property") {
+      setFilters(prev => ({
+        ...prev,
+        listing_category_id: "",
+        listing_subcategory_id: "",
+      }));
+    }
+  }, [filters.listing_subtype]);
+
+  // Filter categories based on listing type/subtype (optional filtering)
+  useEffect(() => {
+    let filtered = [...categories]; // Start with all categories
+
+    // Filter by listing type if selected
+    if (filters.listing_type && filters.listing_type !== "") {
+      filtered = filtered.filter(
+        (cat) => {
+          const catType = cat.type || cat.listing_type;
+          return catType === filters.listing_type;
+        }
+      );
+
+      // For property type, also filter by subtype if selected
+      if (filters.listing_type === "property" && filters.listing_subtype && filters.listing_subtype !== "") {
+        filtered = filtered.filter(
+          (cat) => {
+            return cat.subtype === filters.listing_subtype;
+          }
+        );
+      }
+
+      // Reset category if it's not in the filtered list
+      if (filters.listing_category_id) {
+        const catExists = filtered.some(
+          (cat) => cat.id === parseInt(filters.listing_category_id, 10)
+        );
+        if (!catExists) {
+          setFilters(prev => ({
+            ...prev,
+            listing_category_id: "",
+            listing_subcategory_id: "",
+          }));
+        }
+      }
+    }
+
+    setFilteredCategories(filtered);
+  }, [filters.listing_type, filters.listing_subtype, categories]);
+
+  // Filter subcategories based on selected category (optional filtering)
+  useEffect(() => {
+    let filtered = [...subcategories]; // Start with all subcategories
+
+    // Filter by category if selected
+    if (filters.listing_category_id && filters.listing_category_id !== "") {
+      filtered = filtered.filter(
+        (sub) => {
+          const subCatId = sub.listing_category_id || sub.category_id;
+          return subCatId === parseInt(filters.listing_category_id, 10);
+        }
+      );
+
+      // Reset subcategory if it's not in the filtered list
+      if (filters.listing_subcategory_id) {
+        const subcatExists = filtered.some(
+          (sub) => sub.id === parseInt(filters.listing_subcategory_id, 10)
+        );
+        if (!subcatExists) {
+          setFilters(prev => ({ ...prev, listing_subcategory_id: "" }));
+        }
+      }
+    }
+
+    setFilteredSubcategories(filtered);
+  }, [filters.listing_category_id, subcategories]);
 
   // Calculate dashboard card data from coupons
   const dashboardData = useMemo(() => {
@@ -98,7 +208,7 @@ const index = () => {
       const value = parseFloat(c.discount_value) || 0;
       return sum + value;
     }, 0);
-    
+
     // Calculate expiring soon (within 30 days)
     const expiringSoon = coupons.filter(c => {
       if (!c.date_to) return false;
@@ -176,21 +286,84 @@ const index = () => {
         </div>
       </div>
 
-      <Filter filters={filters} onFilterChange={handleFilterChange} />
+      <div className="row y-gap-15 x-gap-10 mb-5">
 
-      {loading ? (
-        <div className="d-flex justify-center items-center py-40">
-          <CircularProgress />
+        {/* Listing Type/Subtype Selection (optional filters) */}
+        <div className="col-auto">
+          <h1 className="text-13 lh-14 fw-500">Listing Type</h1>
+          <select
+            className="form-select border-light rounded-8 px-15 justify-between fw-400 py-10 h-50 w-140 text-14 mt-5"
+            value={filters.listing_type || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_type: e.target.value }))}
+          >
+            <option value="">All Types</option>
+            <optgroup label="Property List">
+              <option value="property">Property</option>
+            </optgroup>
+            <optgroup label="Non-Property List">
+              <option value="tour">Tour</option>
+              <option value="event">Event</option>
+              <option value="activity">Activity</option>
+            </optgroup>
+          </select>
         </div>
-      ) : (
-        <>
-          <CouponCard data={dashboardData} />
 
-          <div className="py-10 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
-            <CouponList onEdit={handleEdit} refreshTrigger={refreshKey} filters={filters} />
-          </div>
-        </>
-      )}
+        {/* Subtype Selection (only for property, optional filter) */}
+        <div className="col-auto">
+          <h1 className="text-13 lh-14 fw-500">Property Subtype</h1>
+          <select
+            className="form-select border-light rounded-8 px-15 justify-between fw-400 py-10 h-50 w-140 text-14 mt-5"
+            value={filters.listing_subtype || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_subtype: e.target.value }))}
+            disabled={filters.listing_type !== "property"}
+          >
+            <option value="">All Subtypes</option>
+            <option value="Hotel">Hotel</option>
+            <option value="Space">Space</option>
+            <option value="Vacation">Vacation</option>
+            <option value="EventVenue">Event Venue</option>
+          </select>
+        </div>
+
+        {/* Category Selection (optional filter) */}
+        <div className="col-auto">
+          <h1 className="text-13 lh-14 fw-500">Category</h1>
+          <select
+            className="form-select border-light rounded-8 px-15 justify-between fw-400 py-10 h-50 w-140 text-14 mt-5"
+            value={filters.listing_category_id || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_category_id: e.target.value }))}
+          >
+            <option value="">All Categories</option>
+            {filteredCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name || `Category #${category.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Subcategory Selection (optional filter) */}
+        <div className="col-auto">
+          <h1 className="text-13 lh-14 fw-500">Subcategory</h1>
+          <select
+            className="form-select border-light rounded-8 px-15 justify-between fw-400 py-10 h-50 w-180 text-14 mt-5"
+            value={filters.listing_subcategory_id || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_subcategory_id: e.target.value }))}
+          >
+            <option value="">All Subcategories</option>
+            {filteredSubcategories.map((subcategory) => (
+              <option key={subcategory.id} value={subcategory.id}>
+                {subcategory.name || `Subcategory #${subcategory.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <CouponCard data={dashboardData} />
+      <div className="py-10 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
+        <CouponList onEdit={handleEdit} coupons={coupons} loading={loading} />
+      </div>
 
       <Dialog
         open={showModal}
@@ -222,10 +395,6 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
   const [formData, setFormData] = useState({
     code: "",
     description: "",
-    listing_type: "",
-    listing_subtype: "",
-    listing_category_id: "",
-    listing_subcategory_id: "",
     listing_id: "",
     discount_type: "percent",
     discount_value: "",
@@ -234,6 +403,14 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
     usage_limit: "",
     min_spend: "",
     is_active: true,
+  });
+
+  // Filter state for filtering listings dropdown (not part of form submission)
+  const [filters, setFilters] = useState({
+    listing_type: "",
+    listing_subtype: "",
+    listing_category_id: "",
+    listing_subcategory_id: "",
   });
 
   const [startDate, setStartDate] = useState(new DateObject());
@@ -246,240 +423,183 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [listingsRes, categoriesRes, subcategoriesRes] = await Promise.all([
+        getMyListings(),
+        getListingCategories(),
+        getListingSubcategories(),
+      ]);
+
+      const listingsData = listingsRes?.data || listingsRes || [];
+      setListings(Array.isArray(listingsData) ? listingsData : []);
+
+      const categoriesData = categoriesRes?.data || categoriesRes || [];
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+
+      const subcategoriesData = subcategoriesRes?.data || subcategoriesRes || [];
+      setSubcategories(Array.isArray(subcategoriesData) ? subcategoriesData : []);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      toast.error("Failed to load form data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load listings, categories, and subcategories
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [listingsRes, categoriesRes, subcategoriesRes] = await Promise.all([
-          getMyListings(),
-          getListingCategories(),
-          getListingSubcategories(),
-        ]);
-        
-        const listingsData = listingsRes?.data || listingsRes || [];
-        setListings(Array.isArray(listingsData) ? listingsData : []);
-        
-        const categoriesData = categoriesRes?.data || categoriesRes || [];
-        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
-        
-        const subcategoriesData = subcategoriesRes?.data || subcategoriesRes || [];
-        setSubcategories(Array.isArray(subcategoriesData) ? subcategoriesData : []);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error("Failed to load form data");
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, []);
 
   // Clear subtype when listing_type changes to non-property
   useEffect(() => {
-    if (formData.listing_type !== "property") {
-      setFormData(prev => ({ ...prev, listing_subtype: "" }));
+    if (filters.listing_type !== "property") {
+      setFilters(prev => ({ ...prev, listing_subtype: "" }));
     }
-    // Reset category and subcategory when listing type changes
-    setFormData(prev => ({ 
-      ...prev, 
+    // Reset category and subcategory when listing type changes (but keep listing_id if it matches)
+    setFilters(prev => ({
+      ...prev,
       listing_category_id: "",
-      listing_subcategory_id: ""
+      listing_subcategory_id: "",
     }));
-  }, [formData.listing_type]);
+  }, [filters.listing_type]);
 
   // Reset category and subcategory when subtype changes (for property type)
   useEffect(() => {
-    if (formData.listing_type === "property") {
-      setFormData(prev => ({ 
-        ...prev, 
+    if (filters.listing_type === "property") {
+      setFilters(prev => ({
+        ...prev,
         listing_category_id: "",
-        listing_subcategory_id: ""
+        listing_subcategory_id: "",
       }));
     }
-  }, [formData.listing_subtype]);
+  }, [filters.listing_subtype]);
 
-  // Filter categories based on listing type and subtype
+  // Filter categories based on listing type/subtype (optional filtering)
   useEffect(() => {
-    // Wait for categories to be loaded
-    if (categories.length === 0) {
-      setFilteredCategories([]);
-      return;
-    }
+    let filtered = [...categories]; // Start with all categories
 
-    if (formData.listing_type && formData.listing_type !== "") {
-      // For property type, require subtype to be selected before showing categories
-      if (formData.listing_type === "property") {
-        if (formData.listing_subtype && formData.listing_subtype !== "") {
-          // Get unique category IDs from listings with this subtype
-          const subtypeListings = listings.filter(
-            (listing) => {
-              const listingType = listing.type || listing.listing_type;
-              const listingSubtype = listing.subtype || listing.listing_subtype;
-              return listingType === "property" && listingSubtype === formData.listing_subtype;
-            }
-          );
-          
-          const categoryIds = new Set(
-            subtypeListings
-              .map((listing) => {
-                const catId = listing.category_id || listing.listing_category_id;
-                return catId ? parseInt(catId, 10) : null;
-              })
-              .filter((id) => id !== null && id !== undefined && !isNaN(id))
-          );
-          
-          // Filter categories to only those used by listings with this subtype
-          const filtered = categories.filter(
-            (cat) => {
-              const catType = cat.type || cat.listing_type;
-              return catType === formData.listing_type && categoryIds.has(cat.id);
-            }
-          );
-          
-          setFilteredCategories(filtered);
-          // Reset category if it's not in the filtered list
-          if (formData.listing_category_id) {
-            const catExists = filtered.some(
-              (cat) => cat.id === parseInt(formData.listing_category_id, 10)
-            );
-            if (!catExists) {
-              setFormData(prev => ({ 
-                ...prev, 
-                listing_category_id: "",
-                listing_subcategory_id: ""
-              }));
-            }
+    // Filter by listing type if selected
+    if (filters.listing_type && filters.listing_type !== "") {
+      filtered = filtered.filter(
+        (cat) => {
+          const catType = cat.type || cat.listing_type;
+          return catType === filters.listing_type;
+        }
+      );
+
+      // For property type, also filter by subtype if selected
+      if (filters.listing_type === "property" && filters.listing_subtype && filters.listing_subtype !== "") {
+        filtered = filtered.filter(
+          (cat) => {
+            return cat.subtype === filters.listing_subtype;
           }
-        } else {
-          // Property selected but no subtype - don't show categories yet
-          setFilteredCategories([]);
-          setFormData(prev => ({ 
-            ...prev, 
+        );
+      }
+
+      // Reset category if it's not in the filtered list
+      if (filters.listing_category_id) {
+        const catExists = filtered.some(
+          (cat) => cat.id === parseInt(filters.listing_category_id, 10)
+        );
+        if (!catExists) {
+          setFilters(prev => ({
+            ...prev,
             listing_category_id: "",
-            listing_subcategory_id: ""
+            listing_subcategory_id: "",
           }));
         }
-      } else {
-        // For non-property types (tour, event, activity), filter by listing type only
-        const filtered = categories.filter(
-          (cat) => {
-            const catType = cat.type || cat.listing_type;
-            return catType === formData.listing_type;
-          }
-        );
-        setFilteredCategories(filtered);
-        // Reset category if it's not in the filtered list
-        if (formData.listing_category_id) {
-          const catExists = filtered.some(
-            (cat) => cat.id === parseInt(formData.listing_category_id, 10)
-          );
-          if (!catExists) {
-            setFormData(prev => ({ 
-              ...prev, 
-              listing_category_id: "",
-              listing_subcategory_id: ""
-            }));
-          }
-        }
       }
-    } else {
-      setFilteredCategories([]);
-      setFormData(prev => ({ 
-        ...prev, 
-        listing_category_id: "",
-        listing_subcategory_id: ""
-      }));
     }
-  }, [formData.listing_type, formData.listing_subtype, categories, listings]);
 
-  // Filter subcategories based on selected category and subtype
+    setFilteredCategories(filtered);
+  }, [filters.listing_type, filters.listing_subtype, categories]);
+
+  // Filter subcategories based on selected category (optional filtering)
   useEffect(() => {
-    if (formData.listing_category_id && formData.listing_category_id !== "") {
-      // First filter by category
-      let filtered = subcategories.filter(
+    let filtered = [...subcategories]; // Start with all subcategories
+
+    // Filter by category if selected
+    if (filters.listing_category_id && filters.listing_category_id !== "") {
+      filtered = filtered.filter(
         (sub) => {
           const subCatId = sub.listing_category_id || sub.category_id;
-          return subCatId === parseInt(formData.listing_category_id, 10);
+          return subCatId === parseInt(filters.listing_category_id, 10);
         }
       );
-      
-      // For property type, if subtype is selected, filter subcategories by those used in listings with that subtype and category
-      if (formData.listing_type === "property" && formData.listing_subtype && formData.listing_subtype !== "") {
-        // Get unique subcategory IDs from listings with this subtype and category
-        const subtypeListings = listings.filter(
-          (listing) => {
-            const listingType = listing.type || listing.listing_type;
-            const listingSubtype = listing.subtype || listing.listing_subtype;
-            const listingCatId = listing.category_id || listing.listing_category_id;
-            return (
-              listingType === "property" && 
-              listingSubtype === formData.listing_subtype &&
-              listingCatId === parseInt(formData.listing_category_id, 10)
-            );
-          }
-        );
-        const subcategoryIds = new Set(
-          subtypeListings
-            .map((listing) => listing.subcategory_id || listing.listing_subcategory_id)
-            .filter((id) => id !== null && id !== undefined && id !== "")
-        );
-        
-        // Filter subcategories to only those used by listings with this subtype and category
-        if (subcategoryIds.size > 0) {
-          filtered = filtered.filter((sub) => subcategoryIds.has(sub.id));
-        } else {
-          // If no listings with this subtype and category, show all subcategories for this category as fallback
-          // (keep the filtered subcategories by category)
-        }
-      }
-      
-      setFilteredSubcategories(filtered);
+
       // Reset subcategory if it's not in the filtered list
-      if (formData.listing_subcategory_id) {
+      if (filters.listing_subcategory_id) {
         const subcatExists = filtered.some(
-          (sub) => sub.id === parseInt(formData.listing_subcategory_id, 10)
+          (sub) => sub.id === parseInt(filters.listing_subcategory_id, 10)
         );
         if (!subcatExists) {
-          setFormData(prev => ({ ...prev, listing_subcategory_id: "" }));
+          setFilters(prev => ({ ...prev, listing_subcategory_id: "" }));
         }
       }
-    } else {
-      setFilteredSubcategories([]);
-      setFormData(prev => ({ ...prev, listing_subcategory_id: "" }));
     }
-  }, [formData.listing_category_id, formData.listing_type, formData.listing_subtype, subcategories, listings]);
 
-  // Filter listings based on listing type and subtype
+    setFilteredSubcategories(filtered);
+  }, [filters.listing_category_id, subcategories]);
+
+  // Filter listings based on selected filters (all filters are optional)
   useEffect(() => {
-    if (formData.listing_type && formData.listing_type !== "") {
-      let filtered = listings.filter(
-        (listing) => listing.type === formData.listing_type
-      );
-      
-      // For property type, also filter by subtype if selected
-      if (formData.listing_type === "property" && formData.listing_subtype) {
-        filtered = filtered.filter(
-          (listing) => listing.subtype === formData.listing_subtype
-        );
-      }
-      
-      setFilteredListings(filtered);
-      
-      // Reset listing if it's not in the filtered list
-      if (formData.listing_id) {
-        const listingExists = filtered.some(
-          (listing) => listing.id === parseInt(formData.listing_id, 10)
-        );
-        if (!listingExists) {
-          setFormData(prev => ({ ...prev, listing_id: "" }));
+    let filtered = [...listings]; // Start with all listings
+
+    // Filter by listing type if selected
+    if (filters.listing_type && filters.listing_type !== "") {
+      filtered = filtered.filter(
+        (listing) => {
+          const listingType = listing.type || listing.listing_type;
+          return listingType === filters.listing_type;
         }
-      }
-    } else {
-      setFilteredListings([]);
-      setFormData(prev => ({ ...prev, listing_id: "" }));
+      );
     }
-  }, [formData.listing_type, formData.listing_subtype, listings]);
+
+    // For property type, also filter by subtype if selected
+    if (filters.listing_type === "property" && filters.listing_subtype && filters.listing_subtype !== "") {
+      filtered = filtered.filter(
+        (listing) => {
+          const listingSubtype = listing.subtype || listing.listing_subtype;
+          return listingSubtype === filters.listing_subtype;
+        }
+      );
+    }
+
+    // Filter by category if selected
+    if (filters.listing_category_id && filters.listing_category_id !== "") {
+      filtered = filtered.filter(
+        (listing) => {
+          const listingCatId = listing.category_id || listing.listing_category_id;
+          return listingCatId === parseInt(filters.listing_category_id, 10);
+        }
+      );
+    }
+
+    // Filter by subcategory if selected
+    if (filters.listing_subcategory_id && filters.listing_subcategory_id !== "") {
+      filtered = filtered.filter(
+        (listing) => {
+          const listingSubcatId = listing.subcategory_id || listing.listing_subcategory_id;
+          return listingSubcatId === parseInt(filters.listing_subcategory_id, 10);
+        }
+      );
+    }
+
+    setFilteredListings(filtered);
+
+    // Reset listing if it's not in the filtered list
+    if (formData.listing_id) {
+      const listingExists = filtered.some(
+        (listing) => listing.id === parseInt(formData.listing_id, 10)
+      );
+      if (!listingExists) {
+        setFormData(prev => ({ ...prev, listing_id: null }));
+      }
+    }
+  }, [filters.listing_type, filters.listing_subtype, filters.listing_category_id, filters.listing_subcategory_id, listings, formData.listing_id]);
 
   // Populate form when editing
   useEffect(() => {
@@ -488,14 +608,11 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
       const end = coupon.date_to ? new DateObject(coupon.date_to) : new DateObject();
       setStartDate(start);
       setEndDate(end);
-      
+
+      // Set form data (only actual coupon fields)
       setFormData({
         code: coupon.code || "",
         description: coupon.description || "",
-        listing_type: coupon.listing_type || "",
-        listing_subtype: coupon.listing_subtype || "",
-        listing_category_id: coupon.listing_category_id || "",
-        listing_subcategory_id: coupon.listing_subcategory_id || "",
         listing_id: coupon.listing_id || "",
         discount_type: coupon.discount_type || "percent",
         discount_value: coupon.discount_value || "",
@@ -505,6 +622,25 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
         min_spend: coupon.min_spend || "",
         is_active: coupon.is_active !== undefined ? coupon.is_active : true,
       });
+
+      // Set filters based on coupon's listing data (for filtering dropdowns)
+      // If coupon has a listing_id, populate filters from the listing to help filter the dropdown
+      if (coupon.listing_id && coupon.listing) {
+        setFilters({
+          listing_type: coupon.listing.type || coupon.listing.listing_type || "",
+          listing_subtype: coupon.listing.subtype || coupon.listing.listing_subtype || "",
+          listing_category_id: coupon.listing.category_id || coupon.listing.listing_category_id || "",
+          listing_subcategory_id: coupon.listing.subcategory_id || coupon.listing.listing_subcategory_id || "",
+        });
+      } else {
+        // No listing, reset filters
+        setFilters({
+          listing_type: "",
+          listing_subtype: "",
+          listing_category_id: "",
+          listing_subcategory_id: "",
+        });
+      }
     } else {
       // Reset form for new coupon
       setStartDate(new DateObject());
@@ -512,10 +648,6 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
       setFormData({
         code: "",
         description: "",
-        listing_type: "",
-        listing_subtype: "",
-        listing_category_id: "",
-        listing_subcategory_id: "",
         listing_id: "",
         discount_type: "percent",
         discount_value: "",
@@ -525,18 +657,24 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
         min_spend: "",
         is_active: true,
       });
+      setFilters({
+        listing_type: "",
+        listing_subtype: "",
+        listing_category_id: "",
+        listing_subcategory_id: "",
+      });
     }
   }, [coupon]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.code || !formData.code.trim()) {
       toast.error("Coupon code is required");
       return;
     }
-    
+
     if (!formData.discount_value || parseFloat(formData.discount_value) <= 0) {
       toast.error("Discount value must be greater than 0");
       return;
@@ -554,14 +692,11 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
 
     try {
       setSubmitting(true);
-      
+
       const payload = {
         ...formData,
         date_from: startDate.format("YYYY-MM-DD"),
         date_to: endDate.format("YYYY-MM-DD"),
-        listing_subtype: formData.listing_type === "property" ? (formData.listing_subtype || null) : null,
-        listing_category_id: formData.listing_category_id || null,
-        listing_subcategory_id: formData.listing_subcategory_id || null,
         listing_id: formData.listing_id || null,
         usage_limit: formData.usage_limit || null,
         min_spend: formData.min_spend || null,
@@ -574,7 +709,7 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
         await createVendorCoupon(payload);
         toast.success("Coupon created successfully");
       }
-      
+
       onSuccess();
     } catch (error) {
       console.error("Error saving coupon:", error);
@@ -584,13 +719,6 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
     }
   };
 
-  const listingTypes = [
-    { value: "property", label: "Property" },
-    { value: "tour", label: "Tour" },
-    { value: "event", label: "Event" },
-    { value: "activity", label: "Activity" },
-  ];
-
   return (
     <form onSubmit={handleSubmit}>
       <h1 className="text-20 lh-14 fw-500">
@@ -599,203 +727,197 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
       <div className="text-12 text-light-1 lh-14 mb-15">
         {coupon ? "Update your coupon details." : "Create a new coupon code for your listings."}
       </div>
+      <div className="row y-gap-10 x-gap-15">
+        <FormInput
+          label="Coupon Code"
+          required={true}
+          type="text"
+          placeholder="SUMMER2025"
+          gridClass="col-12 mt-5"
+          value={formData.code}
+          onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+        />
 
-      <FormInput
-        label="Coupon Code"
-        required={true}
-        type="text"
-        placeholder="SUMMER2025"
-        gridClass="col-12 mt-5"
-        value={formData.code}
-        onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
-      />
+        <FormInput
+          label="Description"
+          type="textarea"
+          placeholder="Enter coupon description"
+          gridClass="col-12 mt-5"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+        />
 
-      <FormInput
-        label="Description"
-        type="textarea"
-        placeholder="Enter coupon description"
-        gridClass="col-12 mt-5"
-        value={formData.description}
-        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-      />
-
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">
-          Listing Type
-        </h1>
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
-          value={formData.listing_type}
-          onChange={(e) => setFormData(prev => ({ ...prev, listing_type: e.target.value }))}
-        >
-          <option value="">Select Listing Type</option>
-          {listingTypes.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {formData.listing_type === "property" && (
-        <div className="col-sm-6 mt-5">
-          <h1 className="text-14 lh-14 fw-500">
-            Property Subtype
-          </h1>
+        {/* Listing Type Selection */}
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Listing Type</h1>
           <select
             className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
-            value={formData.listing_subtype}
-            onChange={(e) => setFormData(prev => ({ ...prev, listing_subtype: e.target.value }))}
+            value={filters.listing_type || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_type: e.target.value }))}
           >
-            <option value="">Select Property Subtype</option>
-            <option value="Hotel">Hotel</option>
-            <option value="Space">Space</option>
-            <option value="Vacation">Vacation</option>
-            <option value="EventVenue">Event Venue</option>
+            <option value="">Select Listing Type</option>
+            <optgroup label="Property List">
+              <option value="property">Property</option>
+            </optgroup>
+            <optgroup label="Non-Property List">
+              <option value="tour">Tour</option>
+              <option value="event">Event</option>
+              <option value="activity">Activity</option>
+            </optgroup>
           </select>
         </div>
-      )}
 
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">
-          Listing Category
-        </h1>
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
-          value={formData.listing_category_id}
-          onChange={(e) => setFormData(prev => ({ ...prev, listing_category_id: e.target.value }))}
-          disabled={
-            !formData.listing_type || 
-            (formData.listing_type === "property" && (!formData.listing_subtype || formData.listing_subtype === ""))
-          }
-        >
-          <option value="">Select Listing Category</option>
-          {filteredCategories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">
-          Listing Subcategory
-        </h1>
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
-          value={formData.listing_subcategory_id}
-          onChange={(e) => setFormData(prev => ({ ...prev, listing_subcategory_id: e.target.value }))}
-          disabled={!formData.listing_category_id}
-        >
-          <option value="">Select Listing Subcategory</option>
-          {filteredSubcategories.map((sub) => (
-            <option key={sub.id} value={sub.id}>
-              {sub.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">
-          Listing
-        </h1>
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
-          value={formData.listing_id}
-          onChange={(e) => setFormData(prev => ({ ...prev, listing_id: e.target.value }))}
-          disabled={!formData.listing_type}
-        >
-          <option value="">All Listings</option>
-          {filteredListings.map((listing) => (
-            <option key={listing.id} value={listing.id}>
-              {listing.title}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">Discount Type</h1>
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
-          value={formData.discount_type}
-          onChange={(e) => setFormData(prev => ({ ...prev, discount_type: e.target.value }))}
-        >
-          <option value="percent">Percentage</option>
-          <option value="fixed">Fixed</option>
-        </select>
-      </div>
-
-      <FormInput
-        label="Discount Value"
-        type="number"
-        placeholder={formData.discount_type === "percent" ? "10" : "50"}
-        gridClass="col-sm-6 mt-5"
-        value={formData.discount_value}
-        onChange={(e) => setFormData(prev => ({ ...prev, discount_value: e.target.value }))}
-        required
-      />
-
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">Date from</h1>
-        <div className="border-light rounded-8 py-10 px-20 w-full cursor-text text-light-1 bg-white">
-          <DatePicker
-            inputClass="custom_input-picker"
-            containerClassName="custom_container-picker"
-            value={startDate}
-            onChange={(date) => {
-              setStartDate(date);
-              if (date) {
-                setFormData(prev => ({ ...prev, date_from: date.format("YYYY-MM-DD") }));
-              }
-            }}
-            numberOfMonths={1}
-            offsetY={10}
-            format="YYYY-MM-DD"
-          />
+        {/* Listing Subtype Selection (only for property type) */}
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Listing Subtype</h1>
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
+            value={filters.listing_subtype || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_subtype: e.target.value }))}
+            disabled={filters.listing_type !== "property"}
+          >
+            <option value="">Select Subtype</option>
+            <option value="Hotel">Hotels</option>
+            <option value="Space">Spaces</option>
+            <option value="Vacation">Vacation Rentals</option>
+            <option value="EventVenue">Event Venues</option>
+          </select>
         </div>
-      </div>
 
-      <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-14 fw-500">Date to</h1>
-        <div className="border-light rounded-8 py-10 px-20 w-full cursor-text text-light-1 bg-white">
-          <DatePicker
-            inputClass="custom_input-picker"
-            containerClassName="custom_container-picker"
-            value={endDate}
-            onChange={(date) => {
-              setEndDate(date);
-              if (date) {
-                setFormData(prev => ({ ...prev, date_to: date.format("YYYY-MM-DD") }));
-              }
-            }}
-            numberOfMonths={1}
-            offsetY={10}
-            format="YYYY-MM-DD"
-            minDate={startDate}
-          />
+        {/* Category Selection */}
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Listing Category</h1>
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
+            value={filters.listing_category_id || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_category_id: e.target.value }))}
+          >
+            <option value="">All Categories</option>
+            {filteredCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name || `Category #${category.id}`}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Subcategory Selection */}
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Listing Subcategory</h1>
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
+            value={filters.listing_subcategory_id || ""}
+            onChange={(e) => setFilters(prev => ({ ...prev, listing_subcategory_id: e.target.value }))}
+          >
+            <option value="">All Subcategories</option>
+            {filteredSubcategories.map((subcategory) => (
+              <option key={subcategory.id} value={subcategory.id}>
+                {subcategory.name || `Subcategory #${subcategory.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Listing Selection */}
+        <div className="col-12 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Listing<span className="text-red-1">*</span></h1>
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
+            value={formData.listing_id || ""}
+            onChange={(e) => setFormData(prev => ({ ...prev, listing_id: e.target.value }))}
+          >
+            <option value="">All Listings</option>
+            {filteredListings.map((listing) => (
+              <option key={listing.id} value={listing.id}>
+                {listing.title || `Listing #${listing.id}`}
+              </option>
+            ))}
+          </select>
+          {filteredListings.length === 0 && (
+            <div className="text-12 text-light-1 mt-5">
+              No listings found for the selected filters.
+            </div>
+          )}
+        </div>
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Discount Type</h1>
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-full mt-10"
+            value={formData.discount_type}
+            onChange={(e) => setFormData(prev => ({ ...prev, discount_type: e.target.value }))}
+          >
+            <option value="percent">Percentage</option>
+            <option value="fixed">Fixed</option>
+          </select>
+        </div>
+
+        <FormInput
+          label="Discount Value"
+          type="number"
+          placeholder={formData.discount_type === "percent" ? "10" : "50"}
+          gridClass="col-6 mt-5"
+          value={formData.discount_value}
+          onChange={(e) => setFormData(prev => ({ ...prev, discount_value: e.target.value }))}
+          required
+        />
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Date from</h1>
+          <div className="border-light rounded-8 py-10 px-20 w-full cursor-text text-light-1 bg-white">
+            <DatePicker
+              inputClass="custom_input-picker"
+              containerClassName="custom_container-picker"
+              value={startDate}
+              onChange={(date) => {
+                setStartDate(date);
+                if (date) {
+                  setFormData(prev => ({ ...prev, date_from: date.format("YYYY-MM-DD") }));
+                }
+              }}
+              numberOfMonths={1}
+              offsetY={10}
+              format="YYYY-MM-DD"
+            />
+          </div>
+        </div>
+        <div className="col-6 mt-5">
+          <h1 className="text-14 lh-14 fw-500">Date to</h1>
+          <div className="border-light rounded-8 py-10 px-20 w-full cursor-text text-light-1 bg-white">
+            <DatePicker
+              inputClass="custom_input-picker"
+              containerClassName="custom_container-picker"
+              value={endDate}
+              onChange={(date) => {
+                setEndDate(date);
+                if (date) {
+                  setFormData(prev => ({ ...prev, date_to: date.format("YYYY-MM-DD") }));
+                }
+              }}
+              numberOfMonths={1}
+              offsetY={10}
+              format="YYYY-MM-DD"
+              minDate={startDate}
+            />
+          </div>
+        </div>
+
+        <FormInput
+          label="Usage Limit"
+          type="number"
+          placeholder="100 (Leave empty for unlimited)"
+          gridClass="col-6 mt-5"
+          value={formData.usage_limit}
+          onChange={(e) => setFormData(prev => ({ ...prev, usage_limit: e.target.value }))}
+        />
+
+        <FormInput
+          label="Minimum Spend"
+          type="number"
+          placeholder="50 (Leave empty for no minimum)"
+          gridClass="col-6 mt-5"
+          value={formData.min_spend}
+          onChange={(e) => setFormData(prev => ({ ...prev, min_spend: e.target.value }))}
+        />
       </div>
-
-      <FormInput
-        label="Usage Limit"
-        type="number"
-        placeholder="100 (Leave empty for unlimited)"
-        gridClass="col-sm-6 mt-5"
-        value={formData.usage_limit}
-        onChange={(e) => setFormData(prev => ({ ...prev, usage_limit: e.target.value }))}
-      />
-
-      <FormInput
-        label="Minimum Spend"
-        type="number"
-        placeholder="50 (Leave empty for no minimum)"
-        gridClass="col-sm-6 mt-5"
-        value={formData.min_spend}
-        onChange={(e) => setFormData(prev => ({ ...prev, min_spend: e.target.value }))}
-      />
 
       <div className="d-flex justify-end gap-2 mt-20">
         <button
