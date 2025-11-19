@@ -1,0 +1,76 @@
+trigger:
+  branches:
+    include:
+      - main
+
+parameters:
+- name: environment
+  type: string
+  default: staging
+  values:
+  - staging
+  - production
+
+variables:
+  - group: TravelSaaSConfig
+  - name: NEXT_PUBLIC_AUTH_SERVICE_URL
+    value: $(AUTH_SERVICE_URL)
+  - name: NEXT_PUBLIC_LISTING_SERVICE_URL
+    value: $(LISTING_SERVICE_URL)
+  - name: NEXT_PUBLIC_BOOKING_SERVICE_URL
+    value: $(BOOKING_SERVICE_URL)
+  - name: NEXT_PUBLIC_PAYMENT_SERVICE_URL
+    value: $(PAYMENT_SERVICE_URL)
+  - name: NEXT_PUBLIC_COMMUNICATION_SERVICE_URL
+    value: $(COMMUNICATION_SERVICE_URL)
+  - name: NEXT_PUBLIC_REVIEW_SERVICE_URL
+    value: $(REVIEW_SERVICE_URL)
+  - name: NEXT_PUBLIC_PRICING_SERVICE_URL
+    value: $(PRICING_SERVICE_URL)
+
+stages:
+- stage: frontend_service_stage
+  displayName: Frontend Service Stage
+  jobs:
+  - job: build_and_deploy_frontend_service
+    displayName: Build and Deploy Frontend Service
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DockerInstaller@0
+      displayName: Install Docker
+
+    - script: |
+        echo $(acrPassword) | docker login $(acrLoginServer) -u $(acrUsername) --password-stdin
+        docker build \
+          --build-arg MOBISCROLL_TOKEN=$(MOBISCROLL_TOKEN) \
+          --build-arg NEXT_PUBLIC_AUTH_SERVICE_URL=$(NEXT_PUBLIC_AUTH_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_LISTING_SERVICE_URL=$(NEXT_PUBLIC_LISTING_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_BOOKING_SERVICE_URL=$(NEXT_PUBLIC_BOOKING_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_PAYMENT_SERVICE_URL=$(NEXT_PUBLIC_PAYMENT_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_COMMUNICATION_SERVICE_URL=$(NEXT_PUBLIC_COMMUNICATION_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_REVIEW_SERVICE_URL=$(NEXT_PUBLIC_REVIEW_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_PRICING_SERVICE_URL=$(NEXT_PUBLIC_PRICING_SERVICE_URL) \
+          -t $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) ../
+        docker push $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId)
+      displayName: Build and Push Docker Image
+      workingDirectory: $(Build.SourcesDirectory)/yaml
+
+    - script: |
+        az login --service-principal -u $(spClientId) -p $(spClientSecret) --tenant $(spTenantId)
+        az containerapp show --name frontend-service-app --resource-group $(stagingResourceGroup) || \
+        az containerapp create \
+          --name frontend-service-app \
+          --resource-group $(stagingResourceGroup) \
+          --image $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) \
+          --environment $(stagingContainerEnv) \
+          --cpu 2.0 \
+          --memory 4.0Gi \
+          --ingress external \
+          --target-port 3000 \
+          --registry-server $(acrLoginServer) \
+          --registry-username $(acrUsername) \
+          --registry-password $(acrPassword) \
+
+        az containerapp update --name frontend-service-app --resource-group $(stagingResourceGroup) --image $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId)
+      displayName: Create or Update Azure Container App
