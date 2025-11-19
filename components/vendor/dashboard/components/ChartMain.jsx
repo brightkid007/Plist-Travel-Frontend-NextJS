@@ -11,7 +11,6 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
 
 ChartJS.register(
   CategoryScale,
@@ -82,10 +81,12 @@ export const data = {
   ],
 };
 
-const ChartMain = () => {
+const ChartMain = ({ data: chartData }) => {
+  const displayData = chartData || data;
+  
   return (
     <div className="widget-content">
-      <Line options={options} data={data} />
+      <Line options={options} data={displayData} />
     </div>
   );
 };

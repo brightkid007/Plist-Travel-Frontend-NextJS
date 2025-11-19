@@ -1,46 +1,20 @@
-const PopularList = ({ detail = false }) => {
-  const data = [
-    {
-      image: "/img/testimonials/1/4.png",
-      name: "Luxury Beach Resort",
-      type: "Hotel",
-      bookings: "45",
-      revenue: "$15,750",
-      status: { color: "dark-4", text: "white", label: "Active" },
-    },
-    {
-      image: "/img/testimonials/1/4.png",
-      name: "City Walking Tour",
-      type: "Tour",
-      bookings: "32",
-      revenue: "$3,840",
-      status: { color: "dark-4", text: "white", label: "Active" },
-    },
-    {
-      image: "/img/testimonials/1/4.png",
-      name: "Mountain Cabin Retreat",
-      type: "Hotel",
-      bookings: "28",
-      revenue: "$9,800",
-      status: { color: "dark-4", text: "white", label: "Active" },
-    },
-    {
-      image: "/img/testimonials/1/4.png",
-      name: "Wine Tasting Experience",
-      type: "Event",
-      bookings: "22",
-      revenue: "$2,640",
-      status: { color: "dark-4", text: "white", label: "Active" },
-    },
-    {
-      image: "/img/testimonials/1/4.png",
-      name: "Desert Safari Adventure",
-      type: "Tuor",
-      bookings: "18",
-      revenue: "$2,160",
-      status: { color: "dark-4", text: "white", label: "Active" },
-    },
-  ];
+const PopularList = ({ detail = false, listings = [], loading = false }) => {
+  if (loading) {
+    return (
+      <div className="d-flex justify-center items-center py-40">
+        <div className="text-16 text-light-1">Loading listings...</div>
+      </div>
+    );
+  }
+
+  if (listings.length === 0) {
+    return (
+      <div className="d-flex justify-center items-center py-40">
+        <div className="text-16 text-light-1">No popular listings</div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
       <table className="table-2 col-12">
@@ -56,7 +30,7 @@ const PopularList = ({ detail = false }) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((row, index) => (
+          {listings.map((row, index) => (
             <tr key={index}>
               {!detail && (
                 <td className="align-middle">

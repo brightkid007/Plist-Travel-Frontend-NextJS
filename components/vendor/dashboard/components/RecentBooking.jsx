@@ -1,38 +1,23 @@
-const RecentBooking = () => {
-  const data = [
-    {
-      name: "John Smith",
-      email: "john@example.com",
-      status: "Confirmed",
-      price: "$345.00",
-      createdAt: "2 mins ago",
-    },
-    {
-      name: "Sarah Johnson",
-      email: "sarah@example.com",
-      status: "Pending",
-      price: "$120.00",
-      createdAt: "40 mins ago",
-    },
-    {
-      name: "Michael Brown",
-      email: "michael@example.com",
-      status: "Confirmed",
-      price: "$560.00",
-      createdAt: "3 hours ago",
-    },
-    {
-      name: "Emily Davis",
-      email: "emily@example.com",
-      status: "Confirmed",
-      price: "$85.00",
-      createdAt: "5 hours ago",
-    },
-  ];
+const RecentBooking = ({ bookings = [], loading = false }) => {
+  if (loading) {
+    return (
+      <div className="d-flex justify-center items-center py-40">
+        <div className="text-16 text-light-1">Loading bookings...</div>
+      </div>
+    );
+  }
+
+  if (bookings.length === 0) {
+    return (
+      <div className="d-flex justify-center items-center py-40">
+        <div className="text-16 text-light-1">No recent bookings</div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-30">
-      {data.map((row, index) => (
+      {bookings.map((row, index) => (
         <div key={index} className="d-flex items-center justify-between mb-20">
           <div className="d-flex items-center">
             <span className="material-symbols-outlined text-light-1 px-5">
