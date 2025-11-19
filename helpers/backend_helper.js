@@ -139,7 +139,10 @@ export const updateAddress = (id, data) => AuthAPIClient.update(`/address/${id}`
 // Delete address
 export const deleteAddress = (id) => AuthAPIClient.delete(`/address/${id}`);
 
-// Create new user - uses /auth/register endpoint
+// Register new user - uses /auth/register endpoint
+export const register = (data) => AuthAPIClient.create("/auth/register", data);
+
+// Create new user - uses /auth/register endpoint (for admin)
 export const createAdminUser = (data) => AuthAPIClient.create("/auth/register", data);
 
 // Update user - uses PUT /users/:id endpoint

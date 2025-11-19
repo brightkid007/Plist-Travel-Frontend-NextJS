@@ -369,7 +369,7 @@ const index = () => {
             Monitor your business performance with industry-specific metrics
           </div>
         </div>
-        <div className="col-auto">
+        {/* <div className="col-auto">
           <select
             className="form-select rounded-4 border-light justify-between text-16 fw-500 px-20 h-50 w-200 sm:w-full text-14"
             onChange={(e) => setOption(e.target.value)}
@@ -386,7 +386,7 @@ const index = () => {
             <option value="event">Event</option>
           </optgroup>
           </select>
-        </div>
+        </div> */}
       </div>
       <div className="row px-10 mb-20">
         {tabs.map((item) => (
