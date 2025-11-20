@@ -27,6 +27,8 @@ variables:
     value: $(REVIEW_SERVICE_URL)
   - name: NEXT_PUBLIC_PRICING_SERVICE_URL
     value: $(PRICING_SERVICE_URL)
+  - name: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    value: $(GOOGLE_MAPS_API_KEY)
 
 stages:
 - stage: frontend_service_stage
@@ -51,6 +53,7 @@ stages:
           --build-arg NEXT_PUBLIC_COMMUNICATION_SERVICE_URL=$(NEXT_PUBLIC_COMMUNICATION_SERVICE_URL) \
           --build-arg NEXT_PUBLIC_REVIEW_SERVICE_URL=$(NEXT_PUBLIC_REVIEW_SERVICE_URL) \
           --build-arg NEXT_PUBLIC_PRICING_SERVICE_URL=$(NEXT_PUBLIC_PRICING_SERVICE_URL) \
+          --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$(NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) \
           -t $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId) ../
         docker push $(acrLoginServer)/plist-travel-saas-frontend-service:$(Build.BuildId)
       displayName: Build and Push Docker Image
