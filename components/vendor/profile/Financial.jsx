@@ -173,7 +173,7 @@ const Financial = () => {
 
           <div className="col-md-6"></div>
 
-          <div className="col-md-6 col-sm-12 px-30 mt-10">
+          {/* <div className="col-md-6 col-sm-12 px-30 mt-10">
             <div className="row border-light rounded-8 px-15 py-15">
               <div className="text-18 fw-600 lh-1 px-0">Payment Terms</div>
               <div className="col-12 d-flex items-center border-light rounded-8 py-15 px-15 mt-20">
@@ -219,7 +219,7 @@ const Financial = () => {
                 <div className="text-14 lh-1">$49.99/month</div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="d-flex justify-end mt-20 border-top-light pt-15">
             <button

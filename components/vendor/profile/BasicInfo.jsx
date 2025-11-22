@@ -544,6 +544,16 @@ const BasicInfo = () => {
             />
           </div>
           <div className="text-18 fw-500 mt-10">Headquarters Business Address</div>
+          <div className="text-12 text-light-1 d-flex items-center gap-2 lh-1 py-0">
+            <span className="material-symbols-outlined text-14" style={{ opacity: 0.7 }}>
+              info
+            </span>
+            <span>
+              {addresses.length === 0 
+                ? "Please add an address in the 'Location Addresses' section below first. Once added, it will appear in this dropdown."
+                : "Select an address from your saved location addresses to set as headquarters."}
+            </span>
+          </div>
           <div className="col-12">
             <h1 className="text-13 lh-14 fw-500">Address</h1>
             <select
@@ -578,8 +588,13 @@ const BasicInfo = () => {
                   }));
                 }
               }}
+              disabled={addresses.length === 0}
             >
-              <option value="">-- Select Headquarters Address --</option>
+              <option value="">
+                {addresses.length === 0 
+                  ? "-- No addresses available. Add an address below first --"
+                  : "-- Select Headquarters Address --"}
+              </option>
               {addresses.map((a) => {
                 const addrData = editingAddresses[a.id] || {};
                 const label = [addrData.street, addrData.city, addrData.state, addrData.zip_code, addrData.country].filter(Boolean).join(", ");
