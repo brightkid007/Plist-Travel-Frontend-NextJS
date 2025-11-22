@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-const CouponList = ({ onEdit, coupons = [], loading = false }) => {
+const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCouponId, setSelectedCouponId] = useState(null);
   const showMoreMenu = Boolean(anchorEl);
@@ -45,7 +45,9 @@ const CouponList = ({ onEdit, coupons = [], loading = false }) => {
       setDeleting(true);
       await deleteVendorCoupon(couponToDelete.id);
       toast.success("Coupon deleted successfully");
-      loadCoupons();
+      if (onRefresh) {
+        onRefresh();
+      }
       setDeleteModalOpen(false);
       setCouponToDelete(null);
     } catch (error) {
@@ -60,6 +62,15 @@ const CouponList = ({ onEdit, coupons = [], loading = false }) => {
     const coupon = coupons.find((c) => c.id === couponId);
     if (onEdit && coupon) {
       onEdit(coupon);
+    }
+    setAnchorEl(null);
+    setSelectedCouponId(null);
+  };
+
+  const handleViewClick = (couponId) => {
+    const coupon = coupons.find((c) => c.id === couponId);
+    if (onView && coupon) {
+      onView(coupon);
     }
     setAnchorEl(null);
     setSelectedCouponId(null);
@@ -197,6 +208,12 @@ const CouponList = ({ onEdit, coupons = [], loading = false }) => {
                         horizontal: "right",
                       }}
                     >
+                      <MenuItem
+                        onClick={() => handleViewClick(coupon.id)}
+                        className="text-12"
+                      >
+                        View
+                      </MenuItem>
                       <MenuItem
                         onClick={() => handleEditClick(coupon.id)}
                         className="text-12"

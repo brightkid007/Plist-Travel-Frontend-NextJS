@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import CouponCard from "./CouponCard";
 import VendorDashboardLayout from "../common/layout";
 import CouponList from "./CouponList";
+import CouponDetailModal from "./CouponDetailModal";
 import { Dialog, CircularProgress } from "@mui/material";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import FormInput from "@/components/common/form/FormInput";
-import Filter from "../common/Filter";
 import {
   getMyCoupons,
   createVendorCoupon,
@@ -20,13 +20,13 @@ import { toast } from "react-toastify";
 
 const index = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [viewingCoupon, setViewingCoupon] = useState(null);
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingCoupon, setEditingCoupon] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({});
-  const [listings, setListings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
@@ -264,6 +264,16 @@ const index = () => {
     setShowModal(true);
   };
 
+  const handleView = (coupon) => {
+    setViewingCoupon(coupon);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setViewingCoupon(null);
+  };
+
   return (
     <VendorDashboardLayout>
       <div className="row y-gap-20 justify-between items-center mb-5">
@@ -362,7 +372,13 @@ const index = () => {
 
       <CouponCard data={dashboardData} />
       <div className="py-10 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
-        <CouponList onEdit={handleEdit} coupons={coupons} loading={loading} />
+        <CouponList 
+          onEdit={handleEdit} 
+          onView={handleView} 
+          onRefresh={() => loadCoupons(filters)}
+          coupons={coupons} 
+          loading={loading} 
+        />
       </div>
 
       <Dialog
@@ -380,13 +396,18 @@ const index = () => {
             onSuccess={() => {
               handleClose();
               loadCoupons();
-              setRefreshKey(prev => prev + 1);
             }}
             submitting={submitting}
             setSubmitting={setSubmitting}
           />
         </div>
       </Dialog>
+
+      <CouponDetailModal
+        open={showDetailModal}
+        onClose={handleCloseDetailModal}
+        coupon={viewingCoupon}
+      />
     </VendorDashboardLayout>
   );
 };

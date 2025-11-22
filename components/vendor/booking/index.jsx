@@ -62,22 +62,15 @@ const index = () => {
       // Map filter keys to API parameter names
       const params = {};
 
-      // Status filter
+      // Status filter - prioritize filter status over tab, but respect tab if no filter is set
       if (filters.status && filters.status !== "all") {
+        // If user has selected a status filter, use it
         params.status = filters.status;
-      } else if (filters.is_active && filters.is_active !== "all") {
-        // Map is_active to status
-        if (filters.is_active === "true") {
-          params.status = "confirmed";
-        } else if (filters.is_active === "false") {
-          params.status = "pending";
-        }
-      }
-
-      // Map tab to status filter (only for cancelled, others filtered on frontend)
-      if (activeTab === "cancelled") {
+      } else if (activeTab === "cancelled") {
+        // If no status filter but cancelled tab is active, use cancelled status
         params.status = "cancelled";
       }
+      // Note: "upcoming" and "past" tabs are handled by date filtering on frontend, not status
 
       // Listing type filter
       if (filters.listing_type && filters.listing_type !== "all") {
@@ -110,11 +103,13 @@ const index = () => {
       const response = await getVendorBookings(params);
       let bookingsData = response?.data?.bookings || response?.bookings || [];
 
-      // Filter by tab on frontend
+      // Filter by tab on frontend (only if no status filter is applied, or for date-based tabs)
+      // Note: Status filter from dropdown takes precedence over tab status filtering
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      if (activeTab === "upcoming") {
+      // Apply tab-based filtering only if it's a date-based tab (upcoming/past) or if no status filter is set
+      if (activeTab === "upcoming" && (!filters.status || filters.status === "all")) {
         // Upcoming bookings are those with startDate in the future
         bookingsData = bookingsData.filter((booking) => {
           if (!booking.startDate) return false;
@@ -122,7 +117,7 @@ const index = () => {
           startDate.setHours(0, 0, 0, 0);
           return startDate >= today;
         });
-      } else if (activeTab === "past") {
+      } else if (activeTab === "past" && (!filters.status || filters.status === "all")) {
         // Past bookings are those with endDate in the past
         bookingsData = bookingsData.filter((booking) => {
           if (!booking.endDate) return false;
@@ -130,11 +125,9 @@ const index = () => {
           endDate.setHours(0, 0, 0, 0);
           return endDate < today;
         });
-      } else if (activeTab === "walk-in") {
-        // Walk-in bookings - this might need special handling based on your business logic
-        // For now, we'll filter by a specific flag or status if available
-        // You may need to add a walk_in field to the booking model
       }
+      // Note: "cancelled" tab is handled by status filter in params above
+      // "all" tab shows all bookings (no additional filtering needed)
 
       setBookings(bookingsData);
     } catch (error) {
@@ -325,7 +318,16 @@ const index = () => {
         ))}
       </div>
 
-      <Filter filters={filters} onFilterChange={handleFilterChange} />
+      <Filter 
+        filters={filters} 
+        onFilterChange={handleFilterChange}
+        statusOptions={[
+          { value: "pending", label: "Pending" },
+          { value: "confirmed", label: "Confirmed" },
+          { value: "cancelled", label: "Cancelled" },
+          { value: "completed", label: "Completed" },
+        ]}
+      />
 
       <BookingCard data={cardData} />
 
@@ -348,11 +350,11 @@ const index = () => {
               }}
             />
           </div>
-          <div className="col-auto ms-auto">
+          {/* <div className="col-auto ms-auto">
             <button className="size-50 rounded-8 flex-center border-light">
               {svgIcon.filter_alt}
             </button>
-          </div>
+          </div> */}
         </div>
 
         <BookingList 

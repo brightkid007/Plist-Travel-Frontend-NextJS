@@ -3,10 +3,21 @@ import DatePicker, { DateObject } from "react-multi-date-picker";
 import { getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 
-const Filter = ({ filters = {}, onFilterChange }) => {
+const Filter = ({ filters = {}, onFilterChange, statusOptions = null, showStatusFilter = true }) => {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Default status options if not provided
+  const defaultStatusOptions = [
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+  ];
+
+  // Use provided statusOptions or default, or empty array if status filter should be hidden
+  const statusOptionsToUse = showStatusFilter 
+    ? (statusOptions || defaultStatusOptions)
+    : [];
 
   // Load categories and subcategories
   useEffect(() => {
@@ -42,6 +53,27 @@ const Filter = ({ filters = {}, onFilterChange }) => {
   const handleDateChange = (key, date) => {
     if (date && date.isValid) {
       const dateString = date.format("YYYY-MM-DD");
+      
+      // Validate that date_to is greater than or equal to date_from
+      if (key === "date_to" && filters.date_from) {
+        const fromDate = new Date(filters.date_from);
+        const toDate = new Date(dateString);
+        if (toDate < fromDate) {
+          toast.error("Date To must be greater than or equal to Date From");
+          return;
+        }
+      } else if (key === "date_from" && filters.date_to) {
+        const fromDate = new Date(dateString);
+        const toDate = new Date(filters.date_to);
+        if (toDate < fromDate) {
+          toast.error("Date To must be greater than or equal to Date From");
+          // Clear date_to if it becomes invalid
+          handleFilterChange("date_to", "");
+          handleFilterChange(key, dateString);
+          return;
+        }
+      }
+      
       handleFilterChange(key, dateString);
     } else {
       handleFilterChange(key, "");
@@ -58,19 +90,24 @@ const Filter = ({ filters = {}, onFilterChange }) => {
 
   return (
     <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
-      <div className="col-sm-auto">
-        <select
-          className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
-          value={filters.status}
-          onChange={(e) => {
-            handleFilterChange("status", e.target.value)
-          }}
-        >
-          <option value="all">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
+      {showStatusFilter && statusOptionsToUse.length > 0 && (
+        <div className="col-sm-auto">
+          <select
+            className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
+            value={filters.status || "all"}
+            onChange={(e) => {
+              handleFilterChange("status", e.target.value)
+            }}
+          >
+            <option value="all">All Statuses</option>
+            {statusOptionsToUse.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label || option.value.charAt(0).toUpperCase() + option.value.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="col-sm-auto">
         <select
@@ -144,6 +181,7 @@ const Filter = ({ filters = {}, onFilterChange }) => {
             offsetY={10}
             format="YYYY-MM-DD"
             placeholder="Date To"
+            minDate={filters.date_from ? new DateObject(filters.date_from) : null}
           />
         </div>
       </div>

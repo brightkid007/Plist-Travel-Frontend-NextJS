@@ -58,6 +58,27 @@ const index = () => {
   const handleDateChange = (key, date) => {
     if (date && date.isValid) {
       const dateString = date.format("YYYY-MM-DD");
+      
+      // Validate that date_to is greater than or equal to date_from
+      if (key === "date_to" && filters.date_from) {
+        const fromDate = new Date(filters.date_from);
+        const toDate = new Date(dateString);
+        if (toDate < fromDate) {
+          toast.error("Date To must be greater than or equal to Date From");
+          return;
+        }
+      } else if (key === "date_from" && filters.date_to) {
+        const fromDate = new Date(dateString);
+        const toDate = new Date(filters.date_to);
+        if (toDate < fromDate) {
+          toast.error("Date To must be greater than or equal to Date From");
+          // Clear date_to if it becomes invalid
+          handleFilterChange("date_to", "");
+          handleFilterChange(key, dateString);
+          return;
+        }
+      }
+      
       handleFilterChange(key, dateString);
     } else {
       handleFilterChange(key, "");
@@ -312,7 +333,7 @@ const index = () => {
           </div>
         </div>
         <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
-          <div className="col-sm-auto">
+          {/* <div className="col-sm-auto">
             <select
               className="form-select rounded-8 border-light justify-between py-10 px-15 text-14 w-140 sm:w-full"
               value={getStatusValue()}
@@ -334,7 +355,7 @@ const index = () => {
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-          </div>
+          </div> */}
 
 
           <div className="col-sm-auto">
@@ -362,11 +383,12 @@ const index = () => {
                 offsetY={10}
                 format="YYYY-MM-DD"
                 placeholder="Date To"
+                minDate={filters.date_from ? new DateObject(filters.date_from) : null}
               />
             </div>
           </div>
 
-          <div className="col-sm-auto">
+          {/* <div className="col-sm-auto">
             <select
               className="form-select rounded-8 border-light justify-between py-10 px-15 w-140 sm:w-full text-14"
               value={filters.listing_type || "all"}
@@ -382,7 +404,7 @@ const index = () => {
                 <option value="event">Event</option>
               </optgroup>
             </select>
-          </div>
+          </div> */}
         </div>
         <div className="border-light rounded-8 py-20">
           {tabs.map((item) => item.value == activeTab && item.content)}

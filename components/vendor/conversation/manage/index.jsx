@@ -25,6 +25,12 @@ const Management = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [showScheduledModal, setShowScheduledModal] = useState(false);
+  const [scheduledFormData, setScheduledFormData] = useState({
+    title: "",
+    trigger_event: "",
+    content: "",
+  });
 
   // Map trigger_event to display title
   const triggerEventTitles = {
@@ -34,29 +40,6 @@ const Management = () => {
     "1_day_after_checkout": "1 day after check-out date",
   };
 
-  // Default scheduled messages with their trigger events
-  const defaultScheduledMessages = [
-    {
-      title: "Inquiry is received",
-      trigger_event: "inquiry_received",
-      message: "Thank you for reaching out. A representative will get back to you shortly.",
-    },
-    {
-      title: "Booking is received",
-      trigger_event: "booking_received",
-      message: "Your booking has been received and is being processed.",
-    },
-    {
-      title: "3 days before check-in date",
-      trigger_event: "3_days_before_checkin",
-      message: "We look forward to your upcoming stay with us. See you soon!",
-    },
-    {
-      title: "1 day after check-out date",
-      trigger_event: "1_day_after_checkout",
-      message: "Thank you for choosing us. We hope to welcome you back!",
-    },
-  ];
 
   // Load message templates
   const loadTemplates = async () => {
@@ -74,7 +57,7 @@ const Management = () => {
         .filter((t) => t.type === "scheduled_message")
         .map((t) => ({
           id: t.id,
-          title: triggerEventTitles[t.trigger_event] || t.title || t.trigger_event,
+          title: t.title || triggerEventTitles[t.trigger_event] || t.trigger_event,
           trigger_event: t.trigger_event,
           message: t.content,
         }));
@@ -110,8 +93,73 @@ const Management = () => {
 
   const handleEditScheduledMessage = (template) => {
     setEditingTemplate({ type: "scheduled_message", id: template.id, ...template });
-    setReplyText(template.message);
-    setShowModal(true);
+    setScheduledFormData({
+      title: template.title || triggerEventTitles[template.trigger_event] || "",
+      trigger_event: template.trigger_event || "",
+      content: template.message || template.content || "",
+    });
+    setShowScheduledModal(true);
+  };
+
+  const handleDeleteScheduledMessage = (template) => {
+    if (template.id) {
+      setTemplateToDelete({ ...template, type: "scheduled_message" });
+      setDeleteModalOpen(true);
+    } else {
+      toast.info("This is a default message. You can only edit it, not delete it.");
+    }
+  };
+
+  const handleCreateScheduledMessage = () => {
+    setScheduledFormData({
+      title: "",
+      trigger_event: "",
+      content: "",
+    });
+    setShowScheduledModal(true);
+  };
+
+  const handleSaveScheduledMessage = async () => {
+    if (!scheduledFormData.title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+    if (!scheduledFormData.trigger_event) {
+      toast.error("Please select a trigger event");
+      return;
+    }
+    if (!scheduledFormData.content.trim()) {
+      toast.error("Please enter message content");
+      return;
+    }
+
+    try {
+      if (editingTemplate && editingTemplate.id) {
+        // Update existing
+        await updateMessageTemplate(editingTemplate.id, {
+          title: scheduledFormData.title,
+          trigger_event: scheduledFormData.trigger_event,
+          content: scheduledFormData.content,
+        });
+        toast.success("Scheduled message updated successfully");
+      } else {
+        // Create new
+        await createMessageTemplate({
+          type: "scheduled_message",
+          title: scheduledFormData.title,
+          trigger_event: scheduledFormData.trigger_event,
+          content: scheduledFormData.content,
+        });
+        toast.success("Scheduled message created successfully");
+      }
+      setShowScheduledModal(false);
+      setEditingTemplate(null);
+      setScheduledFormData({ title: "", trigger_event: "", content: "" });
+      loadTemplates();
+    } catch (error) {
+      console.error("Error saving scheduled message:", error);
+      toast.error(error?.message || "Failed to save scheduled message");
+    }
   };
 
   const handleSave = async () => {
@@ -122,7 +170,7 @@ const Management = () => {
 
     try {
       if (editingTemplate) {
-        // Update existing template
+        // Update existing quick reply template
         if (editingTemplate.type === "quick_reply") {
           // For quick replies, we need to find the template ID
           const response = await getMessageTemplates({ 
@@ -133,22 +181,10 @@ const Management = () => {
           const template = templates[editingTemplate.index];
           if (template) {
             await updateMessageTemplate(template.id, { content: replyText });
-          }
-        } else {
-          // Scheduled message - update if exists, create if not
-          if (editingTemplate.id) {
-            await updateMessageTemplate(editingTemplate.id, { content: replyText });
-          } else {
-            // Create new scheduled message template
-            await createMessageTemplate({
-              type: "scheduled_message",
-              title: editingTemplate.title,
-              trigger_event: editingTemplate.trigger_event,
-              content: replyText,
-            });
+            toast.success("Quick reply updated successfully");
           }
         }
-        toast.success("Template updated successfully");
+        // Note: Scheduled messages are handled by handleSaveScheduledMessage
       } else {
         // Create new quick reply
         await createMessageTemplate({
@@ -228,6 +264,10 @@ const Management = () => {
               Allow vendors to create quick replies and scheduled messages.
             </div>
           </div>
+        </div>
+
+        <div className="col-12 d-flex sm:d-block justify-between items-center">
+          <h1 className="text-20 lh-14 fw-600">Quick Replies</h1>
           <div className="flex-grow-0">
             <button
               className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
@@ -241,8 +281,6 @@ const Management = () => {
             </button>
           </div>
         </div>
-
-        <h1 className="text-20 lh-14 fw-600">Quick Replies</h1>
         <div className="col-12 px-10">
           <div className="bg-white rounded-8 border-light py-5">
             {loading ? (
@@ -335,31 +373,40 @@ const Management = () => {
           </div>
         </Dialog>
 
-        <h1 className="text-20 lh-14 fw-600">Scheduled Messages</h1>
+        <div className="col-12 d-flex sm:d-block justify-between items-center mt-10">
+          <h1 className="text-20 lh-14 fw-600">Scheduled Messages</h1>
+          <div className="flex-grow-0">
+            <button
+              className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
+              onClick={handleCreateScheduledMessage}
+            >
+              Create Scheduled Message
+            </button>
+          </div>
+        </div>
         <div className="col-12 px-10">
           <div className="bg-white rounded-8 border-light py-5">
             {loading ? (
               <div className="d-flex justify-center py-20">
                 <CircularProgress />
               </div>
+            ) : scheduledMessages.length === 0 ? (
+              <div className="text-16 text-light-1 px-20 py-15">
+                No scheduled messages yet. Create one to get started.
+              </div>
             ) : (
-              defaultScheduledMessages.map((defaultMsg, index) => {
-                const savedMsg = scheduledMessages.find(
-                  (m) => m.trigger_event === defaultMsg.trigger_event
-                );
-                const displayMsg = savedMsg || defaultMsg;
-                
-                return (
-                  <React.Fragment key={defaultMsg.trigger_event}>
-                    <div className="d-flex justify-between items-start gap-2 px-20 py-15">
-                      <div className="text-16 lh-14 w-25">{displayMsg.title}</div>
-                      <div className="w-75 d-flex justify-between items-start gap-2">
-                        <div className="text-16 lh-14 text-light-1 flex-1">
-                          {displayMsg.message}
-                        </div>
+              scheduledMessages.map((msg, index) => (
+                <React.Fragment key={msg.id || msg.trigger_event}>
+                  <div className="d-flex justify-between items-start gap-2 px-20 py-15">
+                    <div className="text-16 lh-14 w-25">{msg.title}</div>
+                    <div className="w-75 d-flex justify-between items-start gap-2">
+                      <div className="text-16 lh-14 text-light-1 flex-1">
+                        {msg.message}
+                      </div>
+                      <div className="d-flex gap-10 items-center">
                         <button
                           className="border-0 bg-transparent cursor-pointer p-0 d-flex items-center justify-center"
-                          onClick={() => handleEditScheduledMessage(displayMsg)}
+                          onClick={() => handleEditScheduledMessage(msg)}
                           title="Edit"
                           style={{ width: "32px", height: "32px" }}
                         >
@@ -367,19 +414,115 @@ const Management = () => {
                             edit
                           </span>
                         </button>
+                        <button
+                          className="border-0 bg-transparent cursor-pointer p-0 d-flex items-center justify-center"
+                          onClick={() => handleDeleteScheduledMessage(msg)}
+                          title="Delete"
+                          style={{ width: "32px", height: "32px" }}
+                        >
+                          <span className="material-symbols-outlined text-red-1" style={{ fontSize: "20px" }}>
+                            delete
+                          </span>
+                        </button>
                       </div>
                     </div>
-                    {index === defaultScheduledMessages.length - 1 ? null : (
-                      <div className="border-top-light"></div>
-                    )}
-                  </React.Fragment>
-                );
-              })
+                  </div>
+                  {index === scheduledMessages.length - 1 ? null : (
+                    <div className="border-top-light"></div>
+                  )}
+                </React.Fragment>
+              ))
             )}
           </div>
         </div>
       </div>
       <div style={{ height: "50px" }}></div>
+
+      <Dialog
+        open={showScheduledModal}
+        onClose={() => {
+          setShowScheduledModal(false);
+          setEditingTemplate(null);
+          setScheduledFormData({ title: "", trigger_event: "", content: "" });
+        }}
+        aria-labelledby="scheduled-message-dialog-title"
+      >
+        <div className="px-20 py-20" style={{ width: "500px" }}>
+          <h1 className="text-20 fw-500 mb-10">
+            {editingTemplate?.id ? "Edit" : "Create"} Scheduled Message
+          </h1>
+          
+          <div className="mb-10">
+            <label className="text-14 fw-500 mb-5 d-block">Title</label>
+            <input
+              type="text"
+              className="text-14 border-light rounded-8 bg-white px-10 py-5 w-100"
+              placeholder="e.g., Inquiry is received"
+              value={scheduledFormData.title}
+              onChange={(e) => setScheduledFormData({ ...scheduledFormData, title: e.target.value })}
+            />
+          </div>
+
+          <div className="mb-10">
+            <label className="text-14 fw-500 mb-5 d-block">Trigger Event</label>
+            <select
+              className="text-14 border-light rounded-8 bg-white px-10 py-5 w-100"
+              value={scheduledFormData.trigger_event}
+              onChange={(e) => setScheduledFormData({ ...scheduledFormData, trigger_event: e.target.value })}
+            >
+              <option value="">Select trigger event</option>
+              <option value="inquiry_received">Inquiry is received</option>
+              <option value="booking_received">Booking is received</option>
+              <option value="3_days_before_checkin">3 days before check-in date</option>
+              <option value="1_day_after_checkout">1 day after check-out date</option>
+            </select>
+          </div>
+
+          <div className="mb-10">
+            <label className="text-14 fw-500 mb-5 d-block">Message Content</label>
+            <div className="d-flex items-center flex-wrap gap-2 mb-5">
+              {dynamicFields.map((item, index) => (
+                <span
+                  className="text-12 fw-500 rounded-100 bg-blue-2 px-10 text-blue-1 cursor-pointer"
+                  key={index}
+                  onClick={() => setScheduledFormData({ 
+                    ...scheduledFormData, 
+                    content: scheduledFormData.content + item.value 
+                  })}
+                >
+                  {item.label}
+                </span>
+              ))}
+            </div>
+            <textarea
+              className="text-14 border-light rounded-8 bg-white px-10 py-5 w-100"
+              style={{ minHeight: "120px" }}
+              placeholder="Enter your message"
+              value={scheduledFormData.content}
+              onChange={(e) => setScheduledFormData({ ...scheduledFormData, content: e.target.value })}
+            />
+          </div>
+
+          <div className="d-flex justify-end gap-2">
+            <button
+              className="text-14 border-light rounded-8 px-10 py-5"
+              onClick={() => {
+                setShowScheduledModal(false);
+                setEditingTemplate(null);
+                setScheduledFormData({ title: "", trigger_event: "", content: "" });
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="text-14 bg-blue-1 text-white fw-500 rounded-8 px-10 py-5"
+              onClick={handleSaveScheduledMessage}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </Dialog>
 
       <ConfirmationModal
         open={deleteModalOpen}
@@ -387,7 +530,7 @@ const Management = () => {
         onConfirm={handleDeleteConfirm}
         title={templateToDelete?.type === "quick_reply" ? "Delete Quick Reply" : "Delete Scheduled Message"}
         message={`Are you sure you want to delete ${templateToDelete?.type === "quick_reply" ? "this quick reply" : "this scheduled message"}?`}
-        itemName={templateToDelete?.content?.substring(0, 50) || "template"}
+        itemName={templateToDelete?.content?.substring(0, 50) || templateToDelete?.title || "template"}
         loading={deleting}
         confirmLabel="Delete"
         confirmingLabel="Deleting..."
