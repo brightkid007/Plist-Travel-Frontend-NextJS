@@ -8,6 +8,7 @@ import { getMyListings, deleteListing, updateListing, getListingCategories, getL
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import ListingDetailModal from "../../common/ListingDetailModal";
 
 const index = ({ isProperty = true }) => {
   const [listings, setListings] = useState([]);
@@ -21,6 +22,8 @@ const index = ({ isProperty = true }) => {
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [listingToSubmit, setListingToSubmit] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedListingIdForDetail, setSelectedListingIdForDetail] = useState(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -92,7 +95,6 @@ const index = ({ isProperty = true }) => {
         return subcatCategoryId === categoryId;
       });
     }
-    console.log(filtered);
     setFilteredSubcategories(filtered);
 
     // Reset subcategory if it's not in the filtered list
@@ -119,9 +121,31 @@ const index = ({ isProperty = true }) => {
       setLoading(true);
       // Build filters object, removing "all" values
       const filterParams = { type: 'property' };
-      filterParams.subtype = filters.type;
-      filterParams.category_id = filters.category_id;
-      filterParams.subcategory_id = filters.subcategory_id;
+      
+      // Add subtype filter
+      if (filters.type && filters.type !== "all") {
+        filterParams.subtype = filters.type;
+      }
+      
+      // Add category_id filter
+      if (filters.category_id && filters.category_id !== "all") {
+        filterParams.category_id = filters.category_id;
+      }
+      
+      // Add subcategory_id filter
+      if (filters.subcategory_id && filters.subcategory_id !== "all") {
+        filterParams.subcategory_id = filters.subcategory_id;
+      }
+      
+      // Add status filter
+      if (filters.status && filters.status !== "all") {
+        filterParams.status = filters.status;
+      }
+      
+      // Add search filter
+      if (filters.search && filters.search.trim() !== "") {
+        filterParams.search = filters.search.trim();
+      }
 
       const response = await getMyListings(filterParams);
       const listingsData = response?.data || response || [];
@@ -404,8 +428,8 @@ const index = ({ isProperty = true }) => {
                       {getStatusBadge(listing.status)}
                     </td>
                     <td className="align-middle text-14">
-                      {listing.created_at
-                        ? new Date(listing.created_at).toLocaleDateString()
+                      {listing.createdAt
+                        ? new Date(listing.createdAt).toLocaleDateString()
                         : "-"}
                     </td>
                     <td className="align-middle">
@@ -464,7 +488,18 @@ const index = ({ isProperty = true }) => {
                         )}
                         <MenuItem
                           onClick={() => {
-                            router.push(`/vendor/property/${listing.id}/edit`);
+                            setSelectedListingIdForDetail(listing.id);
+                            setDetailModalOpen(true);
+                            setAnchorEl(null);
+                            setSelectedListingId(null);
+                          }}
+                          className="text-12"
+                        >
+                          View Details
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            router.push(`/vendor/property/${listing.id}/edit?subtype=${listing.subtype}`);
                             setAnchorEl(null);
                             setSelectedListingId(null);
                           }}
@@ -500,6 +535,15 @@ const index = ({ isProperty = true }) => {
         loading={deleting}
         confirmLabel="Delete"
         confirmingLabel="Deleting..."
+      />
+
+      <ListingDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedListingIdForDetail(null);
+        }}
+        listingId={selectedListingIdForDetail}
       />
     </VendorDashboardLayout>
   );

@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import VendorDashboardLayout from "../common/layout";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Menu, MenuItem } from "@mui/material";
+import { Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { getRoomTypes, deleteRoomType, getMyListings } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import RoomTypeDetailModal from "./RoomTypeDetailModal";
 
 const index = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -25,6 +26,10 @@ const index = () => {
   const [roomTypeToDelete, setRoomTypeToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [listings, setListings] = useState([]);
+  const [propertyTypeModalOpen, setPropertyTypeModalOpen] = useState(false);
+  const [selectedPropertyType, setSelectedPropertyType] = useState("");
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedRoomTypeIdForDetail, setSelectedRoomTypeIdForDetail] = useState(null);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -225,6 +230,36 @@ const index = () => {
     setSelectedRoomTypeId(roomTypeId);
   };
 
+  const handleAddRoomTypeClick = () => {
+    setPropertyTypeModalOpen(true);
+  };
+
+  const handlePropertyTypeSelect = (subtype) => {
+    setSelectedPropertyType(subtype);
+  };
+
+  const handlePropertyTypeConfirm = () => {
+    if (!selectedPropertyType) {
+      toast.error("Please select a property type");
+      return;
+    }
+    setPropertyTypeModalOpen(false);
+    router.push(`/vendor/room-type/add?subtype=${selectedPropertyType}`);
+    setSelectedPropertyType("");
+  };
+
+  const handlePropertyTypeCancel = () => {
+    setPropertyTypeModalOpen(false);
+    setSelectedPropertyType("");
+  };
+
+  const propertyTypes = [
+    { value: "Hotel", label: "Hotel" },
+    { value: "Space", label: "Space" },
+    { value: "Vacation", label: "Vacation Rental" },
+    { value: "EventVenue", label: "Event Venue" },
+  ];
+
   return (
     <VendorDashboardLayout>
       <div className="row y-gap-20 justify-between items-center mb-5">
@@ -237,7 +272,7 @@ const index = () => {
         <div className="col-md-auto d-flex justify-content-end">
           <button
             className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
-            onClick={() => router.push("/vendor/room-type/add?subtype=Hotel")}
+            onClick={handleAddRoomTypeClick}
           >
             <i className="icon-plus mr-10"></i> Add New Room Type
           </button>
@@ -467,6 +502,17 @@ const index = () => {
                         }}
                       >
                         <MenuItem
+                          onClick={() => {
+                            setSelectedRoomTypeIdForDetail(row.id);
+                            setDetailModalOpen(true);
+                            setAnchorEl(null);
+                            setSelectedRoomTypeId(null);
+                          }}
+                          className="text-12"
+                        >
+                          View Details
+                        </MenuItem>
+                        <MenuItem
                           onClick={() => handleEditClick(row.id)}
                           className="text-12"
                         >
@@ -499,6 +545,96 @@ const index = () => {
             : "Are you sure you want to delete this room type?"
         }
         loading={deleting}
+      />
+
+      <Dialog
+        open={propertyTypeModalOpen}
+        onClose={handlePropertyTypeCancel}
+        maxWidth="sm"
+        fullWidth
+        aria-labelledby="property-type-dialog-title"
+        PaperProps={{
+          style: {
+            borderRadius: "16px",
+          },
+        }}
+      >
+        <DialogTitle 
+          id="property-type-dialog-title" 
+          className="d-flex items-center justify-between pb-15"
+          style={{ borderBottom: "1px solid #e5e7eb", paddingBottom: "15px" }}
+        >
+          <div className="d-flex items-center gap-2">
+            <span className="material-symbols-outlined text-24 text-blue-1">category</span>
+            <span className="text-20 fw-600">Select Property Type</span>
+          </div>
+          <button
+            onClick={handlePropertyTypeCancel}
+            className="border-0 bg-transparent cursor-pointer p-0 d-flex items-center justify-center"
+            aria-label="close"
+            style={{ width: "32px", height: "32px", borderRadius: "8px" }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = "#f3f4f6"}
+            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+          >
+            <span className="material-symbols-outlined text-20">close</span>
+          </button>
+        </DialogTitle>
+        <DialogContent style={{ padding: "20px 24px" }}>
+          <div className="text-14 text-light-1 mb-15">
+            Please select the property type for this room type:
+          </div>
+          <div className="d-flex flex-column gap-2">
+            {propertyTypes.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => handlePropertyTypeSelect(type.value)}
+                className={`text-left border rounded-8 px-15 py-10 text-14 fw-500 transition-all ${
+                  selectedPropertyType === type.value
+                    ? "bg-blue-1 text-white border-blue-1"
+                    : "bg-white text-dark-1 border-light hover:border-blue-1"
+                }`}
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+                <div className="d-flex items-center justify-between">
+                  <span>{type.label}</span>
+                  {selectedPropertyType === type.value && (
+                    <span className="material-symbols-outlined text-20">check_circle</span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+        <DialogActions className="px-20 pb-20">
+          <button
+            className="text-14 border-light rounded-8 px-15 py-10 fw-500"
+            onClick={handlePropertyTypeCancel}
+          >
+            Cancel
+          </button>
+          <button
+            className="text-14 bg-blue-1 text-white rounded-8 px-15 py-10 fw-500"
+            onClick={handlePropertyTypeConfirm}
+            disabled={!selectedPropertyType}
+            style={{
+              opacity: selectedPropertyType ? 1 : 0.5,
+              cursor: selectedPropertyType ? "pointer" : "not-allowed",
+            }}
+          >
+            Continue
+          </button>
+        </DialogActions>
+      </Dialog>
+
+      <RoomTypeDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedRoomTypeIdForDetail(null);
+        }}
+        roomTypeId={selectedRoomTypeIdForDetail}
       />
     </VendorDashboardLayout>
   );

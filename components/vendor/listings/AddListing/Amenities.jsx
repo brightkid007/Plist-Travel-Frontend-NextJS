@@ -3,7 +3,7 @@ import { Checkbox } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 
 const Amenities = ({ amenitiesList = [], selectedAmenities = [], onUpdate, accessibilityInfo = "", isAccessibilityEnabled: propIsAccessibilityEnabled = false, onAccessibilityChange, onAccessibilityEnabledChange }) => {
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState(selectedAmenities);
   const [loading, setLoading] = useState(false);
   
   // For accessibility checkbox: if parent controls it, use prop directly (no state)

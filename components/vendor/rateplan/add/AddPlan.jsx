@@ -176,6 +176,8 @@ const index = ({ ratePlanId, isEditMode = false, type = "custom" }) => {
       toast.error("Please enter a rate plan name");
       return;
     }
+    console.log("formData", formData.room_type_ids);
+    
     // Check if room_type_ids is an array and has items
     const roomTypeIds = Array.isArray(formData.room_type_ids) ? formData.room_type_ids : [];
     if (roomTypeIds.length === 0) {

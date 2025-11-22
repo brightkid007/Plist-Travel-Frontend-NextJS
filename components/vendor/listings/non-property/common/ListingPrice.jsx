@@ -50,7 +50,8 @@ const ListingPrice = () => {
             <input
               className="border-light rounded-8 py-5 px-15 w-full mt-10"
               type="number"
-              step={0.01}
+              min="0"
+              step="0.01"
               placeholder={`Enter ${day} Price`}
             />
           </div>
@@ -87,7 +88,8 @@ const ListingPrice = () => {
               <input
                 className="border-light rounded-8 py-5 px-15 w-full mt-10"
                 type="number"
-                step={0.01}
+                min="0"
+                step="0.01"
                 placeholder={`$${100 + index * 20}`}
               />
             </div>

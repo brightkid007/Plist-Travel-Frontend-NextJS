@@ -38,6 +38,7 @@ const ReservationRestrictions = ({ formData, onInputChange }) => {
         const value = event.target.value;
         if (value === "no") {
             // Clear all restrictions
+            setHasRestrictions("no");
             onInputChange("restrict_res_time_enabled", false);
             onInputChange("restrict_los_enabled", false);
             onInputChange("sell_on_website_only", false);
@@ -64,16 +65,28 @@ const ReservationRestrictions = ({ formData, onInputChange }) => {
                     checked={hasRestrictions === "no"}
                     onChange={handleRestrictionChange}
                     value="no"
+                    name="has-restrictions"
                 />
-                <div className="text-14 lh-14 ml-5">No</div>
+                <div 
+                    className="text-14 lh-14 ml-5 cursor-pointer"
+                    onClick={() => handleRestrictionChange({ target: { value: "no" } })}
+                >
+                    No
+                </div>
             </div>
             <div className="d-flex items-center">
                 <Radio
                     checked={hasRestrictions === "yes"}
                     onChange={handleRestrictionChange}
                     value="yes"
+                    name="has-restrictions"
                 />
-                <div className="text-14 lh-14 ml-5">Yes</div>
+                <div 
+                    className="text-14 lh-14 ml-5 cursor-pointer"
+                    onClick={() => handleRestrictionChange({ target: { value: "yes" } })}
+                >
+                    Yes
+                </div>
             </div>
 
             {hasRestrictions === "yes" && (

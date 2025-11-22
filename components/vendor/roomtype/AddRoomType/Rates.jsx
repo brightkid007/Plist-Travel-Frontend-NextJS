@@ -150,7 +150,7 @@ const Rates = ({ bookingType, roomTypeData, updateRoomTypeData }) => {
         <div className="text-14 lh-1 ml-5">
           I agree to the
           <span className="text-blue-1 underline ml-5 mr-5">
-            Vrbo Accommodation Fee Collection Agreement
+            Plist Accommodation Fee Collection Agreement
           </span>
           <span className="text-red-1">*</span>
         </div>

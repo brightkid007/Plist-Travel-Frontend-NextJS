@@ -1,16 +1,16 @@
 import { Checkbox } from "@mui/material";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import CancellationPolicy from "../../../common/CancellationPolicy";
+import { getMyCoupons } from "@/helpers/backend_helper";
 
-const ListingDetails = ({ 
-  bookingType,
+const ListingDetails = ({
   listingId,
   data,
-  onUpdate 
+  onUpdate
 }) => {
   const router = useRouter();
-  
+
   // Initialize data from props
   const size = data?.size || "";
   const eventMaximumCapacity = data?.event_maximum_capacity || "";
@@ -24,6 +24,27 @@ const ListingDetails = ({
   const cancellationPolicyId = data?.cancellation_policy_id || null;
   const accessibilityInfo = data?.accessibility_info || "";
   const isAccessibilityEnabled = data?.is_accessibility_enabled || false;
+
+  const [coupons, setCoupons] = useState([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+
+  // Load coupons on component mount
+  useEffect(() => {
+    const loadCoupons = async () => {
+      try {
+        setLoadingCoupons(true);
+        const response = await getMyCoupons({ is_active: true });
+        const couponsData = response?.data?.data || response?.data || response || [];
+        setCoupons(Array.isArray(couponsData) ? couponsData : []);
+      } catch (error) {
+        console.error("Error loading coupons:", error);
+        setCoupons([]);
+      } finally {
+        setLoadingCoupons(false);
+      }
+    };
+    loadCoupons();
+  }, []);
 
   const handleFieldChange = (field, value) => {
     if (onUpdate) {
@@ -44,11 +65,32 @@ const ListingDetails = ({
   };
 
   const handleMultiDayChange = (checked) => {
-    handleFieldChange("is_multi_day", checked);
-    if (checked && eventDays.length === 0) {
-      handleFieldChange("event_days", [{ date: "", duration: "", start_time: "", end_time: "" }]);
-    } else if (!checked) {
-      handleFieldChange("event_days", []);
+    // Update both fields in a single state update to avoid race conditions
+    const currentEventDays = data?.event_days || [];
+    
+    if (checked) {
+      // If enabling multi-day and no days exist, add one
+      if (currentEventDays.length === 0) {
+        if (onUpdate) {
+          onUpdate({
+            ...data,
+            is_multi_day: checked,
+            event_days: [{ date: "", duration: "", start_time: "", end_time: "" }]
+          });
+        }
+      } else {
+        // Just update is_multi_day if days already exist
+        handleFieldChange("is_multi_day", checked);
+      }
+    } else {
+      // If disabling multi-day, clear all days
+      if (onUpdate) {
+        onUpdate({
+          ...data,
+          is_multi_day: checked,
+          event_days: []
+        });
+      }
     }
   };
 
@@ -68,7 +110,9 @@ const ListingDetails = ({
         <h1 className="text-14 lh-12 fw-500">Size in m2</h1>
         <input
           className="border-light rounded-8 py-5 px-15 w-full mt-10"
-          type="text"
+          type="number"
+          min="0"
+          step="0.01"
           placeholder="Enter property size"
           value={size}
           onChange={(e) => handleFieldChange("size", e.target.value)}
@@ -79,7 +123,9 @@ const ListingDetails = ({
         <h1 className="text-14 lh-12 fw-500">Event Maximum Capacity</h1>
         <input
           className="border-light rounded-8 py-5 px-15 w-full mt-10"
-          type="text"
+          type="number"
+          min="0"
+          step="1"
           placeholder="Enter maximum capacity for the event"
           value={eventMaximumCapacity}
           onChange={(e) => handleFieldChange("event_maximum_capacity", e.target.value)}
@@ -92,7 +138,7 @@ const ListingDetails = ({
             <Checkbox
               className="px-0 py-0"
               checked={isMultiDay}
-              onChange={(e) => handleMultiDayChange(e.target.checked)}
+              onChange={(e) => handleMultiDayChange(!isMultiDay)}
             />
             <div className="text-14 lh-12 fw-500">Multi-Day Event</div>
           </div>
@@ -113,7 +159,7 @@ const ListingDetails = ({
 
               <div className="col-md-3 col-sm-6">
                 <h1 className="text-14 lh-12 fw-500">Duration</h1>
-                <select 
+                <select
                   className="form-select rounded-8 border-light px-15 py-10 justify-between text-14 w-full"
                   value={day.duration || ""}
                   onChange={(e) => handleDayChange(idx, "duration", e.target.value)}
@@ -146,7 +192,9 @@ const ListingDetails = ({
                   value={day.end_time || ""}
                   onChange={(e) => handleDayChange(idx, "end_time", e.target.value)}
                 />
-                {eventDays.length > 1 && (
+              </div>
+              {eventDays.length > 1 && (
+                <div className="col-12 d-flex justify-end">
                   <button
                     type="button"
                     className="text-12 text-red-1 mt-5"
@@ -154,8 +202,8 @@ const ListingDetails = ({
                   >
                     Remove Day
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </React.Fragment>
           ))}
           {isMultiDay && (
@@ -185,7 +233,7 @@ const ListingDetails = ({
 
       <div className="col-sm-6 mt-5">
         <h1 className="text-14 lh-12 fw-500">Age Restriction</h1>
-        <select 
+        <select
           className="form-select rounded-8 border-light px-15 py-10 justify-between text-14 w-full mt-10"
           value={ageRestriction}
           onChange={(e) => handleFieldChange("age_restriction", e.target.value)}
@@ -204,7 +252,7 @@ const ListingDetails = ({
         </div>
         <select
           className="form-select rounded-8 border-light px-15 py-10 justify-between text-14 w-full mt-10"
-          value={specialOffersId}
+          value={specialOffersId || ""}
           onChange={(e) => {
             if (e.target.value === "new-offer") {
               router.push("/vendor/coupon");
@@ -212,11 +260,23 @@ const ListingDetails = ({
               handleFieldChange("special_offers_id", e.target.value || null);
             }
           }}
+          disabled={loadingCoupons}
         >
           <option value="">Select special offers</option>
-          <option value="new-offer">
-            Link to Coupon List to create a new special offer
-          </option>
+          {loadingCoupons ? (
+            <option value="" disabled>Loading coupons...</option>
+          ) : (
+            <>
+              {coupons.map((coupon) => (
+                <option key={coupon.id} value={coupon.id}>
+                  {coupon.code} {coupon.discount_value ? `(${coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : '$' + coupon.discount_value} off)` : ''}
+                </option>
+              ))}
+              <option value="new-offer">
+                + Create New Special Offer
+              </option>
+            </>
+          )}
         </select>
       </div>
 
@@ -256,7 +316,7 @@ const ListingDetails = ({
 
       <div className="col-12 mt-10">
         <div className="d-flex items-center gap-1">
-          <Checkbox 
+          <Checkbox
             className="px-0 py-0"
             checked={isAccessibilityEnabled}
             onChange={(e) => handleFieldChange("is_accessibility_enabled", e.target.checked)}

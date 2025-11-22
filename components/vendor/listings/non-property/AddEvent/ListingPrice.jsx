@@ -97,7 +97,7 @@ const ListingPrice = ({ data, onUpdate }) => {
       {ticketPrices.map((ticket, index) => (
         <React.Fragment key={index}>
           <div className="col-sm-6 mt-5">
-            <h1 className="text-14 lh-12 fw-500">Ticket Price Category</h1>
+            <h1 className="text-14 lh-12 fw-500">Ticket Price Category <span className="text-red-1">*</span></h1>
             <select 
               className="form-select w-full border-light rounded-8 h-50 mt-10"
               value={ticket.category || ""}
@@ -111,11 +111,12 @@ const ListingPrice = ({ data, onUpdate }) => {
             </select>
           </div>
           <div className="col-sm-6 mt-5">
-            <h1 className="text-14 lh-12 fw-500">Price</h1>
+            <h1 className="text-14 lh-12 fw-500">Price <span className="text-red-1">*</span></h1>
             <input
               className="border-light rounded-8 py-5 px-15 w-full h-50 mt-10"
               type="number"
-              step={0.01}
+              min="0"
+              step="0.01"
               placeholder="Enter price"
               value={ticket.price || ""}
               onChange={(e) => handleTicketPriceChange(index, "price", e.target.value)}
@@ -138,7 +139,8 @@ const ListingPrice = ({ data, onUpdate }) => {
             <input
               className="border-light rounded-8 py-5 px-15 w-full mt-10"
               type="number"
-              step={0.01}
+              min="0"
+              step="0.01"
               placeholder={`Enter ${day} Price`}
               value={basePricesByDay[day.toLowerCase()] || ""}
               onChange={(e) => handleDayPriceChange(day, e.target.value)}
@@ -179,12 +181,13 @@ const ListingPrice = ({ data, onUpdate }) => {
           <React.Fragment key={index}>
             <div className="col-md-4 mt-5">
               <h1 className="text-14 lh-1 fw-500">
-                Number of Guest Start Range
+                Number of Guest Start Range <span className="text-red-1">*</span>
               </h1>
               <input
                 className="border-light rounded-8 py-5 px-15 w-full mt-10"
                 type="number"
-                step={1}
+                min="1"
+                step="1"
                 placeholder={1 + index * 20}
                 value={guestPrice.guest_start || ""}
                 onChange={(e) => handleGuestPriceChange(index, "guest_start", e.target.value)}
@@ -192,23 +195,25 @@ const ListingPrice = ({ data, onUpdate }) => {
             </div>
             <div className="col-md-4 mt-5">
               <h1 className="text-14 lh-1 fw-500">
-                Number of Guest End Range
+                Number of Guest End Range <span className="text-red-1">*</span>
               </h1>
               <input
                 className="border-light rounded-8 py-5 px-15 w-full mt-10"
                 type="number"
-                step={1}
+                min="1"
+                step="1"
                 placeholder={20 + index * 20}
                 value={guestPrice.guest_end || ""}
                 onChange={(e) => handleGuestPriceChange(index, "guest_end", e.target.value)}
               />
             </div>
             <div className="col-md-4 mt-5">
-              <h1 className="text-14 lh-1 fw-500">Guests Price</h1>
+              <h1 className="text-14 lh-1 fw-500">Guests Price <span className="text-red-1">*</span></h1>
               <input
                 className="border-light rounded-8 py-5 px-15 w-full mt-10"
                 type="number"
-                step={0.01}
+                min="0"
+                step="0.01"
                 placeholder={`$${100 + index * 20}`}
                 value={guestPrice.price || ""}
                 onChange={(e) => handleGuestPriceChange(index, "price", e.target.value)}

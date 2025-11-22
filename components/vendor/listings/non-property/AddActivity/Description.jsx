@@ -171,7 +171,6 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate }) =>
           placeholder="Describe your activity"
           value={data?.description || ""}
           onChange={(e) => handleChange("description", e.target.value)}
-          required
         />
       </div>
     </div>

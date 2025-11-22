@@ -338,7 +338,7 @@ export const validateRoomType = (roomTypeData) => {
 
   // Required: Terms agreement (has asterisk in UI)
   if (!roomTypeData.terms_agreement_accepted) {
-    toast.error("Please accept the Vrbo Accommodation Fee Collection Agreement");
+    toast.error("Please accept the Plist Accommodation Fee Collection Agreement");
     return false;
   }
 
@@ -452,7 +452,7 @@ export const validateRoomTypeStep = (step, roomTypeData) => {
 
       // Required: Terms agreement (has asterisk in UI)
       if (!roomTypeData.terms_agreement_accepted) {
-        toast.error("Please accept the Vrbo Accommodation Fee Collection Agreement");
+        toast.error("Please accept the Plist Accommodation Fee Collection Agreement");
         return false;
       }
 

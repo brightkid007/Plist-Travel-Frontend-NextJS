@@ -139,6 +139,9 @@ export const updateAddress = (id, data) => AuthAPIClient.update(`/address/${id}`
 // Delete address
 export const deleteAddress = (id) => AuthAPIClient.delete(`/address/${id}`);
 
+// Get address by ID
+export const getAddressById = (id) => AuthAPIClient.get(`/address/${id}`);
+
 // Register new user - uses /auth/register endpoint
 export const register = (data) => AuthAPIClient.create("/auth/register", data);
 

@@ -301,12 +301,30 @@ const AddRoomType = ({ listingId: propListingId, subtype: propSubtype, roomTypeI
         dataToSave.room_numbers = cleanedRoomNumbers.length > 0 ? cleanedRoomNumbers : null;
       }
       
-      // Ensure number_of_rooms is an integer
-      if (dataToSave.number_of_rooms !== undefined && dataToSave.number_of_rooms !== null && dataToSave.number_of_rooms !== "") {
-        dataToSave.number_of_rooms = parseInt(dataToSave.number_of_rooms);
-      } else if (dataToSave.number_of_rooms === "" || dataToSave.number_of_rooms === null) {
-        dataToSave.number_of_rooms = null;
-      }
+      // Ensure integer fields are properly converted (empty strings to null, valid values to integers)
+      const integerFields = [
+        'occupancy_adults',
+        'occupancy_children',
+        'number_of_rooms',
+        'extra_people',
+        'minimum_stay',
+        'booking_advance_days',
+        'booking_advance_months',
+        'living_rooms',
+        'bedrooms',
+        'bathrooms',
+      ];
+
+      integerFields.forEach((field) => {
+        if (dataToSave[field] !== undefined) {
+          if (dataToSave[field] === "" || dataToSave[field] === null || dataToSave[field] === undefined) {
+            dataToSave[field] = null;
+          } else {
+            const parsed = parseInt(dataToSave[field], 10);
+            dataToSave[field] = isNaN(parsed) ? null : parsed;
+          }
+        }
+      });
 
       let response;
       let savedRoomTypeId = roomTypeId;

@@ -45,6 +45,37 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     accessibilityInfo: "",
     isAccessibilityEnabled: false,
     faqs: [],
+    // ListingDetails fields
+    listingDetails: {
+      what_to_bring: "",
+      age_restriction: "",
+      is_multi_day: false,
+      event_days: [],
+      special_offers_id: null,
+      parking_info: "",
+      instructor_host_name: "",
+      instructor_host_detail: "",
+      covid_safety_guidelines: "",
+      cancellation_policy_id: null,
+      accessibility_info: "",
+      is_accessibility_enabled: false,
+    },
+    // ListingPrice fields
+    listingPrice: {
+      ticket_prices: [{ category: "", price: "" }],
+      base_prices_by_day_of_week: false,
+      additional_prices_by_guests: false,
+      base_prices_by_day: {},
+      guest_prices: [{ guest_start: "", guest_end: "", price: "" }],
+    },
+    // Calendar fields
+    calendar: {
+      calendar_type: 1,
+      calendar_start_date: null,
+      calendar_end_date: null,
+      blocked_dates: [],
+      available_dates: [],
+    },
   });
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -53,94 +84,127 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
   const [existingImages, setExistingImages] = useState([]);
   const [existingFaqIds, setExistingFaqIds] = useState([]);
 
-  // Load categories, subcategories, and amenities
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const filterParams = { type: type || "activity" };
+  const loadData = async () => {
+    try {
+      const filterParams = { type: type || "activity" };
 
-        const [catRes, subcatRes, amenitiesRes] = await Promise.all([
-          getListingCategories(filterParams),
-          getListingSubcategories(filterParams),
-          getAmenities(),
-        ]);
-        setCategories(catRes?.data || catRes || []);
-        setSubcategories(subcatRes?.data || subcatRes || []);
-        setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error(error?.message || "Failed to load data");
-      }
-    };
+      const [catRes, subcatRes, amenitiesRes] = await Promise.all([
+        getListingCategories(filterParams),
+        getListingSubcategories(filterParams),
+        getAmenities(),
+      ]);
+      setCategories(catRes?.data || catRes || []);
+      setSubcategories(subcatRes?.data || subcatRes || []);
+      setAmenitiesList(amenitiesRes?.data || amenitiesRes || []);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      toast.error(error?.message || "Failed to load data");
+    }
+  };
+  useEffect(() => {
     loadData();
   }, [type]);
 
-  // Load listing data when in edit mode
-  useEffect(() => {
-    const loadListingData = async () => {
-      if (!isEditMode || !listingId) return;
+  const loadListingData = async () => {
+    if (!isEditMode || !listingId) return;
 
-      try {
-        setLoading(true);
-        const [listingRes, faqsRes, mediaRes] = await Promise.all([
-          getListingById(listingId),
-          getFAQs({ listing_id: listingId }),
-          getMediaAssets({ listing_id: listingId }),
-        ]);
+    try {
+      setLoading(true);
+      const [listingRes, faqsRes, mediaRes] = await Promise.all([
+        getListingById(listingId),
+        getFAQs({ listing_id: listingId }),
+        getMediaAssets({ listing_id: listingId }),
+      ]);
 
-        const listing = listingRes?.data || listingRes;
+      const listing = listingRes?.data || listingRes;
 
-        if (listing) {
-          // Type is already set from props, no need to set listingType state
+      if (listing) {
+        // Type is already set from props, no need to set listingType state
 
+        setListingData((prev) => ({
+          ...prev,
+          title: listing.title || "",
+          category_id: listing.category_id || null,
+          subcategory_id: listing.subcategory_id || null,
+          description: listing.description || "",
+          star_rating: listing.star_rating || null,
+          location_address_id: listing.location_address_id || null,
+          event_date_time: listing.event_date_time || null,
+          amenities: listing.amenity && Array.isArray(listing.amenity)
+            ? listing.amenity.map((a) => a.id)
+            : [],
+          accessibilityInfo: listing.accessibility_info || "",
+          isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
+          status: listing.status || "draft",
+          // ListingDetails fields
+          listingDetails: {
+            what_to_bring: listing.what_to_bring || "",
+            age_restriction: listing.age_restriction || "",
+            is_multi_day: listing.is_multi_day || false,
+            event_days: listing.event_days && Array.isArray(listing.event_days) ? listing.event_days : [],
+            special_offers_id: listing.special_offers_id || null,
+            parking_info: listing.parking_info || "",
+            instructor_host_name: listing.instructor_host_name || "",
+            instructor_host_detail: listing.instructor_host_detail || "",
+            covid_safety_guidelines: listing.covid_safety_guidelines || "",
+            cancellation_policy_id: listing.cancellation_policy_id || null,
+            accessibility_info: listing.accessibility_info || "",
+            is_accessibility_enabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
+          },
+          // ListingPrice fields
+          listingPrice: {
+            ticket_prices: listing.ticket_prices && Array.isArray(listing.ticket_prices) && listing.ticket_prices.length > 0
+              ? listing.ticket_prices
+              : [{ category: "", price: "" }],
+            base_prices_by_day_of_week: listing.base_prices_by_day && typeof listing.base_prices_by_day === 'object' && Object.keys(listing.base_prices_by_day).length > 0,
+            additional_prices_by_guests: listing.guest_prices && Array.isArray(listing.guest_prices) && listing.guest_prices.length > 0,
+            base_prices_by_day: listing.base_prices_by_day && typeof listing.base_prices_by_day === 'object' ? listing.base_prices_by_day : {},
+            guest_prices: listing.guest_prices && Array.isArray(listing.guest_prices) && listing.guest_prices.length > 0
+              ? listing.guest_prices
+              : [{ guest_start: "", guest_end: "", price: "" }],
+          },
+          // Calendar fields
+          calendar: {
+            calendar_type: listing.calendar_type || 1,
+            calendar_start_date: listing.calendar_start_date || null,
+            calendar_end_date: listing.calendar_end_date || null,
+            blocked_dates: listing.blocked_dates && Array.isArray(listing.blocked_dates) ? listing.blocked_dates : [],
+            available_dates: listing.available_dates && Array.isArray(listing.available_dates) ? listing.available_dates : [],
+          },
+        }));
+
+        const faqs = faqsRes?.data || faqsRes || [];
+        if (Array.isArray(faqs)) {
           setListingData((prev) => ({
             ...prev,
-            title: listing.title || "",
-            category_id: listing.category_id || null,
-            subcategory_id: listing.subcategory_id || null,
-            description: listing.description || "",
-            star_rating: listing.star_rating || null,
-            location_address_id: listing.location_address_id || null,
-            event_date_time: listing.event_date_time || null,
-            amenities: listing.amenity && Array.isArray(listing.amenity)
-              ? listing.amenity.map((a) => a.id)
-              : [],
-            accessibilityInfo: listing.accessibility_info || "",
-            isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
-            status: listing.status || "draft",
+            faqs: faqs.map((faq) => ({
+              question: faq.question || "",
+              answer: faq.answer || "",
+            })),
           }));
-
-          const faqs = faqsRes?.data || faqsRes || [];
-          if (Array.isArray(faqs)) {
-            setListingData((prev) => ({
-              ...prev,
-              faqs: faqs.map((faq) => ({
-                question: faq.question || "",
-                answer: faq.answer || "",
-              })),
-            }));
-            setExistingFaqIds(faqs.map((faq) => faq.id).filter((id) => id));
-          }
-
-          const media = mediaRes?.data || mediaRes || [];
-          if (Array.isArray(media)) {
-            const images = media.filter((m) => m.type === "image").map((m) => ({
-              id: m.id,
-              url: m.url,
-              type: m.type,
-            }));
-            setExistingImages(images);
-          }
+          setExistingFaqIds(faqs.map((faq) => faq.id).filter((id) => id));
         }
-      } catch (error) {
-        console.error("Error loading listing data:", error);
-        toast.error(error?.message || "Failed to load listing data");
-        router.push("/vendor/listings/non-property");
-      } finally {
-        setLoading(false);
-      }
-    };
 
+        const media = mediaRes?.data || mediaRes || [];
+        if (Array.isArray(media)) {
+          const images = media.filter((m) => m.type === "image").map((m) => ({
+            id: m.id,
+            url: m.url,
+            type: m.type,
+          }));
+          setExistingImages(images);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading listing data:", error);
+      toast.error(error?.message || "Failed to load listing data");
+      router.push("/vendor/listings/non-property");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadListingData();
   }, [isEditMode, listingId, router]);
 
@@ -194,10 +258,14 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         }
       }
 
+      // Prepare listingDetails data
+      const listingDetailsData = listingData.listingDetails || {};
+      
+      // Process accessibility_info from listingDetails
       let accessibilityInfoValue = null;
-      if (listingData.isAccessibilityEnabled) {
-        if (listingData.accessibilityInfo && typeof listingData.accessibilityInfo === 'string') {
-          const trimmed = listingData.accessibilityInfo.trim();
+      if (listingDetailsData.is_accessibility_enabled) {
+        if (listingDetailsData.accessibility_info && typeof listingDetailsData.accessibility_info === 'string') {
+          const trimmed = listingDetailsData.accessibility_info.trim();
           accessibilityInfoValue = trimmed;
         } else {
           accessibilityInfoValue = "";
@@ -205,6 +273,12 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
       } else {
         accessibilityInfoValue = null;
       }
+      
+      // Prepare listingPrice data
+      const listingPriceData = listingData.listingPrice || {};
+      
+      // Prepare calendar data
+      const calendarData = listingData.calendar || {};
 
       const listingPayload = {
         title: listingData.title.trim(),
@@ -220,6 +294,39 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         amenities: listingData.amenities && Array.isArray(listingData.amenities) && listingData.amenities.length > 0
           ? listingData.amenities.filter(id => typeof id === 'number' && !isNaN(id))
           : [],
+        // ListingDetails fields
+        what_to_bring: listingDetailsData.what_to_bring || null,
+        age_restriction: listingDetailsData.age_restriction || null,
+        is_multi_day: listingDetailsData.is_multi_day || false,
+        event_days: listingDetailsData.event_days && Array.isArray(listingDetailsData.event_days) && listingDetailsData.event_days.length > 0
+          ? listingDetailsData.event_days
+          : null,
+        special_offers_id: listingDetailsData.special_offers_id || null,
+        parking_info: listingDetailsData.parking_info && listingDetailsData.parking_info.trim() ? listingDetailsData.parking_info.trim() : null,
+        instructor_host_name: listingDetailsData.instructor_host_name && listingDetailsData.instructor_host_name.trim() ? listingDetailsData.instructor_host_name.trim() : null,
+        instructor_host_detail: listingDetailsData.instructor_host_detail && listingDetailsData.instructor_host_detail.trim() ? listingDetailsData.instructor_host_detail.trim() : null,
+        covid_safety_guidelines: listingDetailsData.covid_safety_guidelines && listingDetailsData.covid_safety_guidelines.trim() ? listingDetailsData.covid_safety_guidelines.trim() : null,
+        cancellation_policy_id: listingDetailsData.cancellation_policy_id || null,
+        // ListingPrice fields (stored as JSON)
+        ticket_prices: listingPriceData.ticket_prices && Array.isArray(listingPriceData.ticket_prices) && listingPriceData.ticket_prices.length > 0
+          ? listingPriceData.ticket_prices.filter(t => t.category && t.price)
+          : null,
+        base_prices_by_day: listingPriceData.base_prices_by_day && Object.keys(listingPriceData.base_prices_by_day).length > 0
+          ? listingPriceData.base_prices_by_day
+          : null,
+        guest_prices: listingPriceData.guest_prices && Array.isArray(listingPriceData.guest_prices) && listingPriceData.guest_prices.length > 0
+          ? listingPriceData.guest_prices.filter(g => g.guest_start && g.guest_end && g.price)
+          : null,
+        // Calendar fields
+        calendar_type: calendarData.calendar_type || 1,
+        calendar_start_date: calendarData.calendar_start_date || null,
+        calendar_end_date: calendarData.calendar_end_date || null,
+        blocked_dates: calendarData.blocked_dates && Array.isArray(calendarData.blocked_dates) && calendarData.blocked_dates.length > 0
+          ? calendarData.blocked_dates
+          : null,
+        available_dates: calendarData.available_dates && Array.isArray(calendarData.available_dates) && calendarData.available_dates.length > 0
+          ? calendarData.available_dates
+          : null,
       };
 
       if (isEditMode && listingId) {
@@ -411,27 +518,21 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
       id: 4,
       name: "Listing Details",
       content: (
-        <div>
-          <ListingDetails bookingType={listingData.booking_type} />
-          <div className="mt-20">
-            <Amenities
-              amenitiesList={amenitiesList}
-              selectedAmenities={listingData.amenities || []}
-              onUpdate={handleAmenitiesUpdate}
-              accessibilityInfo={listingData.accessibilityInfo || ""}
-              isAccessibilityEnabled={listingData.isAccessibilityEnabled || false}
-              onAccessibilityChange={handleAccessibilityInfoChange}
-              onAccessibilityEnabledChange={handleAccessibilityEnabledChange}
-            />
-          </div>
-        </div>
+        <ListingDetails
+          listingId={isEditMode ? listingId : null}
+          data={listingData.listingDetails}
+          onUpdate={(details) => updateListingData("listingDetails", details)}
+        />
       ),
     },
     {
       id: 5,
       name: "Listing Price",
       content: (
-        <ListingPrice />
+        <ListingPrice
+          data={listingData.listingPrice}
+          onUpdate={(price) => updateListingData("listingPrice", price)}
+        />
       ),
     },
     {
@@ -448,7 +549,10 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
       id: 7,
       name: "Calendar",
       content: (
-        <Calendar />
+        <Calendar
+          data={listingData.calendar}
+          onUpdate={(calendar) => updateListingData("calendar", calendar)}
+        />
       ),
     },
   ], [

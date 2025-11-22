@@ -33,7 +33,7 @@ const ListingPrice = () => {
         .map((_, index) => (
           <React.Fragment key={index}>
             <div className="col-sm-6 mt-5">
-              <h1 className="text-14 lh-12 fw-500">Price Category</h1>
+              <h1 className="text-14 lh-12 fw-500">Price Category <span className="text-red-1">*</span></h1>
               <select className="form-select w-full border-light rounded-8 h-50 mt-10">
                 <option value="50">General Admission</option>
                 <option value="100">VIP</option>
@@ -41,11 +41,12 @@ const ListingPrice = () => {
             </div>
 
             <div className="col-sm-6 mt-5">
-              <h1 className="text-14 lh-12 fw-500">Price</h1>
+              <h1 className="text-14 lh-12 fw-500">Price <span className="text-red-1">*</span></h1>
               <input
                 className="border-light rounded-8 py-5 px-15 w-full h-50 mt-10"
                 type="number"
-                step={0.01}
+                min="0"
+                step="0.01"
                 placeholder="Enter price"
               />
             </div>
@@ -54,6 +55,7 @@ const ListingPrice = () => {
 
       <div className="col-12 mt-5 d-flex items-center">
         <Checkbox
+          className="px-0 py-0"
           value={basePricesByDayOfWeek}
           onChange={() => setBasePricesByDayOfWeek(!basePricesByDayOfWeek)}
         />
@@ -66,13 +68,15 @@ const ListingPrice = () => {
             <input
               className="border-light rounded-8 py-5 px-15 w-full mt-10"
               type="number"
-              step={0.01}
+              min="0"
+              step="0.01"
               placeholder={`Enter ${day} Price`}
             />
           </div>
         ))}
       <div className="col-12 mt-5 d-flex items-center">
         <Checkbox
+          className="px-0 py-0"
           value={additionalPricesByGuests}
           onChange={() =>
             setAdditionalPricesByGuests(!additionalPricesByGuests)
@@ -106,7 +110,8 @@ const ListingPrice = () => {
                 <input
                   className="border-light rounded-8 py-5 px-15 w-full mt-10"
                   type="number"
-                  step={1}
+                  min="1"
+                  step="1"
                   placeholder={1 + index * 20}
                 />
               </div>
@@ -117,7 +122,8 @@ const ListingPrice = () => {
                 <input
                   className="border-light rounded-8 py-5 px-15 w-full mt-10"
                   type="number"
-                  step={1}
+                  min="1"
+                  step="1"
                   placeholder={20 + index * 20}
                 />
               </div>
@@ -126,7 +132,8 @@ const ListingPrice = () => {
                 <input
                   className="border-light rounded-8 py-5 px-15 w-full mt-10"
                   type="number"
-                  step={0.01}
+                  min="0"
+                  step="0.01"
                   placeholder={`$${100 + index * 20}`}
                 />
               </div>

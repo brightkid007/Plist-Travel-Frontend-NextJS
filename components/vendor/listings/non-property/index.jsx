@@ -8,6 +8,7 @@ import { getMyListings, deleteListing, updateListing, getListingCategories, getL
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import ListingDetailModal from "../../common/ListingDetailModal";
 
 const index = ({ isProperty = false }) => {
   const [listings, setListings] = useState([]);
@@ -21,6 +22,8 @@ const index = ({ isProperty = false }) => {
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [listingToSubmit, setListingToSubmit] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedListingIdForDetail, setSelectedListingIdForDetail] = useState(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -404,8 +407,8 @@ const index = ({ isProperty = false }) => {
                       {getStatusBadge(listing.status)}
                     </td>
                     <td className="align-middle text-14">
-                      {listing.created_at
-                        ? new Date(listing.created_at).toLocaleDateString()
+                      {listing.createdAt
+                        ? new Date(listing.createdAt).toLocaleDateString()
                         : "-"}
                     </td>
                     <td className="align-middle">
@@ -438,6 +441,17 @@ const index = ({ isProperty = false }) => {
                             {submitting && listingToSubmit?.id === listing.id ? "Submitting..." : "Submit"}
                           </MenuItem>
                         )}
+                        <MenuItem
+                          onClick={() => {
+                            setSelectedListingIdForDetail(listing.id);
+                            setDetailModalOpen(true);
+                            setAnchorEl(null);
+                            setSelectedListingId(null);
+                          }}
+                          className="text-12"
+                        >
+                          View Details
+                        </MenuItem>
                         <MenuItem
                           onClick={() => {
                             router.push(`/vendor/property/${listing.id}/edit?type=${listing.type}`);
@@ -476,6 +490,15 @@ const index = ({ isProperty = false }) => {
         loading={deleting}
         confirmLabel="Delete"
         confirmingLabel="Deleting..."
+      />
+
+      <ListingDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedListingIdForDetail(null);
+        }}
+        listingId={selectedListingIdForDetail}
       />
     </VendorDashboardLayout>
   );

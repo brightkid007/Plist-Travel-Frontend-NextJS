@@ -121,7 +121,6 @@ const CustomEventCalendar = () => {
 
         return events;
       });
-    console.log("events", events);
     return events;
   }, [bookings, listings, roomTypes, loading]);
 
@@ -162,7 +161,6 @@ const CustomEventCalendar = () => {
         };
       }
     });
-    console.log("resources", resources);
     return resources;
   }, [listings, roomTypes, loading]);
 

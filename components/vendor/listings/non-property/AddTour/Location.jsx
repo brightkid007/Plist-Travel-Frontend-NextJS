@@ -319,7 +319,7 @@ const Location = ({ address = {}, onUpdate }) => {
       </div>
 
       <div className="col-sm-6 mt-5">
-        <h1 className="text-14 lh-12 fw-500">City</h1>
+        <h1 className="text-14 lh-12 fw-500">City <span className="text-red-1">*</span></h1>
         <input
           className="border-light rounded-8 py-5 px-15 w-full mt-10"
           type="text"

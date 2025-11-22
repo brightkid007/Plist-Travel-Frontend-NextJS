@@ -26,6 +26,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate, subt
 
   // Filter subcategories based on selected category
   useEffect(() => {
+    console.log("data", data);
     if (data?.category_id) {
       const filtered = subcategories.filter(
         (sub) => sub.listing_category_id === data.category_id
@@ -189,7 +190,7 @@ const Description = ({ data, categories = [], subcategories = [], onUpdate, subt
       )}
 
       <div className="col-sm-12 mt-5">
-        <h1 className="text-14 lh-12 fw-500">Listing Description</h1>
+        <h1 className="text-14 lh-12 fw-500">Listing Description <span className="text-red-1">*</span></h1>
         <textarea
           rows={5}
           className="border-light rounded-8 py-5 px-15 w-full mt-10"

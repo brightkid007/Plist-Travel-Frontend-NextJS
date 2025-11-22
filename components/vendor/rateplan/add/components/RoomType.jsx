@@ -288,10 +288,9 @@ const RoomType = ({ onRoomTypeIdsChange, roomTypeIds = [] }) => {
     };
 
     // Notify parent when tree changes (only if not updating from props)
-    useEffect(() => {
-        if (selectedRoomTypeIds.length === roomTypeIds.length || treeData.length === 0) return;
-
+    useEffect(() => {        
         const { roomTypeIds: extractedIds } = extractSelectedIds(treeData);
+        console.log("treeData", extractedIds);
         onRoomTypeIdsChange(extractedIds);
     }, [treeData]);
 

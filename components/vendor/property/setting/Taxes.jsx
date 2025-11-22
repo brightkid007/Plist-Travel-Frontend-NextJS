@@ -59,12 +59,12 @@ const Taxes = () => {
     <div className="row y-gap-10 x-gap-10">
       <h1 className="text-20 lh-1 fw-600">Tax Collection</h1>
       <div className="text-14 text-light-1 lh-14">
-        Based on the location this property, both you and Vrbo are responsible
+        Based on the location this property, both you and Plist are responsible
         for collecting filling and paying taxes on bookings.
       </div>
       <div className="col-auto py-0">
         <button className="btn btn-link text-12 px-0 py-0">
-          View Vrbo taxes
+          View Plist taxes
         </button>
       </div>
       <h1 className="text-20 lh-1 fw-600">Your taxes</h1>

@@ -31,6 +31,7 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     subcategory_id: null,
     description: "",
     star_rating: null,
+    event_date_time: null,
     location_address_id: null,
     address: {
       line1: "",
@@ -45,6 +46,9 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     accessibilityInfo: "",
     isAccessibilityEnabled: false,
     faqs: [],
+    // Organizer contact info
+    contact_email: "",
+    contact_phone: "",
     // ListingDetails fields
     listingDetails: {
       size: "",
@@ -105,6 +109,10 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
     loadData();
   }, [type]);
 
+  useEffect(() => {
+    console.log("listingData", listingData.listingDetails);
+  }, [listingData.listingDetails]);
+
   const loadListingData = async () => {
     if (!isEditMode || !listingId) return;
 
@@ -136,6 +144,9 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
           accessibilityInfo: listing.accessibility_info || "",
           isAccessibilityEnabled: listing.accessibility_info !== null && listing.accessibility_info !== undefined,
           status: listing.status || "draft",
+          // Organizer contact info
+          contact_email: listing.contact_email || "",
+          contact_phone: listing.contact_phone || "",
           // ListingDetails fields
           listingDetails: {
             size: listing.size || "",
@@ -258,10 +269,14 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         }
       }
 
+      // Prepare listingDetails data
+      const listingDetailsData = listingData.listingDetails || {};
+      
+      // Process accessibility_info from listingDetails
       let accessibilityInfoValue = null;
-      if (listingData.isAccessibilityEnabled) {
-        if (listingData.accessibilityInfo && typeof listingData.accessibilityInfo === 'string') {
-          const trimmed = listingData.accessibilityInfo.trim();
+      if (listingDetailsData.is_accessibility_enabled) {
+        if (listingDetailsData.accessibility_info && typeof listingDetailsData.accessibility_info === 'string') {
+          const trimmed = listingDetailsData.accessibility_info.trim();
           accessibilityInfoValue = trimmed;
         } else {
           accessibilityInfoValue = "";
@@ -269,9 +284,6 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
       } else {
         accessibilityInfoValue = null;
       }
-
-      // Prepare listingDetails data
-      const listingDetailsData = listingData.listingDetails || {};
       
       // Prepare listingPrice data
       const listingPriceData = listingData.listingPrice || {};
@@ -286,7 +298,11 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         subcategory_id: listingData.subcategory_id || null,
         description: listingData.description.trim(),
         star_rating: listingData.star_rating || null,
-        event_date_time: listingData.event_date_time || null,
+        event_date_time: listingData.event_date_time 
+          ? (typeof listingData.event_date_time === 'string' 
+              ? listingData.event_date_time 
+              : (listingData.event_date_time.toISOString ? listingData.event_date_time.toISOString() : listingData.event_date_time))
+          : null,
         accessibility_info: accessibilityInfoValue,
         location_address_id: locationAddressId || null,
         ...(isEditMode ? {} : { status: "draft" }),
@@ -303,8 +319,8 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         performer_speaker_info: listingDetailsData.performer_speaker_info || null,
         age_restriction: listingDetailsData.age_restriction || null,
         special_offers_id: listingDetailsData.special_offers_id || null,
-        parking_info: listingDetailsData.parking_info || null,
-        covid_safety_guidelines: listingDetailsData.covid_safety_guidelines || null,
+        parking_info: listingDetailsData.parking_info && listingDetailsData.parking_info.trim() ? listingDetailsData.parking_info.trim() : null,
+        covid_safety_guidelines: listingDetailsData.covid_safety_guidelines && listingDetailsData.covid_safety_guidelines.trim() ? listingDetailsData.covid_safety_guidelines.trim() : null,
         cancellation_policy_id: listingDetailsData.cancellation_policy_id || null,
         // ListingPrice fields (stored as JSON)
         ticket_prices: listingPriceData.ticket_prices && Array.isArray(listingPriceData.ticket_prices) && listingPriceData.ticket_prices.length > 0
@@ -326,6 +342,9 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         available_dates: calendarData.available_dates && Array.isArray(calendarData.available_dates) && calendarData.available_dates.length > 0
           ? calendarData.available_dates
           : null,
+        // Organizer contact info
+        contact_email: listingData.contact_email && listingData.contact_email.trim() ? listingData.contact_email.trim() : null,
+        contact_phone: listingData.contact_phone && listingData.contact_phone.trim() ? listingData.contact_phone.trim() : null,
       };
 
       if (isEditMode && listingId) {
@@ -518,7 +537,6 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
       name: "Listing Details",
       content: (
         <ListingDetails
-          bookingType={listingData.booking_type}
           listingId={isEditMode ? listingId : null}
           data={listingData.listingDetails}
           onUpdate={(details) => updateListingData("listingDetails", details)}
