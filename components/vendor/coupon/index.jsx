@@ -897,6 +897,7 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
               numberOfMonths={1}
               offsetY={10}
               format="YYYY-MM-DD"
+              minDate={new DateObject()}
             />
           </div>
         </div>
@@ -916,7 +917,7 @@ const ModalContent = ({ coupon, onClose, onSuccess, submitting, setSubmitting })
               numberOfMonths={1}
               offsetY={10}
               format="YYYY-MM-DD"
-              minDate={startDate}
+              minDate={startDate || new DateObject()}
             />
           </div>
         </div>

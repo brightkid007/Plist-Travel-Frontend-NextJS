@@ -126,6 +126,7 @@ const Calendar = ({ data, onUpdate }) => {
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
+            minDate={new DateObject()}
           />
         </div>
       </div>
@@ -143,6 +144,7 @@ const Calendar = ({ data, onUpdate }) => {
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
+            minDate={data?.calendar_start_date ? new DateObject(data.calendar_start_date) : new DateObject()}
           />
         </div>
       </div>
