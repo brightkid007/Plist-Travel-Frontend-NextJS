@@ -272,7 +272,7 @@ const Location = ({ address = {}, onUpdate }) => {
 
       <div className="col-12 mt-5">
         <div className="d-flex items-center justify-between mb-10">
-          <h1 className="text-14 lh-12 fw-500">Street Address</h1>
+          <h1 className="text-14 lh-12 fw-500">Street Address <span className="text-red-1">*</span></h1>
           {savedAddresses.length > 0 && (
             <button
               type="button"

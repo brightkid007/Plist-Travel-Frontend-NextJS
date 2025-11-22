@@ -92,6 +92,7 @@ const Calendar = ({ data, onUpdate }) => {
     <div className="row y-gap-10 x-gap-10">
       <h1 className="text-20 lh-14 fw-600">Availability Calendar</h1>
       <div className="col-12">
+        <h1 className="text-14 lh-12 fw-500 mb-10">Calendar Type <span className="text-red-1">*</span></h1>
         {calendarTypes.map((type, index) => (
           <div className="d-flex items-end gap-2" key={index}>
             <Radio
@@ -126,7 +127,6 @@ const Calendar = ({ data, onUpdate }) => {
             numberOfMonths={1}
             offsetY={10}
             format="MMMM DD"
-            minDate={new DateObject()}
           />
         </div>
       </div>

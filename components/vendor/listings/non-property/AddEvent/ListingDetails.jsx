@@ -148,7 +148,7 @@ const ListingDetails = ({
                 <div className="col-12 text-14 lh-12 fw-500">
                   Day {idx + 1}:
                 </div>
-                <h1 className="text-14 lh-12 fw-500">Event Date</h1>
+                <h1 className="text-14 lh-12 fw-500">Event Date <span className="text-red-1">*</span></h1>
                 <input
                   className="border-light rounded-8 py-5 px-15 w-full"
                   type="date"
@@ -175,7 +175,7 @@ const ListingDetails = ({
               </div>
 
               <div className="col-md-3 col-sm-6">
-                <h1 className="text-14 lh-12 fw-500">Event Start Time</h1>
+                <h1 className="text-14 lh-12 fw-500">Event Start Time <span className="text-red-1">*</span></h1>
                 <input
                   className="border-light rounded-8 py-5 px-15 w-full"
                   type="time"
@@ -185,7 +185,7 @@ const ListingDetails = ({
               </div>
 
               <div className="col-md-3 col-sm-6">
-                <h1 className="text-14 lh-12 fw-500">Event End Time</h1>
+                <h1 className="text-14 lh-12 fw-500">Event End Time <span className="text-red-1">*</span></h1>
                 <input
                   className="border-light rounded-8 py-5 px-15 w-full"
                   type="time"

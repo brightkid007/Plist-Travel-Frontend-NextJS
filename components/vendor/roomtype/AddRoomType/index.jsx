@@ -326,6 +326,20 @@ const AddRoomType = ({ listingId: propListingId, subtype: propSubtype, roomTypeI
         }
       });
 
+      // Ensure TIME fields are properly converted (empty strings to null)
+      const timeFields = ['check_in_hour', 'check_out_hour', 'late_check_in'];
+      timeFields.forEach((field) => {
+        if (dataToSave[field] !== undefined) {
+          if (dataToSave[field] === "" || dataToSave[field] === null || dataToSave[field] === undefined) {
+            dataToSave[field] = null;
+          } else if (typeof dataToSave[field] === 'string') {
+            // Trim and validate - if empty after trim, set to null
+            const trimmed = dataToSave[field].trim();
+            dataToSave[field] = trimmed === "" ? null : trimmed;
+          }
+        }
+      });
+
       let response;
       let savedRoomTypeId = roomTypeId;
 
@@ -368,7 +382,7 @@ const AddRoomType = ({ listingId: propListingId, subtype: propSubtype, roomTypeI
             }
           }
 
-          router.push(`/vendor/room-type/add?listingId=${listingId}&subtype=${subtype}&roomTypeId=${savedRoomTypeId}`);
+          router.push(`/vendor/room-type`);
           return;
         }
       }

@@ -299,7 +299,13 @@ const index = ({ listingId, isEditMode = false, type: propType }) => {
         age_restriction: listingDetailsData.age_restriction || null,
         is_multi_day: listingDetailsData.is_multi_day || false,
         event_days: listingDetailsData.event_days && Array.isArray(listingDetailsData.event_days) && listingDetailsData.event_days.length > 0
-          ? listingDetailsData.event_days
+          ? listingDetailsData.event_days.map(day => ({
+              ...day,
+              start_time: day.start_time && day.start_time.trim() ? day.start_time.trim() : null,
+              end_time: day.end_time && day.end_time.trim() ? day.end_time.trim() : null,
+              date: day.date && day.date.trim() ? day.date.trim() : null,
+              duration: day.duration && day.duration.trim() ? day.duration.trim() : null,
+            }))
           : null,
         special_offers_id: listingDetailsData.special_offers_id || null,
         parking_info: listingDetailsData.parking_info && listingDetailsData.parking_info.trim() ? listingDetailsData.parking_info.trim() : null,
