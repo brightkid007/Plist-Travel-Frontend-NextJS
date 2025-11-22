@@ -439,7 +439,7 @@ const Conversation = () => {
             </div>
           </div>
         </div>
-        <div className="col-8">
+        <div className="col-8 h-100">
           <div className="bg-white rounded-8 border-light d-flex flex-column h-100">
             {activeChat ? (
               <>
