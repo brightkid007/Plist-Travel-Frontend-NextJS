@@ -142,14 +142,14 @@ const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="11" className="text-center py-40">
+                <td colSpan="11" className="align-middle py-40">
                   <CircularProgress size={24} />
                   <p className="text-14 text-light-1 mt-10">Loading coupons...</p>
                 </td>
               </tr>
             ) : coupons.length === 0 ? (
               <tr>
-                <td colSpan="11" className="text-center py-40">
+                <td colSpan="11" className="align-middle py-40">
                   <p className="text-14 text-light-1">No coupons found. Create your first coupon to get started.</p>
                 </td>
               </tr>
