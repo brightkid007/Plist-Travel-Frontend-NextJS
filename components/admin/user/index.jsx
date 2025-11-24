@@ -16,6 +16,7 @@ import {
   deleteAdminUser,
   updateUserStatus,
   getAdminRoles,
+  getVendorRoles,
   isAuthenticated
 } from "@/helpers/backend_helper";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
@@ -31,14 +32,22 @@ const index = () => {
   // Backend integration states
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [roles, setRoles] = useState([]);
+  const [adminRoles, setAdminRoles] = useState([]);
+  const [vendorRoles, setVendorRoles] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   
   // Check if current user is Super Admin
   const isSuperAdmin = () => {
     if (!currentUser || currentUser.role !== "admin") return false;
-    const currentUserRole = roles.find(r => r.id === currentUser.role_id);
+    const currentUserRole = adminRoles.find(r => r.id === currentUser.role_id);
     return currentUserRole?.name === "Super Admin";
+  };
+
+  // Get roles based on user role type
+  const getRolesForUser = (userRole) => {
+    if (userRole === "admin") return adminRoles;
+    if (userRole === "vendor") return vendorRoles;
+    return [];
   };
   
   // Check if user has permission for a specific resource and action
@@ -55,7 +64,6 @@ const index = () => {
     role_id: null
   });
   const [menuAnchor, setMenuAnchor] = useState({});
-  const menuRef = useRef({});
   
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -114,9 +122,10 @@ const index = () => {
           return;
         }
 
-        const [usersData, rolesData] = await Promise.all([
+        const [usersData, adminRolesData, vendorRolesData] = await Promise.all([
           getAdminUsers({ role: activeTab === "all" ? undefined : activeTab, includeDisabled: true }),
-          getAdminRoles()
+          getAdminRoles(),
+          getVendorRoles()
         ]);
 
         // Handle backend response structure: { status, message, data }
@@ -134,8 +143,12 @@ const index = () => {
         setUsers(mappedUsers);
         
         // Handle admin roles response structure
-        const adminRoles = rolesData?.data?.data || rolesData?.data || [];
-        setRoles(adminRoles);
+        const adminRolesList = adminRolesData?.data?.data || adminRolesData?.data || [];
+        setAdminRoles(adminRolesList);
+        
+        // Handle vendor roles response structure
+        const vendorRolesList = vendorRolesData?.data?.data || vendorRolesData?.data || [];
+        setVendorRoles(vendorRolesList);
         
       } catch (err) {
         console.error("Failed to load users:", err);
@@ -158,7 +171,8 @@ const index = () => {
         is_active: formData.is_active,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        ...(formData.role === "admin" && formData.role_id && { role_id: formData.role_id })
+        ...(formData.role === "admin" && formData.role_id && { role_id: formData.role_id }),
+        ...(formData.role === "vendor" && formData.role_id && { role_id: formData.role_id })
       };
 
       const response = await createAdminUser(userPayload);
@@ -200,7 +214,8 @@ const index = () => {
         is_active: formData.is_active,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        ...(formData.role === "admin" && formData.role_id && { role_id: formData.role_id })
+        ...(formData.role === "admin" && formData.role_id && { role_id: formData.role_id }),
+        ...(formData.role === "vendor" && formData.role_id && { role_id: formData.role_id })
       };
 
       // Only include password if it's provided
@@ -259,9 +274,12 @@ const index = () => {
         status: newStatus,
         is_active: newStatus === "Active"
       });
-      setUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, status: newStatus, is_active: newStatus === "Active" } : user
-      ));
+      
+      // Reload users to get updated data from backend
+      const usersData = await getAdminUsers({ role: activeTab === "all" ? undefined : activeTab, includeDisabled: true });
+      const mappedUsers = (usersData?.data?.data || usersData?.data || []).map(mapUserData).filter(Boolean);
+      setUsers(mappedUsers);
+      
       setMenuAnchor({ [userId]: null });
       toast.success(`User ${newStatus.toLowerCase()}d successfully`);
     } catch (err) {
@@ -273,14 +291,21 @@ const index = () => {
   const handleAssignRole = async (userId, roleId) => {
     try {
       const user = users.find(u => u.id === userId);
-      if (!user || user.role !== "admin") return;
+      if (!user || (user.role !== "admin" && user.role !== "vendor")) return;
+
+      // Block role assignment if user is inactive
+      if (user.status !== "Active" || !user.is_active) {
+        toast.error("Cannot assign role to inactive user. Please activate the user first.");
+        return;
+      }
 
       await updateAdminUser(userId, { 
         role_id: roleId || null
       });
       
-      // Update local state
-      const selectedRole = roles.find(r => r.id === roleId);
+      // Update local state - get role from appropriate roles array
+      const rolesList = user.role === "admin" ? adminRoles : vendorRoles;
+      const selectedRole = rolesList.find(r => r.id === roleId);
       setUsers(prev => prev.map(u => 
         u.id === userId ? { 
           ...u, 
@@ -383,7 +408,7 @@ const index = () => {
                 <tr>
                   <th>User</th>
                   <th>Role</th>
-                  <th>Admin Role</th>
+                  <th className="text-nowrap">User Type</th>
                   <th>Status</th>
                   <th className="text-nowrap">Created At</th>
                   <th>Action</th>
@@ -436,16 +461,16 @@ const index = () => {
                         </span>
                       </td>
                       <td className="align-middle">
-                        {user.role === "admin" ? (
-                          checkPermission("user_management", "update") && isSuperAdmin() ? (
+                        {(user.role === "admin" || user.role === "vendor") ? (
+                          checkPermission("user_management", "update") && (user.role === "admin" ? isSuperAdmin() : true) && user.status === "Active" ? (
                             <select
                               className="form-select border-light rounded-8 py-5 px-10 text-12 w-140"
                               value={user.role_id || ""}
-                              disabled={currentUser.id === user.id}
+                              disabled={user.role === "admin" && currentUser.id === user.id}
                               onChange={(e) => handleAssignRole(user.id, e.target.value ? parseInt(e.target.value) : null)}
                             >
                               <option value="">No Role</option>
-                              {roles.map((role) => (
+                              {getRolesForUser(user.role).map((role) => (
                                 <option key={role.id} value={role.id}>
                                   {role.name}
                                 </option>
@@ -453,7 +478,10 @@ const index = () => {
                             </select>
                           ) : (
                             <span className="text-12 text-light-1">
-                              {roles.find(r => r.id === user.role_id)?.name || "No Role"}
+                              {getRolesForUser(user.role).find(r => r.id === user.role_id)?.name || "No Role"}
+                              {user.status !== "Active" && (
+                                <span className="text-10 text-red-1 d-block mt-2">(Inactive - Cannot assign role)</span>
+                              )}
                             </span>
                           )
                         ) : (
@@ -543,7 +571,8 @@ const index = () => {
       >
         <div className="px-20 py-20">
           <ModalContent 
-            roles={roles} 
+            adminRoles={adminRoles}
+            vendorRoles={vendorRoles}
             formData={formData}
             setFormData={setFormData}
             title="Create New User"
@@ -577,7 +606,8 @@ const index = () => {
       >
         <div className="px-20 py-20">
           <ModalContent 
-            roles={roles} 
+            adminRoles={adminRoles}
+            vendorRoles={vendorRoles}
             formData={formData}
             setFormData={setFormData}
             title="Edit User"
@@ -615,7 +645,7 @@ const index = () => {
   );
 };
 
-const ModalContent = ({ roles = [], formData, setFormData, title, description, isEdit = false, isSuperAdmin = false }) => {
+const ModalContent = ({ adminRoles = [], vendorRoles = [], formData, setFormData, title, description, isEdit = false, isSuperAdmin = false }) => {
   const roleOptions = [
     { label: "Admin", value: "admin" },
     { label: "Vendor", value: "vendor" },
@@ -628,7 +658,12 @@ const ModalContent = ({ roles = [], formData, setFormData, title, description, i
     { label: "Inactive", value: false },
   ];
 
-  const adminRoleOptions = roles.map(role => ({
+  const adminRoleOptions = adminRoles.map(role => ({
+    label: role.name,
+    value: role.id,
+  }));
+
+  const vendorRoleOptions = vendorRoles.map(role => ({
     label: role.name,
     value: role.id,
   }));
@@ -707,6 +742,18 @@ const ModalContent = ({ roles = [], formData, setFormData, title, description, i
           placeholder="Select Admin Role"
           gridClass="col-12 mt-5"
           options={adminRoleOptions}
+          value={formData.role_id ? String(formData.role_id) : ""}
+          onChange={(e) => handleChange("role_id", e.target.value ? parseInt(e.target.value) : null)}
+        />
+      )}
+
+      {formData.role === "vendor" && (
+        <FormInput
+          label="Vendor Role"
+          type="select"
+          placeholder="Select Vendor Role"
+          gridClass="col-12 mt-5"
+          options={vendorRoleOptions}
           value={formData.role_id ? String(formData.role_id) : ""}
           onChange={(e) => handleChange("role_id", e.target.value ? parseInt(e.target.value) : null)}
         />

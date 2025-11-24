@@ -3,17 +3,20 @@
 import AdminDashboardLayout from "../common/layout";
 import { Ellipsis, Plus, Edit2, Trash2, Menu, Eye, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Dialog, Menu as MuiMenu, MenuItem, CircularProgress } from "@mui/material";
+import { Dialog, Menu as MuiMenu, MenuItem, CircularProgress, Tabs, Tab } from "@mui/material";
 import { Checkbox } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
-import { getAdminRoles, createAdminRole, updateAdminRole, deleteAdminRole } from "@/helpers/backend_helper";
+import { 
+  getAdminRoles, createAdminRole, updateAdminRole, deleteAdminRole,
+  getVendorRoles, createVendorRole, updateVendorRole, deleteVendorRole
+} from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
-// Permission structure (CRUD where applicable)
-const PERMISSION_STRUCTURE = [
+// Admin Permission structure (CRUD where applicable)
+const ADMIN_PERMISSION_STRUCTURE = [
   {
     id: "user_management",
     label: "User Management",
@@ -32,12 +35,6 @@ const PERMISSION_STRUCTURE = [
     description: "Review and manage listings from vendors across the platform",
     actions: { view: true, create: true, update: true, delete: true },
   },
-  // {
-  //   id: "agent_management",
-  //   label: "Agent Management",
-  //   description: "Review and manage Agents across the platform",
-  //   actions: { view: true, create: true, update: true, delete: true },
-  // },
   {
     id: "system_settings",
     label: "System Settings",
@@ -104,18 +101,78 @@ const PERMISSION_STRUCTURE = [
     description: "Manage support tickets and customer inquiries.",
     actions: { view: true, create: true, update: true, delete: true },
   },
-  // {
-  //   id: "content_management",
-  //   label: "Content Management",
-  //   description: "Manage content.",
-  //   actions: { view: true, create: true, update: true, delete: true },
-  // },
+];
+
+// Vendor Permission structure
+const VENDOR_PERMISSION_STRUCTURE = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    description: "Monitor business performance with industry-specific metrics",
+    actions: { view: true, create: false, update: false, delete: false },
+  },
+  {
+    id: "profile_management",
+    label: "Profile Management",
+    description: "Manage vendor profile and business information",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "user_management",
+    label: "User Management",
+    description: "Manage customers and users associated with your business",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "listings_management",
+    label: "Listings Management",
+    description: "Manage your property and service listings",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "addon_services_management",
+    label: "Add-On Services Management",
+    description: "Manage your Add-On services, pricing, and availability",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "bookings_calendar_management",
+    label: "Bookings & Calendar Management",
+    description: "Manage and track bookings (Calendars and Bookings Only)",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "rateplan_management",
+    label: "Rate Plan Management",
+    description: "Manage and track bookings (Rate Plan Only)",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "messaging_communication",
+    label: "Messaging & Communication",
+    description: "Communicate with customers, agents, and platform administrators",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "coupon_promotion_management",
+    label: "Coupon & Promotion Management",
+    description: "Create and manage coupon codes and seasonal promotions",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
+  {
+    id: "subscription_payment_management",
+    label: "Subscription & Payment Management",
+    description: "Manage subscription plan, view payment history, and update billing information",
+    actions: { view: true, create: true, update: true, delete: true },
+  },
 ];
 
 const index = () => {
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
-  const [roles, setRoles] = useState([]);
+  const [activeTab, setActiveTab] = useState(0); // 0 = Admin Roles, 1 = Vendor Roles
+  const [adminRoles, setAdminRoles] = useState([]);
+  const [vendorRoles, setVendorRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
@@ -126,29 +183,38 @@ const index = () => {
   const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
   const [viewingRole, setViewingRole] = useState(null);
 
-  // Check if current user is Super Admin
-  const isSuperAdmin = () => {
-    if (!currentUser || currentUser.role !== "admin") return false;
-    const currentUserRole = roles.find(r => r.id === currentUser.role_id);
-    return currentUserRole?.name === "Super Admin";
-  };
+  const isAdminTab = activeTab === 0;
+  const roles = isAdminTab ? adminRoles : vendorRoles;
+  const permissionStructure = isAdminTab ? ADMIN_PERMISSION_STRUCTURE : VENDOR_PERMISSION_STRUCTURE;
 
   useEffect(() => {
     loadRoles();
-  }, []);
+  }, [activeTab]);
 
   const loadRoles = async () => {
     setLoading(true);
     try {
-      const response = await getAdminRoles();
-      const data = response?.data?.data || response?.data || [];
-      setRoles(data);
+      if (isAdminTab) {
+        const response = await getAdminRoles();
+        const data = response?.data?.data || response?.data || [];
+        setAdminRoles(data);
+      } else {
+        const response = await getVendorRoles();
+        const data = response?.data?.data || response?.data || [];
+        setVendorRoles(data);
+      }
     } catch (error) {
       toast.error(error?.message || "Failed to load roles");
       console.error(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setMenuAnchor(null);
+    setSelectedRole(null);
   };
 
   const handleClose = () => {
@@ -171,7 +237,11 @@ const index = () => {
   const handleDeleteConfirm = async () => {
     if (!roleToDelete) return;
     try {
-      await deleteAdminRole(roleToDelete.id);
+      if (isAdminTab) {
+        await deleteAdminRole(roleToDelete.id);
+      } else {
+        await deleteVendorRole(roleToDelete.id);
+      }
       toast.success("Role deleted successfully");
       setDeleteModalOpen(false);
       setRoleToDelete(null);
@@ -245,11 +315,16 @@ const index = () => {
       </div>
 
       <div className="bg-white rounded-8 border-light px-20 py-15">
+        <Tabs value={activeTab} onChange={handleTabChange} className="mb-20">
+          <Tab label="Admin Roles" />
+          <Tab label="Vendor Roles" />
+        </Tabs>
+
         <div className="d-flex items-center justify-between mb-10">
           <div className="d-flex flex-column">
-            <h1 className="text-24 lh-14 fw-500">Roles</h1>
+            <h1 className="text-24 lh-14 fw-500">{isAdminTab ? "Admin Roles" : "Vendor Roles"}</h1>
             <div className="text-14 lh-14 text-light-1">
-              Manage roles and permissions
+              Manage {isAdminTab ? "admin" : "vendor"} roles and permissions
             </div>
           </div>
         </div>
@@ -281,10 +356,10 @@ const index = () => {
                     </td>
                   </tr>
                 ) : (
-                  roles.map((role) => (
+                  roles.map((role, index) => (
                     <tr key={role.id}>
                       <td className="align-middle">
-                        <div className="text-12 fw-500">{role.id}</div>
+                        <div className="text-12 fw-500">{index + 1}</div>
                       </td>
                       <td className="align-middle">
                         <div className="mb-2">
@@ -310,7 +385,7 @@ const index = () => {
                         </div>
                       </td>
                       <td className="align-middle">
-                        <div className="text-14 text-center">{role.user_count || 0}</div>
+                        <div className="text-14 text-center">{role.user_count || role.vendor_count || 0}</div>
                       </td>
                       <td className="align-middle">
                         <div className="text-14 fw-500 text-center">
@@ -381,6 +456,8 @@ const index = () => {
         <div className="px-20 py-20">
           <RoleModal
             role={editingRole}
+            roleType={isAdminTab ? "admin" : "vendor"}
+            permissionStructure={permissionStructure}
             onClose={handleClose}
             onSuccess={loadRoles}
           />
@@ -413,6 +490,7 @@ const index = () => {
         <div className="px-20 py-20">
           <PermissionsViewModal
             role={viewingRole}
+            permissionStructure={permissionStructure}
             onClose={() => {
               setPermissionsModalOpen(false);
               setViewingRole(null);
@@ -424,7 +502,7 @@ const index = () => {
   );
 };
 
-const RoleModal = ({ role, onClose, onSuccess }) => {
+const RoleModal = ({ role, roleType, permissionStructure, onClose, onSuccess }) => {
   const [roleName, setRoleName] = useState(role?.name || "");
   const [description, setDescription] = useState(role?.description || "");
   const [permissions, setPermissions] = useState(role?.permissions || {});
@@ -453,7 +531,7 @@ const RoleModal = ({ role, onClose, onSuccess }) => {
   };
 
   const handleParentChange = (permId, checked) => {
-    const perm = PERMISSION_STRUCTURE.find((p) => p.id === permId);
+    const perm = permissionStructure.find((p) => p.id === permId);
     if (!perm) return;
 
     const a = perm.actions;
@@ -484,10 +562,18 @@ const RoleModal = ({ role, onClose, onSuccess }) => {
       };
 
       if (role) {
-        await updateAdminRole(role.id, data);
+        if (roleType === "admin") {
+          await updateAdminRole(role.id, data);
+        } else {
+          await updateVendorRole(role.id, data);
+        }
         toast.success("Role updated successfully");
       } else {
-        await createAdminRole(data);
+        if (roleType === "admin") {
+          await createAdminRole(data);
+        } else {
+          await createVendorRole(data);
+        }
         toast.success("Role created successfully");
       }
       onSuccess();
@@ -505,7 +591,7 @@ const RoleModal = ({ role, onClose, onSuccess }) => {
         {role ? "Edit Role" : "Create New Role"}
       </h1>
       <div className="text-12 text-light-1 lh-14 mb-15">
-        Define a new role with specific permissions
+        Define a new {roleType} role with specific permissions
       </div>
 
       <FormInput
@@ -533,8 +619,8 @@ const RoleModal = ({ role, onClose, onSuccess }) => {
         <h1 className="text-14 lh-14 fw-500 mb-10">
           Permissions<span className="text-red-1">*</span>
         </h1>
-        <div className="border-light rounded-8 p-15" style={{ maxHeight: 400, overflowY: "auto" }}>
-          {PERMISSION_STRUCTURE.map((perm) => {
+        <div className="border-light rounded-8 px-15 py-10" style={{ maxHeight: 400, overflowY: "auto" }}>
+          {permissionStructure.map((perm) => {
             const base = { view: false, create: false, update: false, delete: false };
             const permData = { ...base, ...(permissions[perm.id] || {}) };
             const a = perm.actions;
@@ -627,7 +713,7 @@ const RoleModal = ({ role, onClose, onSuccess }) => {
   );
 };
 
-const PermissionsViewModal = ({ role, onClose }) => {
+const PermissionsViewModal = ({ role, permissionStructure, onClose }) => {
   if (!role) return null;
 
   const getActionBadges = (permData) => {
@@ -655,7 +741,7 @@ const PermissionsViewModal = ({ role, onClose }) => {
       </div>
 
       <div className="border-light rounded-8 p-15" style={{ maxHeight: 500, overflowY: "auto" }}>
-        {PERMISSION_STRUCTURE.map((perm) => {
+        {permissionStructure.map((perm) => {
           const permData = role.permissions?.[perm.id] || {};
           const hasAnyPermission = permData.view || permData.create || permData.update || permData.delete;
 

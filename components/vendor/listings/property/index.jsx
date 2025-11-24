@@ -9,8 +9,10 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import ListingDetailModal from "../../common/ListingDetailModal";
+import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 
 const index = ({ isProperty = true }) => {
+  const { hasPermission } = useVendorPermissions();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -276,6 +278,8 @@ const index = ({ isProperty = true }) => {
           <button
             className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
             onClick={() => router.push("/vendor/listings/select/property")}
+            disabled={!hasPermission("listings_management", "create")}
+            style={{ opacity: !hasPermission("listings_management", "create") ? 0.5 : 1, cursor: !hasPermission("listings_management", "create") ? "not-allowed" : "pointer" }}
           >
             <i className="icon-plus mr-10"></i> Add New{" "}
             {isProperty ? "Property" : "Listing"}
@@ -478,40 +482,51 @@ const index = ({ isProperty = true }) => {
                         {listing.status === "draft" && (
                           <MenuItem
                             onClick={() => {
-                              handleSubmit(listing.id);
+                              if (hasPermission("listings_management", "update")) {
+                                handleSubmit(listing.id);
+                              }
                             }}
                             className="text-12"
-                            disabled={submitting && listingToSubmit?.id === listing.id}
+                            disabled={!hasPermission("listings_management", "update") || (submitting && listingToSubmit?.id === listing.id)}
                           >
                             {submitting && listingToSubmit?.id === listing.id ? "Submitting..." : "Submit"}
                           </MenuItem>
                         )}
                         <MenuItem
                           onClick={() => {
-                            setSelectedListingIdForDetail(listing.id);
-                            setDetailModalOpen(true);
-                            setAnchorEl(null);
-                            setSelectedListingId(null);
+                            if (hasPermission("listings_management", "view")) {
+                              setSelectedListingIdForDetail(listing.id);
+                              setDetailModalOpen(true);
+                              setAnchorEl(null);
+                              setSelectedListingId(null);
+                            }
                           }}
                           className="text-12"
+                          disabled={!hasPermission("listings_management", "view")}
                         >
                           View Details
                         </MenuItem>
                         <MenuItem
                           onClick={() => {
-                            router.push(`/vendor/property/${listing.id}/edit?subtype=${listing.subtype}`);
-                            setAnchorEl(null);
-                            setSelectedListingId(null);
+                            if (hasPermission("listings_management", "update")) {
+                              router.push(`/vendor/property/${listing.id}/edit?subtype=${listing.subtype}`);
+                              setAnchorEl(null);
+                              setSelectedListingId(null);
+                            }
                           }}
                           className="text-12"
+                          disabled={!hasPermission("listings_management", "update")}
                         >
                           Edit
                         </MenuItem>
                         <MenuItem
                           onClick={() => {
-                            handleDeleteClick(listing.id);
+                            if (hasPermission("listings_management", "delete")) {
+                              handleDeleteClick(listing.id);
+                            }
                           }}
                           className="text-12 text-red-1"
+                          disabled={!hasPermission("listings_management", "delete")}
                         >
                           Delete
                         </MenuItem>

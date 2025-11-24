@@ -544,7 +544,7 @@ const BasicInfo = () => {
             />
           </div>
           <div className="text-18 fw-500 mt-10">Headquarters Business Address</div>
-          <div className="text-12 text-light-1 d-flex items-center gap-2 lh-1 py-0">
+          <div className="text-12 text-green-3 d-flex items-center gap-1 lh-1 py-0">
             <span className="material-symbols-outlined text-14" style={{ opacity: 0.7 }}>
               info
             </span>

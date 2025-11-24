@@ -6,8 +6,10 @@ import { getMyCoupons, deleteVendorCoupon } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 
 const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }) => {
+  const { hasPermission } = useVendorPermissions();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCouponId, setSelectedCouponId] = useState(null);
   const showMoreMenu = Boolean(anchorEl);
@@ -209,20 +211,35 @@ const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }
                       }}
                     >
                       <MenuItem
-                        onClick={() => handleViewClick(coupon.id)}
+                        onClick={() => {
+                          if (hasPermission("coupon_promotion_management", "view")) {
+                            handleViewClick(coupon.id);
+                          }
+                        }}
                         className="text-12"
+                        disabled={!hasPermission("coupon_promotion_management", "view")}
                       >
                         View
                       </MenuItem>
                       <MenuItem
-                        onClick={() => handleEditClick(coupon.id)}
+                        onClick={() => {
+                          if (hasPermission("coupon_promotion_management", "update")) {
+                            handleEditClick(coupon.id);
+                          }
+                        }}
                         className="text-12"
+                        disabled={!hasPermission("coupon_promotion_management", "update")}
                       >
                         Edit
                       </MenuItem>
                       <MenuItem
-                        onClick={() => handleDeleteClick(coupon.id)}
+                        onClick={() => {
+                          if (hasPermission("coupon_promotion_management", "delete")) {
+                            handleDeleteClick(coupon.id);
+                          }
+                        }}
                         className="text-12 text-red-1"
+                        disabled={!hasPermission("coupon_promotion_management", "delete")}
                       >
                         Delete
                       </MenuItem>

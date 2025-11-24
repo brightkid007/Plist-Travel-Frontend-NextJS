@@ -12,8 +12,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Filter from "../common/Filter";
 import { getVendorBookings, getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 
 const index = () => {
+  const { hasPermission } = useVendorPermissions();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -271,9 +273,13 @@ const index = () => {
             aria-haspopup="true"
             aria-expanded={showBookingMenu ? "true" : undefined}
             onClick={(event) => {
-              setAnchorEl(event.currentTarget);
+              if (hasPermission("bookings_calendar_management", "create")) {
+                setAnchorEl(event.currentTarget);
+              }
             }}
             className="bg-dark-blue text-white fw-400 text-14 py-10 px-15 rounded-8"
+            disabled={!hasPermission("bookings_calendar_management", "create")}
+            style={{ opacity: !hasPermission("bookings_calendar_management", "create") ? 0.5 : 1, cursor: !hasPermission("bookings_calendar_management", "create") ? "not-allowed" : "pointer" }}
           >
             {svgIcon.user_add}&nbsp;&nbsp; New Walk-in Booking
           </button>

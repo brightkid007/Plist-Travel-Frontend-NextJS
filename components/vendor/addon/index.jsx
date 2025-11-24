@@ -8,6 +8,7 @@ import { getAddOnServices, deleteAddOnService, getAddOnServiceById } from "@/hel
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -15,6 +16,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import CustomEventCalendar from "../common/CustomEventCalendar";
 
 const index = () => {
+  const { hasPermission } = useVendorPermissions();
   const router = useRouter();
   const [addOnServices, setAddOnServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,7 @@ const index = () => {
   const [deleting, setDeleting] = useState(false);
   const [selectedServiceForCalendar, setSelectedServiceForCalendar] = useState(null);
   const [loadingCalendar, setLoadingCalendar] = useState(false);
+  const [calendarActiveTab, setCalendarActiveTab] = useState("events");
 
   // Load add-on services from backend
   useEffect(() => {
@@ -138,7 +141,13 @@ const index = () => {
         <div className="col-auto ms-auto">
           <button
             className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
-            onClick={() => router.push("/vendor/addon/add")}
+            onClick={() => {
+              if (hasPermission("addon_services_management", "create")) {
+                router.push("/vendor/addon/add");
+              }
+            }}
+            disabled={!hasPermission("addon_services_management", "create")}
+            style={{ opacity: !hasPermission("addon_services_management", "create") ? 0.5 : 1, cursor: !hasPermission("addon_services_management", "create") ? "not-allowed" : "pointer" }}
           >
             New Add-on Service
           </button>
@@ -208,22 +217,36 @@ const index = () => {
                       >
                         <MenuItem
                           onClick={() => {
-                            setSelectedServiceForCalendar(row.id);
-                            handleMenuClose();
+                            if (hasPermission("addon_services_management", "view")) {
+                              setSelectedServiceForCalendar(row.id);
+                              setCalendarActiveTab("availability"); // Switch to availability tab
+                              handleMenuClose();
+                            }
                           }}
                           className="text-12"
+                          disabled={!hasPermission("addon_services_management", "view")}
                         >
                           View Calendar
                         </MenuItem>
                         <MenuItem
-                          onClick={() => handleEditClick(row.id)}
+                          onClick={() => {
+                            if (hasPermission("addon_services_management", "update")) {
+                              handleEditClick(row.id);
+                            }
+                          }}
                           className="text-12"
+                          disabled={!hasPermission("addon_services_management", "update")}
                         >
                           Edit
                         </MenuItem>
                         <MenuItem
-                          onClick={() => handleDeleteClick(row.id)}
+                          onClick={() => {
+                            if (hasPermission("addon_services_management", "delete")) {
+                              handleDeleteClick(row.id);
+                            }
+                          }}
                           className="text-12 text-red-1"
+                          disabled={!hasPermission("addon_services_management", "delete")}
                         >
                           Delete
                         </MenuItem>
@@ -241,6 +264,8 @@ const index = () => {
         selectedServiceId={selectedServiceForCalendar}
         onServiceChange={setSelectedServiceForCalendar}
         addOnServices={addOnServices}
+        activeTab={calendarActiveTab}
+        onTabChange={setCalendarActiveTab}
       />
 
       <ConfirmationModal
@@ -258,9 +283,14 @@ const index = () => {
   );
 };
 
-const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices }) => {
+const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, activeTab: externalActiveTab, onTabChange }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [events, setEvents] = useState([]);
+  const [internalActiveTab, setInternalActiveTab] = useState("events");
+  
+  // Use external activeTab if provided, otherwise use internal state
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
+  const setActiveTab = onTabChange || setInternalActiveTab;
 
   // Load selected service data
   useEffect(() => {
@@ -317,8 +347,6 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices }
     
     setEvents(calendarEvents);
   };
-
-  const [activeTab, setActiveTab] = useState("events");
 
   function renderEventContent(eventInfo) {
     return <span className="text-14 fw-500 lh-1">{eventInfo.event.title}</span>;

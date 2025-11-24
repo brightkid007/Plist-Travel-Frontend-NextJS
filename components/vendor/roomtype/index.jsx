@@ -272,7 +272,13 @@ const index = () => {
         <div className="col-md-auto d-flex justify-content-end">
           <button
             className="button -md bg-blue-1 px-15 py-10 fw-400 text-14 text-white rounded-8"
-            onClick={handleAddRoomTypeClick}
+            onClick={() => {
+              if (hasPermission("listings_management", "create")) {
+                handleAddRoomTypeClick();
+              }
+            }}
+            disabled={!hasPermission("listings_management", "create")}
+            style={{ opacity: !hasPermission("listings_management", "create") ? 0.5 : 1, cursor: !hasPermission("listings_management", "create") ? "not-allowed" : "pointer" }}
           >
             <i className="icon-plus mr-10"></i> Add New Room Type
           </button>
@@ -503,24 +509,37 @@ const index = () => {
                       >
                         <MenuItem
                           onClick={() => {
-                            setSelectedRoomTypeIdForDetail(row.id);
-                            setDetailModalOpen(true);
-                            setAnchorEl(null);
-                            setSelectedRoomTypeId(null);
+                            if (hasPermission("listings_management", "view")) {
+                              setSelectedRoomTypeIdForDetail(row.id);
+                              setDetailModalOpen(true);
+                              setAnchorEl(null);
+                              setSelectedRoomTypeId(null);
+                            }
                           }}
                           className="text-12"
+                          disabled={!hasPermission("listings_management", "view")}
                         >
                           View Details
                         </MenuItem>
                         <MenuItem
-                          onClick={() => handleEditClick(row.id)}
+                          onClick={() => {
+                            if (hasPermission("listings_management", "update")) {
+                              handleEditClick(row.id);
+                            }
+                          }}
                           className="text-12"
+                          disabled={!hasPermission("listings_management", "update")}
                         >
                           Edit Room Type
                         </MenuItem>
                         <MenuItem
-                          onClick={() => handleDeleteClick(row.id)}
+                          onClick={() => {
+                            if (hasPermission("listings_management", "delete")) {
+                              handleDeleteClick(row.id);
+                            }
+                          }}
                           className="text-12 text-red-1"
+                          disabled={!hasPermission("listings_management", "delete")}
                         >
                           Delete Room Type
                         </MenuItem>

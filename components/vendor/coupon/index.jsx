@@ -17,8 +17,10 @@ import {
   getListingSubcategories
 } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 
 const index = () => {
+  const { hasPermission } = useVendorPermissions();
   const [showModal, setShowModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [viewingCoupon, setViewingCoupon] = useState(null);
@@ -288,7 +290,13 @@ const index = () => {
         <div className="col-auto ms-auto">
           <button
             className="bg-dark-blue text-white fw-400 text-13 py-5 px-15 rounded-8"
-            onClick={handleCreateClick}
+            onClick={() => {
+              if (hasPermission("coupon_promotion_management", "create")) {
+                handleCreateClick();
+              }
+            }}
+            disabled={!hasPermission("coupon_promotion_management", "create")}
+            style={{ opacity: !hasPermission("coupon_promotion_management", "create") ? 0.5 : 1, cursor: !hasPermission("coupon_promotion_management", "create") ? "not-allowed" : "pointer" }}
           >
             <i className="icon-plus mr-10 fw-400 text-10"></i>
             Create New Coupon

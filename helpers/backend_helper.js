@@ -163,16 +163,27 @@ export const deleteAdminUser = (id) => {
 
 // Update user status (disable/enable)
 export const updateUserStatus = (id, data) => {
-  // Use PATCH to disable user
-  if (data.status === 'Inactive' || data.is_active === false) {
-    return AuthAPIClient.patch(`/users/${id}`, {}).then(response => {
-      if (response?.data) return response.data;
-      return response;
-    });
-  } else {
-    // Re-enable by setting disabledAt to null
-    return AuthAPIClient.update(`/users/${id}`, { disabledAt: null });
-  }
+  // Use PUT to update user status with both is_active and disabledAt
+  const updateData = {
+    is_active: data.is_active !== undefined ? data.is_active : (data.status === 'Active'),
+    disabledAt: data.status === 'Inactive' || data.is_active === false ? new Date().toISOString() : null
+  };
+  return AuthAPIClient.update(`/users/${id}`, updateData);
+};
+
+// Search customers (for vendors to add internal customers)
+export const searchCustomers = (searchTerm) => {
+  return AuthAPIClient.get("/users/search/customers", { search: searchTerm });
+};
+
+// Associate customer with vendor
+export const associateCustomerWithVendor = (customerId) => {
+  return AuthAPIClient.create(`/users/${customerId}/associate-vendor`, {});
+};
+
+// Remove customer association from vendor
+export const removeCustomerAssociation = (customerId) => {
+  return AuthAPIClient.delete(`/users/${customerId}/vendor-association`);
 };
 
 // Get user roles - Returns static roles list
@@ -205,6 +216,25 @@ export const updateAdminRole = (id, data) => AuthAPIClient.update(`/admin/roles/
 
 // Delete role
 export const deleteAdminRole = (id) => AuthAPIClient.delete(`/admin/roles/${id}`);
+
+// ===========================================
+// VENDOR ROLE MANAGEMENT (Auth-User Service)
+// ===========================================
+
+// Get all vendor roles
+export const getVendorRoles = (params) => AuthAPIClient.get("/vendor/roles", params);
+
+// Get vendor role by ID
+export const getVendorRoleById = (id) => AuthAPIClient.get(`/vendor/roles/${id}`);
+
+// Create vendor role
+export const createVendorRole = (data) => AuthAPIClient.create("/vendor/roles", data);
+
+// Update vendor role
+export const updateVendorRole = (id, data) => AuthAPIClient.update(`/vendor/roles/${id}`, data);
+
+// Delete vendor role
+export const deleteVendorRole = (id) => AuthAPIClient.delete(`/vendor/roles/${id}`);
 
 // BOOKING MANAGEMENT
 // Get all bookings (admin) - using BookingAPIClient
