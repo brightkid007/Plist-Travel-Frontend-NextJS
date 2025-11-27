@@ -9,8 +9,10 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import RoomTypeDetailModal from "./RoomTypeDetailModal";
+import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 
 const index = () => {
+  const { hasPermission } = useVendorPermissions();
   const [activeTab, setActiveTab] = useState("all");
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState(null);

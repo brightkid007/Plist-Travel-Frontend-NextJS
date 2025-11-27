@@ -1,16 +1,16 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { MoreVertical } from "lucide-react";
+import { Tag } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Menu as MuiMenu, MenuItem, CircularProgress } from "@mui/material";
 import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "react-toastify";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
-import { 
-  getAdminCommissions, 
-  deleteAdminCommission, 
-  updateCommissionStatus 
+import {
+  getAdminCommissions,
+  deleteAdminCommission,
+  updateCommissionStatus
 } from "@/helpers/backend_helper";
 
 const index = () => {
@@ -37,7 +37,7 @@ const index = () => {
       }
       const response = await getAdminCommissions(params);
       const commissions = response?.commissions || [];
-      
+
       // Map backend data to frontend format
       const mappedEntries = commissions.map((commission) => ({
         id: commission.id,
@@ -52,7 +52,7 @@ const index = () => {
         is_active: commission.is_active,
         user_id: commission.user_id,
       }));
-      
+
       setEntries(mappedEntries);
     } catch (error) {
       console.error("Error fetching commissions:", error);
@@ -152,9 +152,8 @@ const index = () => {
             {tabs.map((item) => (
               <div className="col-auto px-5" key={item.value}>
                 <button
-                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${
-                    activeTab === item.value ? "bg-white" : "text-light-1"
-                  }`}
+                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${activeTab === item.value ? "bg-white" : "text-light-1"
+                    }`}
                   onClick={() => {
                     setActiveTab(item.value);
                   }}
@@ -212,13 +211,19 @@ const index = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="10" className="text-center py-20">
-                      <CircularProgress size={24} />
+                      <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
+                        <CircularProgress size={24} />
+                        <span>Loading commissions...</span>
+                      </div>
                     </td>
                   </tr>
                 ) : entries.length === 0 ? (
                   <tr>
                     <td colSpan="10" className="text-center py-20">
-                      <div className="text-14 text-light-1">No commissions found</div>
+                      <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                        <Tag size={18} />
+                        <span>No commissions found</span>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -229,54 +234,52 @@ const index = () => {
                         : item.role.toLowerCase() === activeTab;
                     })
                     .map((entry, index) => (
-                    <tr key={index}>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.id}
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.name}
-                      </td>
+                      <tr key={index}>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.id}
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.name}
+                        </td>
 
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        <span
-                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                            {
-                              Vendor: "bg-green-4 text-green-3",
-                              Agent: "bg-blue-1-05 text-blue-1",
-                            }[entry.role] || "bg-gray-4 text-gray-3"
-                          }`}
-                        >
-                          {entry.role}
-                        </span>
-                      </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          <span
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${{
+                                Vendor: "bg-green-4 text-green-3",
+                                Agent: "bg-blue-1-05 text-blue-1",
+                              }[entry.role] || "bg-gray-4 text-gray-3"
+                              }`}
+                          >
+                            {entry.role}
+                          </span>
+                        </td>
 
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.listing_type}
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.plan}
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.commission_rate}%
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.total_revenue}
-                      </td>
-                      <td className="align-middle text-12 lh-16 fw-500">
-                        {entry.total_commission}
-                      </td>
-                      <td className="align-middle">
-                        <span
-                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                            entry.status === "Active"
-                              ? "bg-green-1 text-green-2"
-                              : "bg-light-2 text-dark-1"
-                          }`}
-                        >
-                          {entry.status}
-                        </span>
-                      </td>
-                      {/* <td className="align-middle">
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.listing_type}
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.plan}
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.commission_rate}%
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.total_revenue}
+                        </td>
+                        <td className="align-middle text-12 lh-16 fw-500">
+                          {entry.total_commission}
+                        </td>
+                        <td className="align-middle">
+                          <span
+                            className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${entry.status === "Active"
+                                ? "bg-green-1 text-green-2"
+                                : "bg-light-2 text-dark-1"
+                              }`}
+                          >
+                            {entry.status}
+                          </span>
+                        </td>
+                        {/* <td className="align-middle">
                         <div className="position-relative">
                           <button
                             className="border-0 bg-transparent cursor-pointer  px-5 py-5"
@@ -313,7 +316,7 @@ const index = () => {
                           </MuiMenu>
                         </div>
                       </td> */}
-                    </tr>
+                      </tr>
                     ))
                 )}
               </tbody>

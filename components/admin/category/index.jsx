@@ -1,9 +1,9 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { Plus, MoreVertical } from "lucide-react";
+import { Plus, MoreVertical, Tag } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Dialog, Menu, MenuItem } from "@mui/material";
+import { Dialog, Menu, MenuItem, CircularProgress } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import {
   getListingCategories,
@@ -508,14 +508,20 @@ const index = () => {
                   {loading ? (
                     <tr>
                       <td colSpan="5" className="text-center py-20">
-                        <div className="text-14 text-light-1">Loading...</div>
+                        <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
+                          <CircularProgress size={24} />
+                          <span>Loading categories...</span>
+                        </div>
                       </td>
                     </tr>
                   ) : activeTab == "category" ? (
                     filteredCategories.length === 0 ? (
                       <tr>
                         <td colSpan="5" className="text-center py-20">
-                          <div className="text-14 text-light-1">No categories found</div>
+                          <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                            <Tag size={18} />
+                            <span>No categories found</span>
+                          </div>
                         </td>
                       </tr>
                     ) : (

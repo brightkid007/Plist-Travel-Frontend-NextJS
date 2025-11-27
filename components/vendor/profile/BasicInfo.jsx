@@ -486,7 +486,7 @@ const BasicInfo = () => {
     <div className="row y-gap-15 bg-white px-10 py-20 rounded-8">
       <div className="text-20 fw-600">Basic Infomation</div>
       {loading ? (
-        <div className="col-12 mt-5 d-flex items-center gap-10">
+        <div className="col-12 mt-5 d-flex justify-center items-center gap-2">
           <CircularProgress size={20} thickness={5} />
           <div className="text-16 text-light-1">Loading profile...</div>
         </div>

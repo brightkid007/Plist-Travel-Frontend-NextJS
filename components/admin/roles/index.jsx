@@ -1,14 +1,14 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { Ellipsis, Plus, Edit2, Trash2, Menu, Eye, Lock } from "lucide-react";
+import { Ellipsis, Plus, Edit2, Trash2, Tag, Eye, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog, Menu as MuiMenu, MenuItem, CircularProgress, Tabs, Tab } from "@mui/material";
 import { Checkbox } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
-import { 
+import {
   getAdminRoles, createAdminRole, updateAdminRole, deleteAdminRole,
   getVendorRoles, createVendorRole, updateVendorRole, deleteVendorRole
 } from "@/helpers/backend_helper";
@@ -345,14 +345,19 @@ const index = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="text-center py-20">
-                      <CircularProgress size={24} />
-                      <div className="text-14 text-light-1 mt-10">Loading roles...</div>
+                      <div className="d-flex items-center justify-center gap-2">
+                        <CircularProgress size={24} />
+                        <div className="text-14 text-light-1 mt-10">Loading roles...</div>
+                      </div>
                     </td>
                   </tr>
                 ) : roles.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-20 text-14 text-light-1">
-                      No roles found
+                      <div className="d-flex flex-column items-center justify-center gap-2">
+                        <Tag size={18} />
+                        <div className="text-14 text-light-1">No roles found</div>
+                      </div>
                     </td>
                   </tr>
                 ) : (

@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { useVendorPermissions } from "@/hooks/useVendorPermissions";
+import { Tag } from "lucide-react";
 
 const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }) => {
   const { hasPermission } = useVendorPermissions();
@@ -98,7 +99,7 @@ const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }
 
   const getSubtypeName = (subtype) => {
     if (!subtype) return "N/A";
-    
+
     const subtypeMap = {
       "Hotel": "Hotels",
       "Space": "Spaces",
@@ -111,7 +112,7 @@ const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }
 
   const getListingTypeName = (listingType) => {
     if (!listingType) return "N/A";
-    
+
     const typeMap = {
       "property": "Property",
       "tour": "Tour",
@@ -145,14 +146,19 @@ const CouponList = ({ onEdit, onView, onRefresh, coupons = [], loading = false }
             {loading ? (
               <tr>
                 <td colSpan="11" className="align-middle py-40">
-                  <CircularProgress size={24} />
-                  <p className="text-14 text-light-1 mt-10">Loading coupons...</p>
+                  <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
+                    <CircularProgress size={24} />
+                    <span>Loading coupons...</span>
+                  </div>
                 </td>
               </tr>
             ) : coupons.length === 0 ? (
               <tr>
                 <td colSpan="11" className="align-middle py-40">
-                  <p className="text-14 text-light-1">No coupons found. Create your first coupon to get started.</p>
+                  <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                    <Tag size={18} />
+                    <span>No coupons found</span>
+                  </div>
                 </td>
               </tr>
             ) : (
