@@ -300,7 +300,7 @@ const index = ({ filters = {} }) => {
               {loading && (
                 <tr>
                   <td colSpan={7} className="text-center py-20">
-                    <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                    <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                       <CircularProgress size={18} thickness={5} />
                       <span>Loading notifications...</span>
                     </div>

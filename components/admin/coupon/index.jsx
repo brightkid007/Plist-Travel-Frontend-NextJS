@@ -238,7 +238,7 @@ const index = () => {
                 {loading && (
                   <tr>
                     <td className="py-15 text-center" colSpan={8}>
-                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                      <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                         <CircularProgress size={18} thickness={5} />
                         <span>Loading coupons...</span>
                       </div>
@@ -248,7 +248,7 @@ const index = () => {
                 {!loading && entries.length === 0 && (
                   <tr>
                     <td className="py-15 text-center" colSpan={8}>
-                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                      <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                         <Tag size={18} />
                         <span>No coupons found.</span>
                       </div>

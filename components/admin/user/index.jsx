@@ -417,8 +417,8 @@ const index = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-20">
-                      <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                    <td colSpan="6" className="text-center py-20">
+                      <div className="d-flex items-center justify-center gap-2 text-16 text-light-1">
                         <CircularProgress size={20} thickness={5} />
                         <span>Loading users...</span>
                       </div>
@@ -426,8 +426,8 @@ const index = () => {
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-20">
-                      <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                    <td colSpan="6" className="text-center py-20">
+                      <div className="d-flex items-center justify-center gap-2 text-16 text-light-1">
                         <UserX size={18} />
                         <span>No users found</span>
                       </div>

@@ -129,7 +129,7 @@ const index = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={8} className="text-center py-20">
-                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                      <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                         <CircularProgress size={24} />
                         <span>Loading listings...</span>
                       </div>
@@ -138,7 +138,7 @@ const index = () => {
                 ) : filteredListings.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-20">
-                      <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                      <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
                         <BookOpen size={32} className="text-light-1 mb-5" />
                         <span>No listings found</span>
                       </div>

@@ -366,7 +366,7 @@ const index = () => {
                           <div className="d-flex align-items-center gap-2 flex-wrap">
                             <strong className="text-dark">{role.name}</strong>
                             {role.is_system && (
-                              <span className="badge bg-primary d-inline-flex align-items-center gap-1">
+                              <span className="badge bg-primary d-flex align-items-center gap-1">
                                 <Lock size={10} />
                                 System
                               </span>

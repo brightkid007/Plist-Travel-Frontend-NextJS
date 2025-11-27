@@ -257,7 +257,7 @@ const ReviewList = ({ detail = false, filters = {} }) => {
           {loading ? (
             <tr>
               <td colSpan="7" className="text-center py-20">
-                <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                <div className="d-flex items-center justify-center gap-2 text-16 text-light-1">
                   <CircularProgress size={20} thickness={5} />
                   <span>Loading reviews...</span>
                 </div>
@@ -266,7 +266,7 @@ const ReviewList = ({ detail = false, filters = {} }) => {
           ) : reviews.length === 0 ? (
             <tr>
               <td colSpan="7" className="text-center py-20">
-                <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                <div className="d-flex items-center justify-center gap-2 text-16 text-light-1">
                   <span>No reviews found.</span>
                 </div>
               </td>

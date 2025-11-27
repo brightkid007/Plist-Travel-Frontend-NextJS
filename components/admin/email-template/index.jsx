@@ -333,7 +333,7 @@ const index = () => {
                 {loading && (
                   <tr>
                     <td colSpan={6} className="text-center py-20">
-                      <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                      <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                         <CircularProgress size={20} thickness={5} />
                         <span>Loading email templates...</span>
                       </div>

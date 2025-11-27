@@ -63,7 +63,7 @@ const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelec
           {loading && (
             <tr>
               <td colSpan={8} className="text-center py-20">
-                <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                   <CircularProgress size={20} thickness={5} />
                   <span>Loading tickets...</span>
                 </div>
