@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Bell, MoreVertical, Edit, Trash2, Send } from "lucide-react";
+import { Bell, MoreVertical, Send } from "lucide-react";
 import { getNotifications, deleteNotification, sendNotification, getNotificationById, updateNotification } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
-import { Dialog, Checkbox, CircularProgress } from "@mui/material";
+import { Dialog, Checkbox, CircularProgress, Menu, MenuItem } from "@mui/material";
 import FormInput from "@/components/common/form/FormInput";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -26,6 +26,16 @@ const index = ({ filters = {} }) => {
   });
   const [scheduleLater, setScheduleLater] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState({});
+
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, notificationId) => {
+    setMenuAnchor({ [notificationId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (notificationId) => {
+    setMenuAnchor({ [notificationId]: null });
+  };
 
   useEffect(() => {
     loadNotifications();
@@ -67,7 +77,7 @@ const index = ({ filters = {} }) => {
 
   const handleDeleteConfirm = async () => {
     if (!notificationToDelete) return;
-    
+
     try {
       await deleteNotification(notificationToDelete);
       toast.success("Notification deleted successfully");
@@ -92,7 +102,7 @@ const index = ({ filters = {} }) => {
     try {
       const response = await getNotificationById(id);
       const notificationData = response?.notification || response?.data?.notification || response?.data || response || {};
-      
+
       const scheduledAt = notificationData.scheduled_at || notificationData.scheduled_date;
       const hasScheduledDate = scheduledAt && new Date(scheduledAt) > new Date();
 
@@ -135,11 +145,11 @@ const index = ({ filters = {} }) => {
         audience: editFormData.audience || "all",
         target_audience: editFormData.audience || "all",
         recipient_type: editFormData.audience || "all",
-        scheduled_at: scheduleLater && editFormData.scheduledAt 
-          ? (editFormData.scheduledAt.toISOString ? editFormData.scheduledAt.toISOString() : (editFormData.scheduledAt.format ? editFormData.scheduledAt.format("YYYY-MM-DD HH:mm:ss") : dayjs(editFormData.scheduledAt).format("YYYY-MM-DD HH:mm:ss"))) 
+        scheduled_at: scheduleLater && editFormData.scheduledAt
+          ? (editFormData.scheduledAt.toISOString ? editFormData.scheduledAt.toISOString() : (editFormData.scheduledAt.format ? editFormData.scheduledAt.format("YYYY-MM-DD HH:mm:ss") : dayjs(editFormData.scheduledAt).format("YYYY-MM-DD HH:mm:ss")))
           : null,
-        scheduled_date: scheduleLater && editFormData.scheduledAt 
-          ? (editFormData.scheduledAt.format ? editFormData.scheduledAt.format("YYYY-MM-DD HH:mm:ss") : dayjs(editFormData.scheduledAt).format("YYYY-MM-DD HH:mm:ss")) 
+        scheduled_date: scheduleLater && editFormData.scheduledAt
+          ? (editFormData.scheduledAt.format ? editFormData.scheduledAt.format("YYYY-MM-DD HH:mm:ss") : dayjs(editFormData.scheduledAt).format("YYYY-MM-DD HH:mm:ss"))
           : null,
       };
 
@@ -162,15 +172,15 @@ const index = ({ filters = {} }) => {
     try {
       // Find the notification in the current list to validate it
       const notification = notifications.find(n => n.id === id);
-      
+
       if (notification) {
         // Validate notification content using existing data
         const title = notification.title?.trim() || "";
         const message = notification.message?.trim() || "";
-        
+
         // Check if title/message are invalid (empty or default values)
-        if (!title || title === "No title" || title === "Untitled Notification" || 
-            !message || message === "No message") {
+        if (!title || title === "No title" || title === "Untitled Notification" ||
+          !message || message === "No message") {
           toast.error("Cannot send notification: Title and message must be valid. Please edit the notification first.");
           return;
         }
@@ -179,8 +189,8 @@ const index = ({ filters = {} }) => {
       // If validation passes, send the notification
       const response = await sendNotification(id);
       const notificationStatus = response?.notification?.status || response?.data?.notification?.status || response?.status;
-      const message = notificationStatus === "scheduled" 
-        ? "Notification scheduled successfully!" 
+      const message = notificationStatus === "scheduled"
+        ? "Notification scheduled successfully!"
         : "Notification sent successfully!";
       toast.success(message);
       loadNotifications();
@@ -226,7 +236,7 @@ const index = ({ filters = {} }) => {
     // Date range filter
     if (filters.startDate || filters.endDate) {
       const notificationDate = n.sentDate !== "—" ? new Date(n.sentDate) : new Date(n.scheduledDate || n.sentDate || Date.now());
-      
+
       if (filters.startDate) {
         const startDate = new Date(filters.startDate);
         startDate.setHours(0, 0, 0, 0);
@@ -271,109 +281,123 @@ const index = ({ filters = {} }) => {
           <Bell size={18} className="mr-10" /> View System Notifications
         </button> */}
       </div>
-      <table className="table-2 col-12">
-        <thead>
-          <tr className="text-light-1 fw-600">
-            <th>Title</th>
-            <th>Audience</th>
-            <th>Send Date</th>
-            <th>Status</th>
-            <th>Opens</th>
-            <th>Clicks</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading && (
-            <tr>
-              <td colSpan={7} className="text-center py-20">
-                <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
-                  <CircularProgress size={18} thickness={5} />
-                  <span>Loading notifications...</span>
-                </div>
-              </td>
-            </tr>
-          )}
-          {!loading && filteredNotifications.length === 0 ? (
-            <tr>
-              <td colSpan={7} className="text-center py-40">
-                <div className="d-flex flex-column items-center gap-10">
-                  <Bell size={32} className="text-light-1" />
-                  <div className="text-16 text-light-1 fw-500">No notifications found.</div>
-                  <div className="text-14 text-light-1">
-                    {searchTerm ? "Try a different search term." : "Create your first notification to get started."}
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ) : (
-            !loading && filteredNotifications.map((row) => (
-              <tr key={row.id}>
-                <td className="align-middle">{row.title}</td>
-                <td className="align-middle">{row.audience}</td>
-                <td className="align-middle">{formatDate(row.sentDate)}</td>
-                <td className="align-middle">
-                  <span
-                    className={`rounded-100 px-10 py-5 text-center text-12 fw-500 ${
-                      {
-                        scheduled: "border-light text-dark-1",
-                        sent: "bg-dark-blue text-white",
-                        draft: "bg-light-2 text-dark-1",
-                      }[row.status?.toLowerCase()] || "border-light text-dark-1"
-                    }`}
-                  >
-                    {row.status?.charAt(0).toUpperCase() + row.status?.slice(1).toLowerCase() || "Draft"}
-                  </span>
-                </td>
-                <td className="align-middle">{row.opens}</td>
-                <td className="align-middle">{row.clicks}</td>
-                <td className="align-middle px-10">
-                  <div className="d-flex items-center justify-content-end">
-                    {row.status?.toLowerCase() === "draft" && (
-                      <button
-                        onClick={() => handleSend(row.id)}
-                        className={`border-light rounded-8 px-10 py-10 mr-5 ${
-                          hasPermission("notification_management", "update")
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed opacity-50"
-                        }`}
-                        title="Send notification"
-                        disabled={!hasPermission("notification_management", "update")}
-                      >
-                        <Send size={14} className="text-dark-1" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleEditClick(row.id)}
-                      className={`border-light rounded-8 px-10 py-10 mr-5 ${
-                        hasPermission("notification_management", "update")
-                          ? "cursor-pointer"
-                          : "cursor-not-allowed opacity-50"
-                      }`}
-                      title="Edit notification"
-                      disabled={!hasPermission("notification_management", "update")}
-                    >
-                      <Edit size={14} className="text-dark-1" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(row.id)}
-                      className={`border-light rounded-8 px-10 py-10 ${
-                        hasPermission("notification_management", "delete")
-                          ? "cursor-pointer"
-                          : "cursor-not-allowed opacity-50"
-                      }`}
-                      title="Delete notification"
-                      disabled={!hasPermission("notification_management", "delete")}
-                    >
-                      <Trash2 size={14} className="text-red-1" />
-                    </button>
-                  </div>
-                </td>
+
+      <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
+        <div className="overflow-scroll scroll-bar-1">
+          <table className="table-2 col-12 text-14">
+            <thead className="text-nowrap">
+              <tr>
+                <th>Title</th>
+                <th>Audience</th>
+                <th>Send Date</th>
+                <th>Status</th>
+                <th>Opens</th>
+                <th>Clicks</th>
+                <th>Action</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {loading && (
+                <tr>
+                  <td colSpan={7} className="text-center py-20">
+                    <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                      <CircularProgress size={18} thickness={5} />
+                      <span>Loading notifications...</span>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {!loading && filteredNotifications.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-40">
+                    <div className="d-flex flex-column items-center gap-10">
+                      <Bell size={32} className="text-light-1" />
+                      <div className="text-16 text-light-1 fw-500">No notifications found.</div>
+                      <div className="text-14 text-light-1">
+                        {searchTerm ? "Try a different search term." : "Create your first notification to get started."}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                !loading && filteredNotifications.map((row) => (
+                  <tr key={row.id}>
+                    <td className="align-middle">{row.title}</td>
+                    <td className="align-middle">{row.audience}</td>
+                    <td className="align-middle">{formatDate(row.sentDate)}</td>
+                    <td className="align-middle">
+                      <span
+                        className={`rounded-100 px-10 py-5 text-center text-12 fw-500 ${{
+                          scheduled: "border-light text-dark-1",
+                          sent: "bg-dark-blue text-white",
+                          draft: "bg-light-2 text-dark-1",
+                        }[row.status?.toLowerCase()] || "border-light text-dark-1"
+                          }`}
+                      >
+                        {row.status?.charAt(0).toUpperCase() + row.status?.slice(1).toLowerCase() || "Draft"}
+                      </span>
+                    </td>
+                    <td className="align-middle">{row.opens}</td>
+                    <td className="align-middle">{row.clicks}</td>
+                    <td className="align-middle px-10">
+                      <div className="position-relative">
+                        <button
+                          className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                          onClick={(e) => handleMenuOpen(e, row.id)}
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                        <Menu
+                          anchorEl={menuAnchor[row.id]}
+                          open={Boolean(menuAnchor[row.id])}
+                          onClose={() => handleMenuClose(row.id)}
+                        >
+                          {row.status?.toLowerCase() === "draft" && (
+                            <MenuItem
+                              disabled={!hasPermission("notification_management", "update")}
+                              onClick={() => {
+                                if (hasPermission("notification_management", "update")) {
+                                  handleSend(row.id);
+                                  handleMenuClose(row.id);
+                                }
+                              }}
+                            >
+                              <Send size={14} className="mr-10" /> Send
+                            </MenuItem>
+                          )}
+                          <MenuItem
+                            disabled={!hasPermission("notification_management", "update")}
+                            onClick={() => {
+                              if (hasPermission("notification_management", "update")) {
+                                handleEditClick(row.id);
+                                handleMenuClose(row.id);
+                              }
+                            }}
+                          >
+                            Edit
+                          </MenuItem>
+                          <MenuItem
+                            disabled={!hasPermission("notification_management", "delete")}
+                            onClick={() => {
+                              if (hasPermission("notification_management", "delete")) {
+                                handleDeleteClick(row.id);
+                                handleMenuClose(row.id);
+                              }
+                            }}
+                            className="text-red-2"
+                          >
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <Dialog
         open={deleteDialogOpen}

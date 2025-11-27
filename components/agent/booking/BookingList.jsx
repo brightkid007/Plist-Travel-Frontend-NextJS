@@ -56,8 +56,8 @@ const BookingList = () => {
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
-      <table className="table-2 col-12">
-        <thead>
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
           <tr className="text-light-1 fw-600">
             <th>Image</th>
             <th>Name</th>

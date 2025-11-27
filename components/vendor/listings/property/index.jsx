@@ -385,8 +385,8 @@ const index = ({ isProperty = true }) => {
 
       <div className="bg-white rounded-8 border-light px-15 py-5">
         <div className="overflow-scroll scroll-bar-1">
-          <table className="table-2 col-12">
-            <thead>
+          <table className="table-2 col-12 text-14">
+            <thead className="text-nowrap">
               <tr className="text-light-1 fw-600">
                 <th>Name</th>
                 <th>Type</th>

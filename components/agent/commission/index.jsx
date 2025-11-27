@@ -167,8 +167,8 @@ const index = () => {
         </div>
         <h1 className="text-16 lh-14 fw-500">Tier Requirements</h1>
         <div className="overflow-scroll scroll-bar-1">
-          <table className="table-5 col-12">
-            <thead>
+          <table className="table-5 col-12 text-14">
+            <thead className="text-nowrap">
               <tr className="text-light-1 fw-600 border-bottom-light">
                 <th>Tier Level</th>
                 <th>Booking Volume Required</th>
@@ -207,8 +207,8 @@ const index = () => {
           Your tier-based commission rates for each service category
         </div>
         <div className="overflow-scroll scroll-bar-1">
-          <table className="table-5 col-12">
-            <thead>
+          <table className="table-5 col-12 text-14">
+            <thead className="text-nowrap">
               <tr className="text-light-1 fw-600 border-bottom-light">
                 <th>Service Category</th>
                 <th>Local Vendor Rate</th>

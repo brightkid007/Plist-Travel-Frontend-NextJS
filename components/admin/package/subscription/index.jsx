@@ -1,8 +1,8 @@
 "use client";
 
-import { Plus, Receipt, Package } from "lucide-react";
+import { Plus, Receipt, Package, MoreVertical } from "lucide-react";
 import AdminDashboardLayout from "../../common/layout";
-import { Dialog, Checkbox, CircularProgress } from "@mui/material";
+import { Dialog, Checkbox, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getPackageSubscriptions, exportPackageSubscriptionsPdf } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -48,6 +48,16 @@ const SubscriptionList = () => {
   const [editTrialEnd, setEditTrialEnd] = useState(null);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [menuAnchor, setMenuAnchor] = useState({});
+
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, subscriptionId) => {
+    setMenuAnchor({ [subscriptionId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (subscriptionId) => {
+    setMenuAnchor({ [subscriptionId]: null });
+  };
   const [packages, setPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -357,9 +367,9 @@ const SubscriptionList = () => {
             </button> */}
           </div>
         </div>
-        <table className="table-2 col-12 text-12 text-nowrap">
-          <thead>
-            <tr className="text-light-1 fw-600">
+        <table className="table-2 col-12 text-14">
+          <thead className="text-nowrap">
+            <tr>
               {visibleColumns.business_name && (<th>Business Name</th>)}
               {visibleColumns.package_name && (<th>Package Name</th>)}
               {visibleColumns.status && (<th>Status</th>)}
@@ -378,7 +388,7 @@ const SubscriptionList = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="text-center py-20">
+                <td colSpan={13} className="text-center py-20">
                   <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
                     <CircularProgress size={24} />
                     <span>Loading subscriptions...</span>
@@ -387,7 +397,7 @@ const SubscriptionList = () => {
               </tr>
             ) : filteredRows.length === 0 ? (
               <tr>
-                <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="text-center py-20">
+                <td colSpan={13} className="text-center py-20">
                   <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
                     <Package size={32} className="text-light-1 mb-5" />
                     <span>No subscriptions found</span>
@@ -420,51 +430,59 @@ const SubscriptionList = () => {
                 {visibleColumns.paid_amount && (<td className="align-middle text-12">{row.paid_amount}</td>)}
                 {visibleColumns.paid_via && (<td className="align-middle text-12">{row.paid_via}</td>)}
                 {visibleColumns.transaction_id && (<td className="align-middle text-12">{row.transaction_id}</td>)}
-                {visibleColumns.actions && (<td className="align-middle d-flex items-center gap-1">
-                  <span
-                    className={`rounded-8 px-10 text-center text-12 fw-500 ${
-                      hasPermission("package_management", "update")
-                        ? "border-blue-1 text-blue-1 cursor-pointer"
-                        : "border-light-2 text-light-1 cursor-not-allowed opacity-50"
-                    }`}
-                    onClick={() => {
-                      if (!hasPermission("package_management", "update")) {
-                        toast.error("You don't have permission to update subscription status");
-                        return;
-                      }
-                      setActiveRow(row);
-                      setStatusValue(row.status || 'Pending');
-                      setTxnId(row.transaction_id || '');
-                      setShowStatusModal(true);
-                    }}
-                  >
-                    Status
-                  </span>
-                  <span
-                    className={`rounded-8 px-10 text-center text-12 fw-500 ${
-                      hasPermission("package_management", "update")
-                        ? "border-green-2 text-green-2 cursor-pointer"
-                        : "border-light-2 text-light-1 cursor-not-allowed opacity-50"
-                    }`}
-                    onClick={() => {
-                      if (!hasPermission("package_management", "update")) {
-                        toast.error("You don't have permission to edit subscriptions");
-                        return;
-                      }
-                      const parse = (s) => {
-                        if (!s) return null;
-                        const d = dayjs(s, ["YYYY-MM-DD", "DD/MM/YYYY"], true);
-                        return d.isValid() ? d : null;
-                      };
-                      setActiveRow(row);
-                      setEditStart(parse(row.start_date));
-                      setEditEnd(parse(row.end_date));
-                      setEditTrialEnd(parse(row.trial_end_date));
-                      setShowEditModal(true);
-                    }}
-                  >
-                    Edit
-                  </span>
+                {visibleColumns.actions && (<td className="align-middle">
+                  <div className="position-relative">
+                    <button
+                      className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                      onClick={(e) => handleMenuOpen(e, row.id)}
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                    <Menu
+                      anchorEl={menuAnchor[row.id]}
+                      open={Boolean(menuAnchor[row.id])}
+                      onClose={() => handleMenuClose(row.id)}
+                    >
+                      <MenuItem 
+                        disabled={!hasPermission("package_management", "update")}
+                        onClick={() => {
+                          if (hasPermission("package_management", "update")) {
+                            setActiveRow(row);
+                            setStatusValue(row.status || 'Pending');
+                            setTxnId(row.transaction_id || '');
+                            setShowStatusModal(true);
+                            handleMenuClose(row.id);
+                          } else {
+                            toast.error("You don't have permission to update subscription status");
+                          }
+                        }}
+                      >
+                        Update Status
+                      </MenuItem>
+                      <MenuItem 
+                        disabled={!hasPermission("package_management", "update")}
+                        onClick={() => {
+                          if (hasPermission("package_management", "update")) {
+                            const parse = (s) => {
+                              if (!s) return null;
+                              const d = dayjs(s, ["YYYY-MM-DD", "DD/MM/YYYY"], true);
+                              return d.isValid() ? d : null;
+                            };
+                            setActiveRow(row);
+                            setEditStart(parse(row.start_date));
+                            setEditEnd(parse(row.end_date));
+                            setEditTrialEnd(parse(row.trial_end_date));
+                            setShowEditModal(true);
+                            handleMenuClose(row.id);
+                          } else {
+                            toast.error("You don't have permission to edit subscriptions");
+                          }
+                        }}
+                      >
+                        Edit
+                      </MenuItem>
+                    </Menu>
+                  </div>
                 </td>)}
               </tr>
               ))

@@ -46,9 +46,9 @@ const TicketList = ({ filterType = "all", tickets = [], loading = false, onSelec
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
-      <table className="table-2 col-12">
-        <thead>
-          <tr className="text-light-1 fw-600">
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
+          <tr>
             <th>Id</th>
             <th>Customer</th>
             <th>Subject</th>

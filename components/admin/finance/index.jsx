@@ -175,10 +175,10 @@ const index = () => {
         <div className="text-14 lh-14 text-light-1">
           Review and approve manually entered listing from vendors
         </div> */}
-        <div className="bg-white rounded-8 border-light py-5 mt-10">
+        <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
+            <table className="table-2 text-14 col-12">
+              <thead className="text-nowrap">
                 <tr>
                   <th>Invoice</th>
                   <th>Customer/Vendor</th>

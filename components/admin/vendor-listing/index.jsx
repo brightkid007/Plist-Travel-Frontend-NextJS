@@ -1,13 +1,10 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { useRouter } from "next/navigation";
-import { BookOpen, Ellipsis, Mail, MapPin, Phone, Plus } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Dialog, CircularProgress } from "@mui/material";
-import { Checkbox } from "@mui/material";
-import FormInput from "@/components/common/form/FormInput";
-import { getAdminListings, approveListing, rejectListing, setListingStatus } from "@/helpers/backend_helper";
+import { CircularProgress } from "@mui/material";
+import { getAdminListings, setListingStatus } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { usePermissions } from "@/hooks/usePermissions";
 const index = () => {
@@ -89,9 +86,8 @@ const index = () => {
             {tabs.map((item) => (
               <div className="col-auto px-5" key={item.value}>
                 <button
-                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${
-                    activeTab === item.value ? "bg-white" : "text-light-1"
-                  }`}
+                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${activeTab === item.value ? "bg-white" : "text-light-1"
+                    }`}
                   onClick={() => {
                     setActiveTab(item.value);
                   }}
@@ -114,10 +110,10 @@ const index = () => {
             <option value="rejected">Rejected</option>
           </select>
         </div>
-        <div className="bg-white rounded-8 border-light py-5 mt-10">
+        <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
+            <table className="table-2 text-14 col-12">
+              <thead className="text-nowrap">
                 <tr>
                   <th>Image</th>
                   <th>Name</th>
@@ -169,14 +165,14 @@ const index = () => {
                       </td>
                       <td className="align-middle">
                         <div className="d-flex items-center gap-1 text-12">
-                          <MapPin size={14} /> {
+                          {
                             entry?.location_address
                               ? [
-                                  entry.location_address.line1,
-                                  entry.location_address.city,
-                                  entry.location_address.state,
-                                  entry.location_address.country,
-                                ].filter(Boolean).join(", ")
+                                entry.location_address.line1,
+                                entry.location_address.city,
+                                entry.location_address.state,
+                                entry.location_address.country,
+                              ].filter(Boolean).join(", ")
                               : (entry?.location || entry?.city || entry?.address || "-")
                           }
                         </div>
@@ -200,7 +196,7 @@ const index = () => {
                           value={(entry?.status || "").toString().toLowerCase()}
                           onChange={(e) => onChangeStatus(entry?.id, e.target.value)}
                           disabled={!hasPermission("vendor_listing_management", "update")}
-                          style={{ 
+                          style={{
                             opacity: !hasPermission("vendor_listing_management", "update") ? 0.5 : 1,
                             cursor: !hasPermission("vendor_listing_management", "update") ? "not-allowed" : "pointer"
                           }}

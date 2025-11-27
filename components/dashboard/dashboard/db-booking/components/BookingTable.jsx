@@ -45,8 +45,8 @@ const BookingTable = () => {
         <div className="tabs__content pt-30 js-tabs-content">
           <div className="tabs__pane -tab-item-1 is-tab-el-active">
             <div className="overflow-scroll scroll-bar-1">
-              <table className="table-3 -border-bottom col-12">
-                <thead className="bg-light-2">
+              <table className="table-2 col-12 text-14">
+                <thead className="bg-light-2 text-nowrap">
                   <tr>
                     <th>Type</th>
                     <th>Title</th>

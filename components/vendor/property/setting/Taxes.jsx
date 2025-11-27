@@ -73,8 +73,8 @@ const Taxes = () => {
       </div>
 
       <div className="overflow-scroll scroll-bar-1 pt-10">
-        <table className="table-2 col-12 text-12">
-          <thead>
+        <table className="table-2 col-12 text-14">
+          <thead className="text-nowrap">
             <tr>
               <th>Taxing authority</th>
               <th>Government level</th>

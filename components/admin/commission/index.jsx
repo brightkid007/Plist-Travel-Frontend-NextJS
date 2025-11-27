@@ -175,7 +175,7 @@ const index = () => {
               Manage commission rates for vendors and agents
             </div>
           </div>
-          <div className="d-flex items-center gap-2">
+          {/* <div className="d-flex items-center gap-2">
             {activeTab === "vendor" && (
               <select className="form-select border-light h-45 px-15 w-140">
                 <option value="all">All Vendors</option>
@@ -189,12 +189,12 @@ const index = () => {
             <select className="form-select border-light h-45 px-15 w-140">
               <option value="all">All Locations</option>
             </select>
-          </div>
+          </div> */}
         </div>
-        <div className="bg-white rounded-8 border-light py-5 mt-10">
+        <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
+            <table className="table-2 text-14 col-12">
+              <thead className="text-nowrap">
                 <tr>
                   <th>ID</th>
                   <th>Name</th>

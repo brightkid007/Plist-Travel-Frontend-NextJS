@@ -2,9 +2,9 @@
 
 import AgentDashboardLayout from "../common/layout";
 import { useState, useEffect, useMemo } from "react";
-import { Dialog, Drawer, CircularProgress } from "@mui/material";
+import { Dialog, Drawer, CircularProgress, Menu, MenuItem } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Eye, Edit, Trash2, MailX } from "lucide-react";
+import { MoreVertical, MailX } from "lucide-react";
 import { MailOutline } from "@mui/icons-material";
 import { getEmailTemplates, deleteEmailTemplate } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -34,8 +34,18 @@ const index = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState({});
 
   const router = useRouter();
+
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, templateId) => {
+    setMenuAnchor({ [templateId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (templateId) => {
+    setMenuAnchor({ [templateId]: null });
+  };
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -308,9 +318,9 @@ const index = () => {
         </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-2 col-12">
-              <thead>
-                <tr className="text-light-1 fw-600">
+            <table className="table-2 col-12 text-14">
+              <thead className="text-nowrap">
+                <tr>
                   <th>Template Name</th>
                   <th>Category</th>
                   <th>Subject</th>
@@ -355,38 +365,56 @@ const index = () => {
                         </span>
                       </td>
                       <td className="align-middle">
-                        <div className="d-flex items-center justify-end">
-                          <Eye
-                            size={18}
-                            className={`mr-5 ${hasPermission("email_template", "view") ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
-                            onClick={() => {
-                              if (hasPermission("email_template", "view")) {
-                                setPreview(row);
-                                handleOpenModal();
-                              } else {
-                                toast.error("You don't have permission to view email templates");
-                              }
-                            }}
-                            title="Preview template"
-                          />
-                          <Edit
-                            size={18}
-                            className={`mr-5 ${hasPermission("email_template", "update") ? "cursor-pointer text-blue-1" : "cursor-not-allowed opacity-50 text-light-1"}`}
-                            onClick={() => {
-                              if (hasPermission("email_template", "update")) {
-                                router.push(`/admin/email-template/add?edit=${row.id}`);
-                              } else {
-                                toast.error("You don't have permission to edit email templates");
-                              }
-                            }}
-                            title="Edit template"
-                          />
-                          <Trash2
-                            size={18}
-                            className={`${hasPermission("email_template", "delete") ? "cursor-pointer text-red-1" : "cursor-not-allowed opacity-50 text-light-1"}`}
-                            onClick={() => handleDeleteClick(row.id, row.name)}
-                            title="Delete template"
-                          />
+                        <div className="position-relative">
+                          <button
+                            className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                            onClick={(e) => handleMenuOpen(e, row.id)}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          <Menu
+                            anchorEl={menuAnchor[row.id]}
+                            open={Boolean(menuAnchor[row.id])}
+                            onClose={() => handleMenuClose(row.id)}
+                          >
+                            <MenuItem 
+                              disabled={!hasPermission("email_template", "view")}
+                              onClick={() => {
+                                if (hasPermission("email_template", "view")) {
+                                  setPreview(row);
+                                  handleOpenModal();
+                                  handleMenuClose(row.id);
+                                } else {
+                                  toast.error("You don't have permission to view email templates");
+                                }
+                              }}
+                            >
+                              Preview
+                            </MenuItem>
+                            <MenuItem 
+                              disabled={!hasPermission("email_template", "update")}
+                              onClick={() => {
+                                if (hasPermission("email_template", "update")) {
+                                  router.push(`/admin/email-template/add?edit=${row.id}`);
+                                  handleMenuClose(row.id);
+                                } else {
+                                  toast.error("You don't have permission to edit email templates");
+                                }
+                              }}
+                            >
+                              Edit
+                            </MenuItem>
+                            <MenuItem 
+                              disabled={!hasPermission("email_template", "delete")}
+                              onClick={() => {
+                                handleDeleteClick(row.id, row.name);
+                                handleMenuClose(row.id);
+                              }}
+                              className="text-red-2"
+                            >
+                              Delete
+                            </MenuItem>
+                          </Menu>
                         </div>
                       </td>
                     </tr>

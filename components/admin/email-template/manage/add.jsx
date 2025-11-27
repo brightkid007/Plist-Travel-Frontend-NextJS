@@ -380,7 +380,7 @@ const index = () => {
               <strong>Category:</strong> {formData.category}
             </div>
           </div>
-          <div className="border-light rounded-8 p-15 bg-light-2">
+          <div className="border-light rounded-8 px-15 py-10 bg-light-2">
             {type === "text" ? (
               <div
                 className="text-14 lh-20"

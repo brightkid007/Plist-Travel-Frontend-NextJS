@@ -2,7 +2,6 @@
 
 import DashboardCard from "./components/DashboardCard";
 import ChartMain from "./components/ChartMain";
-import Link from "next/link";
 import RecentBooking from "./components/RecentBooking";
 import { useState, useEffect } from "react";
 import PopularList from "./components/PopularList";
@@ -11,6 +10,7 @@ import data from "./data";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import { getVendorBookings, getMyListings, getListingCategories, getListingSubcategories } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const index = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -18,8 +18,6 @@ const index = () => {
   const [endDateObj, setEndDateObj] = useState(new DateObject());
   const [option, setOption] = useState("hotel");
   const [loading, setLoading] = useState(true);
-  const [bookings, setBookings] = useState([]);
-  const [listings, setListings] = useState([]);
   const [dashboardMetrics, setDashboardMetrics] = useState(null);
   const [recentBookings, setRecentBookings] = useState([]);
   const [popularListings, setPopularListings] = useState([]);
@@ -28,6 +26,8 @@ const index = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+
+  const router = useRouter();
 
   const tabs = [
     { label: "Overview", value: "overview" },
@@ -117,9 +117,6 @@ const index = () => {
 
         const bookingsData = bookingsRes?.data?.bookings || bookingsRes?.bookings || [];
         const listingsData = listingsRes?.data || listingsRes || [];
-
-        setBookings(bookingsData);
-        setListings(Array.isArray(listingsData) ? listingsData : []);
 
         // Calculate metrics
         calculateMetrics(bookingsData, listingsData);
@@ -509,9 +506,9 @@ const index = () => {
                 </div>
               </div>
               <div className="flex-grow-1 d-flex justify-end gap-2">
-                <Link href="#" className="text-14 text-blue-1 fw-500 underline">
+                <div className="text-14 text-blue-1 fw-500 underline cursor-pointer" onClick={() => router.push("/vendor/booking")}>
                   View All
-                </Link>
+                </div>
               </div>
             </div>
 
@@ -529,9 +526,9 @@ const index = () => {
                 </div>
               </div>
               <div>
-                <Link href="#" className="text-14 text-blue-1 fw-500 underline">
+                <div className="text-14 text-blue-1 fw-500 underline cursor-pointer" onClick={() => router.push("/vendor/listings/property")}>
                   View All
-                </Link>
+                </div>
               </div>
             </div>
             <PopularList listings={popularListings} loading={loading} />

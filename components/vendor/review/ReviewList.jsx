@@ -1,5 +1,5 @@
-import { OpenInFull } from "@mui/icons-material";
-import { Dialog, Radio, CircularProgress } from "@mui/material";
+import { Dialog, Radio, CircularProgress, Menu, MenuItem } from "@mui/material";
+import { MoreVertical } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { getReviews, getListingById, createReviewReply } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -12,6 +12,16 @@ const ReviewList = ({ detail = false, filters = {} }) => {
   const [rate, setRate] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState({});
+
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, reviewId) => {
+    setMenuAnchor({ [reviewId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (reviewId) => {
+    setMenuAnchor({ [reviewId]: null });
+  };
 
   const loadReviews = async (filterParams = {}) => {
     try {
@@ -170,12 +180,6 @@ const ReviewList = ({ detail = false, filters = {} }) => {
         comment: trimmedComment, // Required field - ensure it's not null or undefined
       };
 
-      // Debug: Log the payload to verify comment is included
-      console.log("Submitting payload:", payload);
-      console.log("Comment value:", payload.comment);
-      console.log("Comment type:", typeof payload.comment);
-      console.log("Comment length:", payload.comment?.length);
-
       // Use the general createReviewReply endpoint instead of createReviewReplyRating
       // because the rating endpoint doesn't accept comment, but comment is required
       await createReviewReply(payload);
@@ -235,28 +239,10 @@ const ReviewList = ({ detail = false, filters = {} }) => {
     return statusColors[status] || "bg-light-2 text-dark-1";
   };
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-center items-center py-40">
-        <CircularProgress />
-      </div>
-    );
-  }
-
-  if (reviews.length === 0) {
-    return (
-      <div className="d-flex justify-center items-center py-40">
-        <div className="text-center">
-          <p className="text-14 text-light-1">No reviews found.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
-      <table className="table-2 col-12">
-        <thead>
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
           <tr className="text-light-1 fw-600 text-14">
             <th>Customer</th>
             <th>Listing</th>
@@ -268,7 +254,25 @@ const ReviewList = ({ detail = false, filters = {} }) => {
           </tr>
         </thead>
         <tbody>
-          {reviews.map((review) => (
+          {loading ? (
+            <tr>
+              <td colSpan="7" className="text-center py-20">
+                <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                  <CircularProgress size={20} thickness={5} />
+                  <span>Loading reviews...</span>
+                </div>
+              </td>
+            </tr>
+          ) : reviews.length === 0 ? (
+            <tr>
+              <td colSpan="7" className="text-center py-20">
+                <div className="d-inline-flex items-center justify-center gap-2 text-16 text-light-1">
+                  <span>No reviews found.</span>
+                </div>
+              </td>
+            </tr>
+          ) : (
+            reviews.map((review) => (
             <tr key={review.id}>
               <td className="align-middle text-12">
                 {review.user
@@ -304,15 +308,32 @@ const ReviewList = ({ detail = false, filters = {} }) => {
               </td>
               <td className="align-middle text-12">{formatDate(review.created_at || review.createdAt)}</td>
               <td className="align-middle">
-                <span
-                  className="text-10 cursor-pointer"
-                  onClick={() => handleOpenModal(review)}
-                >
-                  <OpenInFull />
-                </span>
+                <div className="position-relative">
+                  <button
+                    className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                    onClick={(e) => handleMenuOpen(e, review.id)}
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                  <Menu
+                    anchorEl={menuAnchor[review.id]}
+                    open={Boolean(menuAnchor[review.id])}
+                    onClose={() => handleMenuClose(review.id)}
+                  >
+                    <MenuItem 
+                      onClick={() => {
+                        handleOpenModal(review);
+                        handleMenuClose(review.id);
+                      }}
+                    >
+                      View Details
+                    </MenuItem>
+                  </Menu>
+                </div>
               </td>
             </tr>
-          ))}
+            ))
+          )}
         </tbody>
       </table>
 

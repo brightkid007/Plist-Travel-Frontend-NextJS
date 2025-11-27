@@ -53,9 +53,9 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
-      <table className="table-2 col-12">
-        <thead>
-          <tr className="text-light-1 fw-600">
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
+          <tr>
             <th>Image</th>
             <th>Name</th>
             <th>Listing Type</th>
@@ -73,7 +73,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
           {loading ? (
             <tr>
               <td colSpan={11} className="text-center py-20">
-                <div className="d-inline-flex items-center justify-center gap-2 text-14 text-light-1">
+                <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                   <CircularProgress size={24} />
                   <span>Loading bookings...</span>
                 </div>
@@ -82,7 +82,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
           ) : rows.length === 0 ? (
             <tr>
               <td colSpan={11} className="text-center py-20">
-                <div className="d-inline-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
                   <Calendar size={32} className="text-light-1 mb-5" />
                   <span>No bookings found</span>
                 </div>

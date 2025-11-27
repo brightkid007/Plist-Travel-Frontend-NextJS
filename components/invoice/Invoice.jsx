@@ -100,8 +100,8 @@ export default function InvoiceComponent () {
 
                   <div className="row pt-50">
                     <div className="col-12">
-                      <table className="table col-12">
-                        <thead className="bg-blue-1-05 text-blue-1">
+                      <table className="table col-12 text-14">
+                        <thead className="bg-blue-1-05 text-blue-1 text-nowrap">
                           <tr>
                             <th>Description</th>
                             <th>Price</th>

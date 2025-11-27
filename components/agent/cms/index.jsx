@@ -88,8 +88,8 @@ const index = () => {
         </h1>
         <div className="bg-white rounded-8 border-light py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
+            <table className="table-2 col-12 text-14">
+              <thead className="bg-light-2 text-nowrap">
                 <tr>
                   <th>Title</th>
                   {activeTab != "static" && <th>Position</th>}

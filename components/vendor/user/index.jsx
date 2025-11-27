@@ -7,8 +7,8 @@ import { MoreVertical, Mail, UserPlus, UserX } from "lucide-react";
 import FormInput from "@/components/common/form/FormInput";
 import { useVendorPermissions } from "@/hooks/useVendorPermissions";
 import { toast } from "react-toastify";
-import { 
-  getAdminUsers, 
+import {
+  getAdminUsers,
   register,
   searchCustomers,
   associateCustomerWithVendor,
@@ -31,7 +31,7 @@ const index = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedInternalCustomer, setSelectedInternalCustomer] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -52,7 +52,7 @@ const index = () => {
         if (!isAuthenticated()) {
           return;
         }
-        
+
         setLoading(true);
         const usersData = await getAdminUsers({ role: "customer", includeDisabled: true });
         const mappedCustomers = (usersData?.data?.data || usersData?.data || []).map(mapCustomerData).filter(Boolean);
@@ -121,12 +121,12 @@ const index = () => {
         }
 
         await associateCustomerWithVendor(selectedInternalCustomer.id);
-        
+
         // Reload customers to get updated list
         const usersData = await getAdminUsers({ role: "customer", includeDisabled: true });
         const mappedCustomers = (usersData?.data?.data || usersData?.data || []).map(mapCustomerData).filter(Boolean);
         setCustomers(mappedCustomers);
-        
+
         toast.success("Customer added successfully");
         handleClose();
         return;
@@ -270,12 +270,12 @@ const index = () => {
         </div>
       </div>
 
-      <div className="px-15">
-        <div className="bg-white border-light rounded-8 shadow-3">
+      <div className="bg-white border-light rounded-8 shadow-3">
+        <div className="px-15 py-15">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
-                <tr>
+            <table className="table-2 col-12 text-14">
+              <thead className="text-nowrap">
+                <tr className="text-light-1 fw-600">
                   <th>Customer</th>
                   <th>Email</th>
                   <th>Phone</th>
@@ -332,11 +332,10 @@ const index = () => {
                       <td className="align-middle text-12">{customer.business_name || "-"}</td>
                       <td className="align-middle">
                         <span
-                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${
-                            customer.status === "Active"
+                          className={`rounded-100 py-4 px-10 text-center text-12 fw-500 ${customer.status === "Active"
                               ? "bg-green-1 text-green-2"
                               : "bg-light-2 text-dark-1"
-                          }`}
+                            }`}
                         >
                           {customer.status}
                         </span>
@@ -359,7 +358,7 @@ const index = () => {
                             open={Boolean(menuAnchor[customer.id])}
                             onClose={() => handleMenuClose(customer.id)}
                           >
-                            <MenuItem 
+                            <MenuItem
                               onClick={() => {
                                 if (hasPermission("user_management", "delete")) {
                                   handleDeleteCustomerClick(customer.id, customer.name);
@@ -392,7 +391,7 @@ const index = () => {
       >
         <div className="px-20 py-20">
           <h1 className="text-20 lh-14 fw-500 mb-15">Add Customer</h1>
-          
+
           {/* Tabs */}
           <div className="d-flex gap-2 mb-20 border-bottom-light pb-10">
             {/* <button
@@ -411,11 +410,10 @@ const index = () => {
               Invite External User
             </button> */}
             <button
-              className={`text-14 fw-500 px-15 py-8 rounded-8 ${
-                modalType === "add"
+              className={`text-14 fw-500 px-15 py-8 rounded-8 ${modalType === "add"
                   ? "bg-blue-1 text-white"
                   : "bg-light-2 text-dark-1"
-              }`}
+                }`}
               onClick={() => {
                 setModalType("add");
                 setFormData({
@@ -437,7 +435,7 @@ const index = () => {
           </div>
 
           {modalType === "invite" ? (
-            <ModalContent 
+            <ModalContent
               formData={formData}
               setFormData={setFormData}
               title=""
@@ -494,7 +492,7 @@ const AddInternalCustomerContent = ({ searchTerm, setSearchTerm, searchResults, 
         <div className="text-12 text-light-1 lh-14 mb-15">
           Search for existing customers in the system to add them to your customer list.
         </div>
-        
+
         <FormInput
           label="Search Customers"
           type="text"
@@ -528,11 +526,10 @@ const AddInternalCustomerContent = ({ searchTerm, setSearchTerm, searchResults, 
               {searchResults.map((customer) => (
                 <div
                   key={customer.id}
-                  className={`px-15 py-10 cursor-pointer border-bottom-light ${
-                    selectedInternalCustomer?.id === customer.id
+                  className={`px-15 py-10 cursor-pointer border-bottom-light ${selectedInternalCustomer?.id === customer.id
                       ? "bg-blue-1 bg-opacity-10"
                       : "hover:bg-light-2"
-                  }`}
+                    }`}
                   onClick={() => setSelectedInternalCustomer(customer)}
                 >
                   <div className="d-flex items-center justify-between">

@@ -109,12 +109,12 @@ const index = () => {
         const bookingsArray = Array.isArray(rawBookings)
           ? rawBookings
           : Array.isArray(rawBookings?.data)
-          ? rawBookings.data
-          : Array.isArray(rawBookings?.rows)
-          ? rawBookings.rows
-          : Array.isArray(rawBookings?.results)
-          ? rawBookings.results
-          : [];
+            ? rawBookings.data
+            : Array.isArray(rawBookings?.rows)
+              ? rawBookings.rows
+              : Array.isArray(rawBookings?.results)
+                ? rawBookings.results
+                : [];
         const bk = bookingsArray.map((b) => ({
           id: b.id,
           service: b.service || b.listing_type || b.type || '-',
@@ -192,7 +192,7 @@ const index = () => {
             onClick={handleExportData}
             disabled={loading}
           >
-            {loading ? "Exporting..." : "Export Data"}
+            Export Data
           </button>
         </div>
         {/* <div className="col-auto">

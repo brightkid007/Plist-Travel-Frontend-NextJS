@@ -3,25 +3,20 @@
 import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
 import {
-  BookOpen,
-  Ellipsis,
-  Eye,
-  Mail,
-  MapPin,
-  Pencil,
-  Phone,
+  MoreVertical,
   Plus,
-  Trash2,
 } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { getAdminContent, getBanners, deleteAdminContent, deleteBanner } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
+import { Menu, MenuItem } from "@mui/material";
 
 const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("static");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [menuAnchor, setMenuAnchor] = useState({});
 
   const tabs = [
     {
@@ -100,6 +95,15 @@ const index = () => {
     }
   };
 
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, itemId) => {
+    setMenuAnchor({ [itemId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (itemId) => {
+    setMenuAnchor({ [itemId]: null });
+  };
+
   return (
     <AdminDashboardLayout>
       <div className="row y-gap-10 x-gap-10 items-center mb-10">
@@ -144,8 +148,8 @@ const index = () => {
         </h1>
         <div className="bg-white rounded-8 border-light py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
+            <table className="table-2 col-12 text-14">
+              <thead className="text-nowrap">
                 <tr>
                   <th>Title</th>
                   {activeTab != "static" && <th>Position</th>}
@@ -186,15 +190,45 @@ const index = () => {
                       {row.last_updated ? new Date(row.last_updated).toLocaleString() : "—"}
                     </td>
                     <td className="align-middle">
-                      <button className="size-30 bg-white">
-                        <Eye size={16} />
-                      </button>
-                      <button className="size-30 bg-white">
-                        <Pencil size={16} />
-                      </button>
-                      <button className="size-30 bg-white" onClick={() => handleDelete(row.id)}>
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="position-relative">
+                        <button
+                          className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                          onClick={(e) => handleMenuOpen(e, row.id)}
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                        <Menu
+                          anchorEl={menuAnchor[row.id]}
+                          open={Boolean(menuAnchor[row.id])}
+                          onClose={() => handleMenuClose(row.id)}
+                        >
+                          <MenuItem 
+                            onClick={() => {
+                              router.push(`/admin/cms/add?service=${activeTab}&view=${row.id}`);
+                              handleMenuClose(row.id);
+                            }}
+                          >
+                            View
+                          </MenuItem>
+                          <MenuItem 
+                            onClick={() => {
+                              router.push(`/admin/cms/add?service=${activeTab}&edit=${row.id}`);
+                              handleMenuClose(row.id);
+                            }}
+                          >
+                            Edit
+                          </MenuItem>
+                          <MenuItem 
+                            onClick={() => {
+                              handleDelete(row.id);
+                              handleMenuClose(row.id);
+                            }}
+                            className="text-red-2"
+                          >
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </div>
                     </td>
                   </tr>
                 ))}

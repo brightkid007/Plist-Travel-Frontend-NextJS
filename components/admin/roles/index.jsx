@@ -328,10 +328,10 @@ const index = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-8 border-light py-5 mt-10">
+        <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-3 -border-bottom col-12">
-              <thead className="bg-light-2">
+            <table className="table-2 col-12 text-14">
+              <thead className="text-nowrap">
                 <tr>
                   <th>ID</th>
                   <th>Role</th>
@@ -740,7 +740,7 @@ const PermissionsViewModal = ({ role, permissionStructure, onClose }) => {
         </button>
       </div>
 
-      <div className="border-light rounded-8 p-15" style={{ maxHeight: 500, overflowY: "auto" }}>
+      <div className="border-light rounded-8 px-15 py-10" style={{ maxHeight: 500, overflowY: "auto" }}>
         {permissionStructure.map((perm) => {
           const permData = role.permissions?.[perm.id] || {};
           const hasAnyPermission = permData.view || permData.create || permData.update || permData.delete;

@@ -43,8 +43,8 @@ const RercentBooking = () => {
   ];
   return (
     <div className="overflow-scroll scroll-bar-1 pt-30">
-      <table className="table-2 col-12">
-        <thead>
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
           <tr>
             <th>#</th>
             <th>Item</th>

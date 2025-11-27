@@ -1,4 +1,19 @@
+import { useState } from "react";
+import { MoreVertical } from "lucide-react";
+import { Menu, MenuItem } from "@mui/material";
+
 const index = () => {
+  const [menuAnchor, setMenuAnchor] = useState({});
+
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, pageIndex) => {
+    setMenuAnchor({ [pageIndex]: event.currentTarget });
+  };
+
+  const handleMenuClose = (pageIndex) => {
+    setMenuAnchor({ [pageIndex]: null });
+  };
+
   const pages = [
     {
       page_title: "Home Page",
@@ -56,9 +71,9 @@ const index = () => {
           Export SEO Data
         </button>
       </div>
-      <table className="table-2 col-12">
-        <thead>
-          <tr className="text-light-1 fw-600">
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
+          <tr>
             <th>Page Title</th>
             <th>URL</th>
             <th>Meta Title</th>
@@ -85,7 +100,36 @@ const index = () => {
                 </span>
               </td>
               <td className="align-middle">
-                <span className="material-symbols-outlined">more_horiz</span>
+                <div className="position-relative">
+                  <button
+                    className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                    onClick={(e) => handleMenuOpen(e, index)}
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                  <Menu
+                    anchorEl={menuAnchor[index]}
+                    open={Boolean(menuAnchor[index])}
+                    onClose={() => handleMenuClose(index)}
+                  >
+                    <MenuItem 
+                      onClick={() => {
+                        // Add view/edit action here
+                        handleMenuClose(index);
+                      }}
+                    >
+                      View
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={() => {
+                        // Add edit action here
+                        handleMenuClose(index);
+                      }}
+                    >
+                      Edit
+                    </MenuItem>
+                  </Menu>
+                </div>
               </td>
             </tr>
           ))}

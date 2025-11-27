@@ -302,8 +302,8 @@ const index = () => {
       </div>
       <div className="border-light mt-30 bg-white rounded-8 shadow-4 px-20">
         <div className="overflow-scroll scroll-bar-1">
-          <table className="table-2 col-12">
-            <thead className="text-light-1">
+          <table className="table-2 col-12 text-14">
+            <thead className="text-light-1 text-nowrap">
               <tr>
                 <th>Date</th>
                 <th>Invoice ID</th>

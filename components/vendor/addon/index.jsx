@@ -156,8 +156,8 @@ const index = () => {
 
       <div className="px-15 px-15 py-10 rounded-8 bg-white shadow-3 mb-10">
         <div className="overflow-scroll scroll-bar-1 pt-0">
-          <table className="table-2 col-12">
-            <thead>
+          <table className="table-2 col-12 text-14">
+            <thead className="text-nowrap">
               <tr className="text-light-1 fw-600">
                 <th>Name</th>
                 <th>Description</th>

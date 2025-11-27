@@ -17,8 +17,8 @@ const PopularList = ({ detail = false, listings = [], loading = false }) => {
 
   return (
     <div className="overflow-scroll scroll-bar-1 pt-0">
-      <table className="table-2 col-12">
-        <thead>
+      <table className="table-2 col-12 text-14">
+        <thead className="text-nowrap">
           <tr className="text-light-1 fw-600">
             {!detail && <th>Image</th>}
             <th>Name</th>
@@ -26,7 +26,6 @@ const PopularList = ({ detail = false, listings = [], loading = false }) => {
             <th>Bookings</th>
             <th>Revenue</th>
             {!detail && <th>Status</th>}
-            {!detail && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -48,17 +47,11 @@ const PopularList = ({ detail = false, listings = [], loading = false }) => {
               <td className="align-middle fw-500">{row.revenue}</td>
               {!detail && (
                 <td className="align-middle fw-500">
-                  <div
-                    className={`rounded-100 py-4 text-center col-12 text-14 fw-500 bg-${row.status.color} text-${row.status.text}`}
+                  <span
+                    className={`rounded-100 px-10 text-center col-12 text-14 fw-500 bg-${row.status.color} text-${row.status.text}`}
                   >
                     {row.status.label}
-                  </div>
-                </td>
-              )}
-              {!detail && (
-                <td className="align-middle">
-                  <span className="material-symbols-outlined">more_horiz</span>
-                  <span className="material-symbols-outlined">north_east</span>
+                  </span>
                 </td>
               )}
             </tr>

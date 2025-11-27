@@ -10,8 +10,8 @@ import DatePicker, { DateObject } from "react-multi-date-picker";
 import VendorDashboardLayout from "../common/layout";
 import { getRatePlans, getMyListings, getRoomTypes, deleteRatePlan } from "@/helpers/backend_helper";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { MoreVertical } from "lucide-react";
+import { Menu, MenuItem } from "@mui/material";
 
 const index = () => {
   const router = useRouter();
@@ -30,6 +30,16 @@ const index = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [ratePlanToDelete, setRatePlanToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState({});
+
+  // Menu handlers for dropdown actions
+  const handleMenuOpen = (event, ratePlanId) => {
+    setMenuAnchor({ [ratePlanId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (ratePlanId) => {
+    setMenuAnchor({ [ratePlanId]: null });
+  };
 
   useEffect(() => {
     loadData();
@@ -282,15 +292,15 @@ const index = () => {
           </div>
 
           <div className="overflow-scroll scroll-bar-1 pt-10">
-            <table className="table-2 col-12 text-12">
-              <thead>
+            <table className="table-2 col-12 text-14">
+              <thead className="text-nowrap">
                 <tr>
                   <th style={{ width: "25%" }}>Rate plan name</th>
-                  <th style={{ width: "15%" }}>Cancellation policy</th>
+                  <th>Cancellation policy</th>
                   <th>Rate, room status & restrictions</th>
-                  <th style={{ width: "25%" }}>Meals</th>
+                  <th>Meals</th>
                   <th>Status</th>
-                  <th style={{ width: "10%" }}>Actions</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,21 +342,36 @@ const index = () => {
                         </span>
                       </td>
                       <td>
-                        <div className="d-flex items-center justify-end gap-10">
+                        <div className="position-relative">
                           <button
-                            className="btn-icon"
-                            onClick={() => handleEdit(ratePlan)}
-                            title="Edit rate plan"
+                            className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                            onClick={(e) => handleMenuOpen(e, ratePlan.id)}
                           >
-                            <EditIcon sx={{ fontSize: 18, color: "#1976d2" }} />
+                            <MoreVertical size={16} />
                           </button>
-                          <button
-                            className="btn-icon"
-                            onClick={() => handleDeleteClick(ratePlan)}
-                            title="Delete rate plan"
+                          <Menu
+                            anchorEl={menuAnchor[ratePlan.id]}
+                            open={Boolean(menuAnchor[ratePlan.id])}
+                            onClose={() => handleMenuClose(ratePlan.id)}
                           >
-                            <DeleteIcon sx={{ fontSize: 18, color: "#d32f2f" }} />
-                          </button>
+                            <MenuItem 
+                              onClick={() => {
+                                handleEdit(ratePlan);
+                                handleMenuClose(ratePlan.id);
+                              }}
+                            >
+                              Edit
+                            </MenuItem>
+                            <MenuItem 
+                              onClick={() => {
+                                handleDeleteClick(ratePlan);
+                                handleMenuClose(ratePlan.id);
+                              }}
+                              className="text-red-2"
+                            >
+                              Delete
+                            </MenuItem>
+                          </Menu>
                         </div>
                       </td>
                     </tr>
