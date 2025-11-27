@@ -41,7 +41,7 @@ const index = () => {
       const response = await getAddOnServices();
       const servicesData = response?.data || response || [];
       const servicesArray = Array.isArray(servicesData) ? servicesData : [];
-      
+
       // Transform backend data to match UI format
       const transformedServices = servicesArray.map((service) => {
         return {
@@ -50,10 +50,10 @@ const index = () => {
           description: service.name || "", // Use name as description for now (model doesn't have description)
           type: service.type || "",
           basePrice: service.base_price ? `$${parseFloat(service.base_price).toFixed(2)}` : "$0.00",
-          hourAvailable: service.hours_available 
+          hourAvailable: service.hours_available
             ? `${parseFloat(service.hours_available)} ${parseFloat(service.hours_available) <= 1 ? "hour" : "hours"}`
             : "N/A",
-          availabilityPerTimeframe: service.availability_per_timeframe 
+          availabilityPerTimeframe: service.availability_per_timeframe
             ? service.availability_per_timeframe.toString()
             : "N/A",
           requires_scheduling: service.requires_scheduling || false,
@@ -66,7 +66,7 @@ const index = () => {
           rawData: service, // Keep raw data for edit
         };
       });
-      
+
       setAddOnServices(transformedServices);
     } catch (error) {
       console.error("Error loading add-on services:", error);
@@ -172,14 +172,17 @@ const index = () => {
               {loading ? (
                 <tr>
                   <td colSpan="7" className="text-center py-40">
-                    <CircularProgress size={24} />
-                    <span className="text-14 text-light-1 ml-10">Loading add-on services...</span>
+                    <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
+                      <CircularProgress size={24} />
+                      <span>Loading add-on services...</span>
+                    </div>
                   </td>
                 </tr>
               ) : addOnServices.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-40">
-                    <div className="text-16 text-light-1">
+                    <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                      <Tag size={32} />
                       No add-on services found. Create your first add-on service to get started.
                     </div>
                   </td>
@@ -260,7 +263,7 @@ const index = () => {
         </div>
       </div>
 
-      <AvailableCalendar 
+      <AvailableCalendar
         selectedServiceId={selectedServiceForCalendar}
         onServiceChange={setSelectedServiceForCalendar}
         addOnServices={addOnServices}
@@ -287,7 +290,7 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
   const [selectedService, setSelectedService] = useState(null);
   const [events, setEvents] = useState([]);
   const [internalActiveTab, setInternalActiveTab] = useState("events");
-  
+
   // Use external activeTab if provided, otherwise use internal state
   const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
   const setActiveTab = onTabChange || setInternalActiveTab;
@@ -297,7 +300,7 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
     if (selectedServiceId && addOnServices && addOnServices.length > 0) {
       const service = addOnServices.find((s) => s.id === selectedServiceId);
       setSelectedService(service || null);
-      
+
       if (service) {
         generateCalendarEvents(service);
       }
@@ -309,7 +312,7 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
 
   const generateCalendarEvents = (service) => {
     const calendarEvents = [];
-    
+
     // Add start/end date range event if set
     if (service.calendar_start_date && service.calendar_end_date) {
       const calendarType = service.calendar_type || 1;
@@ -320,7 +323,7 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
         backgroundColor: calendarType === 1 ? "#4CAF50" : "#F44336",
       });
     }
-    
+
     // Add blocked dates as events (only if calendar type is Open)
     if (service.calendar_type === 1 && service.blocked_dates && Array.isArray(service.blocked_dates)) {
       service.blocked_dates.forEach(date => {
@@ -332,7 +335,7 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
         });
       });
     }
-    
+
     // Add available dates as events (only if calendar type is Blocked)
     if (service.calendar_type === 2 && service.available_dates && Array.isArray(service.available_dates)) {
       service.available_dates.forEach(date => {
@@ -344,7 +347,7 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
         });
       });
     }
-    
+
     setEvents(calendarEvents);
   };
 
@@ -404,9 +407,8 @@ const AvailableCalendar = ({ selectedServiceId, onServiceChange, addOnServices, 
         <div className="px-5 mb-10 py-5 bg-light-2 rounded-8">
           {tabs.map((item) => (
             <button
-              className={`text-14 px-10 fw-500 py-5 rounded-8 ${
-                activeTab === item.value ? "bg-white" : "text-light-1"
-              }`}
+              className={`text-14 px-10 fw-500 py-5 rounded-8 ${activeTab === item.value ? "bg-white" : "text-light-1"
+                }`}
               key={item.value}
               onClick={() => setActiveTab(item.value)}
             >

@@ -1,7 +1,7 @@
 "use client";
 
 import VendorDashboardLayout from "../common/layout";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, Menu, MenuItem, CircularProgress } from "@mui/material";
 import { MoreVertical, Mail, UserPlus, UserX } from "lucide-react";
 import FormInput from "@/components/common/form/FormInput";
@@ -31,6 +31,7 @@ const index = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedInternalCustomer, setSelectedInternalCustomer] = useState(null);
+  const [tableSearchTerm, setTableSearchTerm] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -244,6 +245,22 @@ const index = () => {
     return name.substring(0, 2).toUpperCase();
   };
 
+  // Filter customers based on search term
+  const filteredCustomers = useMemo(() => {
+    if (!tableSearchTerm.trim()) {
+      return customers;
+    }
+    const searchLower = tableSearchTerm.toLowerCase();
+    return customers.filter((customer) => {
+      return (
+        customer.name?.toLowerCase().includes(searchLower) ||
+        customer.email?.toLowerCase().includes(searchLower) ||
+        customer.phone?.toLowerCase().includes(searchLower) ||
+        customer.business_name?.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [customers, tableSearchTerm]);
+
   return (
     <VendorDashboardLayout>
       <div className="row y-gap-20 justify-between items-center mb-5">
@@ -272,8 +289,29 @@ const index = () => {
 
       <div className="bg-white border-light rounded-8 shadow-3">
         <div className="px-15 py-15">
+          <div className="row y-gap-10 x-gap-10 items-center mb-15">
+            <div className="col-sm-auto d-flex">
+              <div className="position-relative d-flex items-center w-300 sm:w-full">
+                <input
+                  type="text"
+                  placeholder="Search customers..."
+                  className="border-light bg-white rounded-8 px-10 py-10 pl-35 text-14"
+                  value={tableSearchTerm}
+                  onChange={(e) => setTableSearchTerm(e.target.value)}
+                />
+                <i
+                  className="icon-search text-light-1 position-absolute"
+                  style={{
+                    left: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                ></i>
+              </div>
+            </div>
+          </div>
           <div className="overflow-scroll scroll-bar-1">
-            <table className="table-2 col-12 text-14">
+            <table className="table-2 col-12 text-14 text-nowrap">
               <thead className="text-nowrap">
                 <tr className="text-light-1 fw-600">
                   <th>Customer</th>
@@ -295,17 +333,23 @@ const index = () => {
                       </div>
                     </td>
                   </tr>
-                ) : customers.length === 0 ? (
+                ) : filteredCustomers.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center py-20">
                       <div className="d-flex items-center justify-center gap-2 text-16 text-light-1">
                         <UserX size={18} />
-                        <span>No customers found</span>
+                        <span>
+                          {customers.length === 0
+                            ? "No customers found"
+                            : tableSearchTerm
+                              ? "No customers match your search"
+                              : "No customers found"}
+                        </span>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  customers.map((customer) => (
+                  filteredCustomers.map((customer) => (
                     <tr key={customer.id}>
                       <td className="align-middle">
                         <div className="d-flex items-center gap-2">

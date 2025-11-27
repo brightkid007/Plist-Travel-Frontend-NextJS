@@ -19,9 +19,8 @@ const index = () => {
   const [loading, setLoading] = useState(true);
   const [ratePlans, setRatePlans] = useState([]);
   const [listings, setListings] = useState([]);
-  const [roomTypes, setRoomTypes] = useState([]);
   const [filteredRoomTypes, setFilteredRoomTypes] = useState([]);
-  
+
   const [filters, setFilters] = useState({
     listing_id: "",
     room_type_id: "",
@@ -83,7 +82,7 @@ const index = () => {
     try {
       setLoading(true);
       const params = {};
-      
+
       if (filters.listing_id) {
         params.listing_id = filters.listing_id;
       }
@@ -307,14 +306,19 @@ const index = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="6" className="text-center py-40">
-                      <CircularProgress size={30} />
-                      <p className="text-14 text-light-1 mt-10">Loading rate plans...</p>
+                      <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                        <CircularProgress size={30} />
+                        <span>Loading rate plans...</span>
+                      </div>
                     </td>
                   </tr>
                 ) : ratePlans.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center py-40">
-                      <p className="text-14 text-light-1">No rate plans found</p>
+                      <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                        <Tag size={32} />
+                        <span>No rate plans found</span>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -354,7 +358,7 @@ const index = () => {
                             open={Boolean(menuAnchor[ratePlan.id])}
                             onClose={() => handleMenuClose(ratePlan.id)}
                           >
-                            <MenuItem 
+                            <MenuItem
                               onClick={() => {
                                 handleEdit(ratePlan);
                                 handleMenuClose(ratePlan.id);
@@ -362,7 +366,7 @@ const index = () => {
                             >
                               Edit
                             </MenuItem>
-                            <MenuItem 
+                            <MenuItem
                               onClick={() => {
                                 handleDeleteClick(ratePlan);
                                 handleMenuClose(ratePlan.id);
