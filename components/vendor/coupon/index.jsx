@@ -379,7 +379,7 @@ const index = () => {
       </div>
 
       <CouponCard data={dashboardData} />
-      <div className="py-10 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
+      <div className="py-20 px-20 rounded-8 bg-white shadow-3 h-100 mt-20">
         <CouponList 
           onEdit={handleEdit} 
           onView={handleView} 

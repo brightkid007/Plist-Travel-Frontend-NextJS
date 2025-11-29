@@ -540,7 +540,7 @@ export const downloadAllInvoices = async (params) => {
   }
 };
 
-export const getPaymentAnalytics = () => PaymentAPIClient.get(url.GET_PAYMENT_ANALYTICS);
+export const getPaymentAnalytics = (params) => PaymentAPIClient.get(url.GET_PAYMENT_ANALYTICS, params);
 export const refundTransaction = (id) => PaymentAPIClient.patch(`${url.REFUND_TRANSACTION}/${id}/refund`);
 
 // Vendor Subscriptions (Payment Service)

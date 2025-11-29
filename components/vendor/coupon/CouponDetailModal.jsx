@@ -102,7 +102,7 @@ const CouponDetailModal = ({ open, onClose, coupon }) => {
               <span className="text-18 fw-600 text-blue-1">{coupon.code || "N/A"}</span>
               <span className="text-14 text-light-1 ml-20">Status:</span>
               <span
-                className={`rounded-100 py-4 px-10 text-center text-14 fw-500 ${
+                className={`rounded-100 px-10 text-center text-14 fw-500 ${
                   coupon.is_active
                     ? "bg-dark-4 text-white"
                     : "bg-light-2 text-dark-1"
