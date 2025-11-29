@@ -17,6 +17,7 @@ const index = () => {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [menuAnchor, setMenuAnchor] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   const tabs = [
     {
@@ -143,9 +144,30 @@ const index = () => {
       </div>
 
       <div className="bg-white rounded-8 border-light px-20 py-15">
-        <h1 className="text-24 lh-14 fw-500">
-          Manage {activeTab == "static" ? "Static Pages" : "Banners"}
-        </h1>
+        <div className="d-flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-24 lh-14 fw-500">
+              Manage {activeTab == "static" ? "Static Pages" : "Banners"}
+            </h1>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder={`Search ${activeTab == "static" ? "pages" : "banners"}...`}
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
+        </div>
         <div className="bg-white rounded-8 border-light py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
             <table className="table-2 col-12 text-14">
@@ -163,11 +185,33 @@ const index = () => {
                   <tr>
                     <td colSpan={activeTab !== "static" ? 5 : 4} className="text-center py-30 text-14 text-light-1">Loading...</td>
                   </tr>
-                ) : items.length === 0 ? (
+                ) : items
+                    .filter((row) => {
+                      if (!searchTerm) return true;
+                      const search = searchTerm.toLowerCase();
+                      return (
+                        row.title?.toLowerCase().includes(search) ||
+                        row.position?.toLowerCase().includes(search) ||
+                        row.status?.toLowerCase().includes(search)
+                      );
+                    })
+                    .length === 0 ? (
                   <tr>
-                    <td colSpan={activeTab !== "static" ? 5 : 4} className="text-center py-30 text-14 text-light-1">No records found</td>
+                    <td colSpan={activeTab !== "static" ? 5 : 4} className="text-center py-30 text-14 text-light-1">
+                      {searchTerm ? "No records found matching your search" : "No records found"}
+                    </td>
                   </tr>
-                ) : items.map((row) => (
+                ) : items
+                    .filter((row) => {
+                      if (!searchTerm) return true;
+                      const search = searchTerm.toLowerCase();
+                      return (
+                        row.title?.toLowerCase().includes(search) ||
+                        row.position?.toLowerCase().includes(search) ||
+                        row.status?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map((row) => (
                   <tr key={row.id}>
                     <td className="align-middle text-14 fw-500 lh-16">
                       {row.title}

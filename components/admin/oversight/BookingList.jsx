@@ -56,7 +56,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
       <table className="table-2 col-12 text-14">
         <thead className="text-nowrap">
           <tr>
-            <th>Image</th>
+            <th>#</th>
             <th>Name</th>
             <th>Listing Type</th>
             <th>Category</th>
@@ -92,16 +92,7 @@ const BookingList = ({ bookings = [], loading = false, hasPermission = () => fal
             rows.map((row, index) => (
               <tr key={index}>
                 <td className="align-middle">
-                  <img
-                    className="rounded-8"
-                    src={row.image}
-                    alt={row.name}
-                    style={{
-                      height: "50px",
-                      width: "60px",
-                      objectFit: "fill",
-                    }}
-                  />
+                  {index + 1}
                 </td>
                 <td className="align-middle">{row.name}</td>
                 <td className="align-middle">{row.type}</td>

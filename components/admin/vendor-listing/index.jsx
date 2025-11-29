@@ -1,18 +1,27 @@
 "use client";
 
 import AdminDashboardLayout from "../common/layout";
-import { BookOpen } from "lucide-react";
+import { BookOpen, MoreVertical } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Menu, MenuItem } from "@mui/material";
 import { getAdminListings, setListingStatus } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import { usePermissions } from "@/hooks/usePermissions";
+import ListingDetailModal from "@/components/vendor/common/ListingDetailModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 const index = () => {
   const { hasPermission } = usePermissions();
-  const [activeTab, setActiveTab] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [menuAnchor, setMenuAnchor] = useState({});
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedListingId, setSelectedListingId] = useState(null);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [listingToReject, setListingToReject] = useState(null);
+  const [rejecting, setRejecting] = useState(false);
 
   const fetchListings = async () => {
     setLoading(true);
@@ -33,20 +42,48 @@ const index = () => {
     fetchListings();
   }, [statusFilter]);
 
-  const tabs = [
-    { label: "All", value: "all" },
-    { label: "Property", value: "property" },
-    { label: "Tour", value: "tour" },
-    { label: "Event", value: "event" },
-    { label: "Activity", value: "activity" },
-  ];
 
   const filteredListings = useMemo(() => {
-    if (activeTab === "all") return listings;
-    return (listings || []).filter((item) =>
-      (item?.type || item?.listing_type || "").toLowerCase() === activeTab
-    );
-  }, [listings, activeTab]);
+    let filtered = listings || [];
+    
+    // Filter by listing type
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((item) =>
+        (item?.type || item?.listing_type || "").toLowerCase() === typeFilter
+      );
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter((item) => {
+        const name = (item?.title || item?.name || "").toLowerCase();
+        const type = (item?.type || item?.listing_type || "").toLowerCase();
+        const location = [
+          item?.location_address?.line1,
+          item?.location_address?.city,
+          item?.location_address?.state,
+          item?.location_address?.country,
+          item?.location,
+          item?.city,
+          item?.address
+        ].filter(Boolean).join(" ").toLowerCase();
+        const vendor = (item?.vendor?.vendor_profile?.business_name || item?.vendor?.email || item?.vendor_id || "").toLowerCase();
+        const status = (item?.status || "").toLowerCase();
+        
+        return (
+          name.includes(search) ||
+          type.includes(search) ||
+          location.includes(search) ||
+          vendor.includes(search) ||
+          status.includes(search) ||
+          String(item?.id).includes(search)
+        );
+      });
+    }
+    
+    return filtered;
+  }, [listings, typeFilter, searchTerm]);
 
   const getStatusClasses = (status) => {
     const s = (status || "").toString().toLowerCase();
@@ -65,9 +102,50 @@ const index = () => {
       await setListingStatus(id, status);
       toast.success("Listing status updated successfully");
       await fetchListings();
+      setMenuAnchor({ [id]: null });
     } catch (e) {
       toast.error(e?.message || "Failed to update status");
     }
+  };
+
+  const handleMenuOpen = (event, listingId) => {
+    setMenuAnchor({ [listingId]: event.currentTarget });
+  };
+
+  const handleMenuClose = (listingId) => {
+    setMenuAnchor({ [listingId]: null });
+  };
+
+  const handleViewDetails = (listingId) => {
+    setSelectedListingId(listingId);
+    setDetailModalOpen(true);
+    handleMenuClose(listingId);
+  };
+
+  const handleRejectClick = (listing) => {
+    setListingToReject(listing);
+    setRejectModalOpen(true);
+    handleMenuClose(listing.id);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!listingToReject) return;
+    
+    try {
+      setRejecting(true);
+      await onChangeStatus(listingToReject.id, "rejected");
+      setRejectModalOpen(false);
+      setListingToReject(null);
+    } catch (error) {
+      // Error is already handled in onChangeStatus
+    } finally {
+      setRejecting(false);
+    }
+  };
+
+  const handleRejectCancel = () => {
+    setRejectModalOpen(false);
+    setListingToReject(null);
   };
 
   return (
@@ -80,42 +158,55 @@ const index = () => {
           </div>
         </div>
       </div>
-      <div className="row y-gap-10 x-gap-10 items-center mb-10">
-        <div className="col-auto">
-          <div className="row px-10">
-            {tabs.map((item) => (
-              <div className="col-auto px-5" key={item.value}>
-                <button
-                  className={`text-14 px-10 fw-500 py-5 rounded-8 ${activeTab === item.value ? "bg-white" : "text-light-1"
-                    }`}
-                  onClick={() => {
-                    setActiveTab(item.value);
-                  }}
-                >
-                  {item.label}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white rounded-8 border-light px-20 py-15">
-        <div className="d-flex items-center gap-3">
-          <select className="form-select border-light h-45 px-15 w-140" value={statusFilter || ""} onChange={(e) => setStatusFilter(e.target.value || null)}>
-            <option value="">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="submitted">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+        <div className="d-flex items-center justify-between mb-10">
+          <div className="d-flex items-center gap-3">
+            <select 
+              className="form-select border-light h-45 px-15 w-140" 
+              value={typeFilter} 
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="all">All Types</option>
+              <option value="property">Property</option>
+              <option value="tour">Tour</option>
+              <option value="event">Event</option>
+              <option value="activity">Activity</option>
+            </select>
+            <select 
+              className="form-select border-light h-45 px-15 w-140" 
+              value={statusFilter || ""} 
+              onChange={(e) => setStatusFilter(e.target.value || null)}
+            >
+              <option value="">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="submitted">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search listings..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
         </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
             <table className="table-2 text-14 col-12">
               <thead className="text-nowrap">
                 <tr>
-                  <th>Image</th>
                   <th>Name</th>
                   <th>Listing Type</th>
                   <th>Location</th>
@@ -128,7 +219,7 @@ const index = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-20">
+                    <td colSpan={7} className="text-center py-20">
                       <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                         <CircularProgress size={24} />
                         <span>Loading listings...</span>
@@ -137,7 +228,7 @@ const index = () => {
                   </tr>
                 ) : filteredListings.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-20">
+                    <td colSpan={7} className="text-center py-20">
                       <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
                         <BookOpen size={32} className="text-light-1 mb-5" />
                         <span>No listings found</span>
@@ -147,18 +238,6 @@ const index = () => {
                 ) : (
                   filteredListings.map((entry, index) => (
                     <tr key={entry?.id || index}>
-                      <td className="align-middle">
-                        <img
-                          className="rounded-8"
-                          src={entry?.thumbnail_url || entry?.image || "/img/testimonials/1/4.png"}
-                          alt={entry?.title || entry?.name || "Listing"}
-                          style={{
-                            height: "50px",
-                            width: "60px",
-                            objectFit: "fill",
-                          }}
-                        />
-                      </td>
                       <td className="align-middle">{entry?.title || entry?.name || "-"}</td>
                       <td className="align-middle text-12 lh-16 fw-500">
                         {(entry?.type || entry?.listing_type || "").toString()}
@@ -191,21 +270,71 @@ const index = () => {
                         </div>
                       </td>
                       <td className="align-middle">
-                        <select
-                          className="form-select border-light h-36 px-10 w-160"
-                          value={(entry?.status || "").toString().toLowerCase()}
-                          onChange={(e) => onChangeStatus(entry?.id, e.target.value)}
-                          disabled={!hasPermission("vendor_listing_management", "update")}
-                          style={{
-                            opacity: !hasPermission("vendor_listing_management", "update") ? 0.5 : 1,
-                            cursor: !hasPermission("vendor_listing_management", "update") ? "not-allowed" : "pointer"
-                          }}
-                        >
-                          <option value="draft">Draft</option>
-                          <option value="submitted">Submitted</option>
-                          <option value="approved">Approved</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
+                        <div className="position-relative">
+                          <button
+                            className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                            onClick={(e) => handleMenuOpen(e, entry?.id)}
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          <Menu
+                            anchorEl={menuAnchor[entry?.id]}
+                            open={Boolean(menuAnchor[entry?.id])}
+                            onClose={() => handleMenuClose(entry?.id)}
+                          >
+                            <MenuItem
+                              onClick={() => handleViewDetails(entry?.id)}
+                              disabled={!hasPermission("vendor_listing_management", "view")}
+                              className="text-14"
+                            >
+                              View Details
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                if (hasPermission("vendor_listing_management", "update")) {
+                                  onChangeStatus(entry?.id, "draft");
+                                }
+                              }}
+                              disabled={!hasPermission("vendor_listing_management", "update") || entry?.status === "draft"}
+                              className="text-14"
+                            >
+                              Draft
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                if (hasPermission("vendor_listing_management", "update")) {
+                                  onChangeStatus(entry?.id, "submitted");
+                                }
+                              }}
+                              disabled={!hasPermission("vendor_listing_management", "update") || entry?.status === "submitted"}
+                              className="text-14"
+                            >
+                              Submitted
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                if (hasPermission("vendor_listing_management", "update")) {
+                                  onChangeStatus(entry?.id, "approved");
+                                }
+                              }}
+                              disabled={!hasPermission("vendor_listing_management", "update") || entry?.status === "approved"}
+                              className="text-14"
+                            >
+                              Approve
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
+                                if (hasPermission("vendor_listing_management", "update")) {
+                                  handleRejectClick(entry);
+                                }
+                              }}
+                              disabled={!hasPermission("vendor_listing_management", "update") || entry?.status === "rejected"}
+                              className="text-14"
+                            >
+                              Reject
+                            </MenuItem>
+                          </Menu>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -215,6 +344,27 @@ const index = () => {
           </div>
         </div>
       </div>
+
+      <ListingDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedListingId(null);
+        }}
+        listingId={selectedListingId}
+      />
+
+      <ConfirmationModal
+        open={rejectModalOpen}
+        onClose={handleRejectCancel}
+        onConfirm={handleRejectConfirm}
+        title="Reject Listing"
+        message={`Are you sure you want to reject the listing "${listingToReject?.title || listingToReject?.name || `#${listingToReject?.id}`}"? This action cannot be undone.`}
+        itemName={listingToReject?.title || listingToReject?.name || `Listing #${listingToReject?.id}`}
+        loading={rejecting}
+        confirmLabel="Reject"
+        confirmingLabel="Rejecting..."
+      />
     </AdminDashboardLayout>
   );
 };

@@ -30,6 +30,7 @@ const index = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleMenuOpen = (event, id) => {
     setMenuAnchor({ [id]: event.currentTarget });
@@ -215,10 +216,31 @@ const index = () => {
         </div>
       </div> */}
       <div className="bg-white rounded-8 border-light px-20 py-15">
-        {/* <h1 className="text-24 lh-14 fw-500"> Manual Entries</h1>
-        <div className="text-14 lh-14 text-light-1">
-          Review and approve manually entered listing from vendors
-        </div> */}
+        <div className="d-flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-24 lh-14 fw-500">Coupons</h1>
+            <div className="text-14 lh-14 text-light-1">
+              Manage all coupon codes and promotions
+            </div>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search coupons..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
+        </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
             <table className="table-2 col-12 text-14">
@@ -245,17 +267,40 @@ const index = () => {
                     </td>
                   </tr>
                 )}
-                {!loading && entries.length === 0 && (
+                {!loading && entries
+                  .filter((entry) => {
+                    if (!searchTerm) return true;
+                    const search = searchTerm.toLowerCase();
+                    return (
+                      entry.code?.toLowerCase().includes(search) ||
+                      entry.description?.toLowerCase().includes(search) ||
+                      entry.type?.toLowerCase().includes(search) ||
+                      entry.status?.toLowerCase().includes(search) ||
+                      String(entry.discount).includes(search)
+                    );
+                  })
+                  .length === 0 && (
                   <tr>
                     <td className="py-15 text-center" colSpan={8}>
                       <div className="d-flex items-center justify-center gap-2 text-14 text-light-1">
                         <Tag size={18} />
-                        <span>No coupons found.</span>
+                        <span>{searchTerm ? "No coupons found matching your search" : "No coupons found."}</span>
                       </div>
                     </td>
                   </tr>
                 )}
                 {!loading && entries
+                  .filter((entry) => {
+                    if (!searchTerm) return true;
+                    const search = searchTerm.toLowerCase();
+                    return (
+                      entry.code?.toLowerCase().includes(search) ||
+                      entry.description?.toLowerCase().includes(search) ||
+                      entry.type?.toLowerCase().includes(search) ||
+                      entry.status?.toLowerCase().includes(search) ||
+                      String(entry.discount).includes(search)
+                    );
+                  })
                   .map((entry, index) => (
                     <tr key={index}>
                       <td className="align-middle text-12 lh-16 fw-500">

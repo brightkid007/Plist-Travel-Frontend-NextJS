@@ -31,6 +31,7 @@ const index = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [parentCategoryFilter, setParentCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -112,7 +113,11 @@ const index = () => {
     const statusOk =
       statusFilter === "all" || (statusFilter === "active" ? cat.is_active !== false : cat.is_active === false);
     const typeOk = typeFilter === "all" || (cat.type || "").toLowerCase() === typeFilter;
-    return statusOk && typeOk;
+    const searchOk = !searchTerm || 
+      cat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cat.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cat.type?.toLowerCase().includes(searchTerm.toLowerCase());
+    return statusOk && typeOk && searchOk;
   });
 
   const filteredSubcategories = subcategories.filter((sub) => {
@@ -120,7 +125,10 @@ const index = () => {
       statusFilter === "all" || (statusFilter === "active" ? sub.is_active !== false : sub.is_active === false);
     const parentOk =
       parentCategoryFilter === "all" || String(sub.category_id) === String(parentCategoryFilter);
-    return statusOk && parentOk;
+    const searchOk = !searchTerm || 
+      sub.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sub.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    return statusOk && parentOk && searchOk;
   });
 
   // Actions
@@ -128,6 +136,7 @@ const index = () => {
     setStatusFilter("all");
     setTypeFilter("all");
     setParentCategoryFilter("all");
+    setSearchTerm("");
     // Reload data
     if (activeTab === "category") {
       fetchCategories();
@@ -421,6 +430,25 @@ const index = () => {
         </div> */}
 
         <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
+          <div className="col-sm-auto">
+            <div className="position-relative d-flex items-center w-180 sm:w-full">
+              <input
+                type="text"
+                placeholder="Search categories..."
+                className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <i
+                className="icon-search text-light-1 position-absolute"
+                style={{
+                  left: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                }}
+              ></i>
+            </div>
+          </div>
 
           <div className="col-sm-auto">
             <select

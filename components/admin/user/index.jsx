@@ -69,6 +69,7 @@ const index = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
     setShowModal(false);
@@ -397,9 +398,30 @@ const index = () => {
       </div>
 
       <div className="bg-white rounded-8 border-light px-20 py-15">
-        <h1 className="text-24 lh-14 fw-500">All Users</h1>
-        <div className="text-14 lh-14 text-light-1">
-          Manage all users across the platform
+        <div className="d-flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-24 lh-14 fw-500">All Users</h1>
+            <div className="text-14 lh-14 text-light-1">
+              Manage all users across the platform
+            </div>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search users..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
         </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
@@ -434,7 +456,19 @@ const index = () => {
                     </td>
                   </tr>
                 ) : (
-                  users.map((user) => (
+                  users
+                    .filter((user) => {
+                      if (!searchTerm) return true;
+                      const search = searchTerm.toLowerCase();
+                      return (
+                        user.name?.toLowerCase().includes(search) ||
+                        user.email?.toLowerCase().includes(search) ||
+                        user.role?.toLowerCase().includes(search) ||
+                        user.role_name?.toLowerCase().includes(search) ||
+                        user.location?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map((user) => (
                     <tr key={user.id}>
                       <td className="align-middle">
                         <div className="d-flex items-center gap-2">

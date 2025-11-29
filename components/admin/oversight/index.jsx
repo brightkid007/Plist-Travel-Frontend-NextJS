@@ -18,28 +18,29 @@ const index = () => {
   const [filters, setFilters] = useState({});
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterOptions, setFilterOptions] = useState({
     statuses: [],
     categories: [],
     subcategories: [],
     types: [],
   });
-  
+
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  
+
   // Reject confirmation modal state
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [bookingToReject, setBookingToReject] = useState(null);
   const [rejecting, setRejecting] = useState(false);
-  
+
   // Refund confirmation modal state
   const [refundModalOpen, setRefundModalOpen] = useState(false);
   const [bookingToRefund, setBookingToRefund] = useState(null);
   const [refunding, setRefunding] = useState(false);
-  
+
   // Action loading state
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -100,8 +101,8 @@ const index = () => {
           totalPrice: b.total_price != null
             ? Number(b.total_price)
             : b.totalPrice != null
-            ? Number(b.totalPrice)
-            : b.amount || b.price || 0,
+              ? Number(b.totalPrice)
+              : b.amount || b.price || 0,
           currency: b.currency || 'USD',
           paid: (b.payment_status || 'unpaid').replace(/^./, (c) => c.toUpperCase()),
           status: (b.status || b.bookingStatus || "pending").replace(/^./, (c) => c.toUpperCase()),
@@ -117,7 +118,7 @@ const index = () => {
       const header = cols.map(c => '"' + c.label.replace(/"/g, '""') + '"').join(',');
 
       // Create CSV rows
-      const lines = processedBookings.map((r) => 
+      const lines = processedBookings.map((r) =>
         cols.map(c => {
           const v = r[c.key];
           return '"' + (v instanceof Date ? v.toISOString() : (v ?? '')).toString().replace(/"/g, '""') + '"';
@@ -208,7 +209,7 @@ const index = () => {
           subcategories: [],
         });
       }
-      
+
       const total = summary?.total ?? bookingsList.length ?? cards[0].amount;
       const confirmed = summary?.confirmed ?? bookingsList.filter((b) => (b.status || b.bookingStatus) === "confirmed").length ?? cards[1].amount;
       const pending = summary?.pending ?? bookingsList.filter((b) => (b.status || b.bookingStatus) === "pending").length ?? cards[2].amount;
@@ -362,17 +363,57 @@ const index = () => {
 
       <DashboardCard data={cards} />
 
-      <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100 mt-20">
-        <BookingList 
-          bookings={bookings} 
-          loading={loading}
-          hasPermission={hasPermission}
-          onDelete={handleDeleteClick}
-          onAccept={handleAcceptBooking}
-          onReject={handleRejectClick}
-          onRefund={handleRefundClick}
-          actionLoading={actionLoading}
-        />
+      <div className="py-15 px-15 rounded-8 bg-white shadow-3 h-100 mt-20">
+        <div className="d-flex items-center justify-end mb-10">
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search bookings..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
+        </div>
+        <div className="border-light rounded-8 px-15 py-5">
+          <BookingList
+            bookings={searchTerm ? bookings.filter((b) => {
+              const search = searchTerm.toLowerCase();
+              const listing = b.listing || {};
+              const name = (listing.title || b.title || b.name || b.listingName || "").toLowerCase();
+              const type = (listing.type || b.type || b.listingType || b.category_type || "").toLowerCase();
+              const category = ((listing.category || {}).name || b.category || b.listingCategory || "").toLowerCase();
+              const subcategory = ((listing.subcategory || {}).name || b.subcategory || b.listingSubcategory || "").toLowerCase();
+              const status = (b.status || b.bookingStatus || "").toLowerCase();
+              const paid = (b.payment_status || "").toLowerCase();
+
+              return (
+                name.includes(search) ||
+                type.includes(search) ||
+                category.includes(search) ||
+                subcategory.includes(search) ||
+                status.includes(search) ||
+                paid.includes(search) ||
+                String(b.id || b._id || "").includes(search)
+              );
+            }) : bookings}
+            loading={loading}
+            hasPermission={hasPermission}
+            onDelete={handleDeleteClick}
+            onAccept={handleAcceptBooking}
+            onReject={handleRejectClick}
+            onRefund={handleRefundClick}
+            actionLoading={actionLoading}
+          />
+        </div>
       </div>
 
       <ConfirmationModal

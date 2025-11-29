@@ -11,6 +11,7 @@ const index = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleClose = () => {
     setShowModal(false);
@@ -131,9 +132,30 @@ const index = () => {
       </div>
 
       <div className="bg-white rounded-8 border-light px-20 py-15">
-        <h1 className="text-24 lh-14 fw-500"> Manual Entries</h1>
-        <div className="text-14 lh-14 text-light-1">
-          Review and approve manually entered listing from vendors
+        <div className="d-flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-24 lh-14 fw-500"> Manual Entries</h1>
+            <div className="text-14 lh-14 text-light-1">
+              Review and approve manually entered listing from vendors
+            </div>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search entries..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
         </div>
         <div className="bg-white rounded-8 border-light py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
@@ -153,9 +175,19 @@ const index = () => {
               <tbody>
                 {entries
                   .filter((item) => {
-                    return activeTab === "all"
+                    const tabMatch = activeTab === "all"
                       ? true
                       : item.listing_type.toLowerCase() === activeTab;
+                    if (!tabMatch) return false;
+                    if (!searchTerm) return true;
+                    const search = searchTerm.toLowerCase();
+                    return (
+                      item.name?.toLowerCase().includes(search) ||
+                      item.listing_type?.toLowerCase().includes(search) ||
+                      item.location?.toLowerCase().includes(search) ||
+                      item.vendor?.toLowerCase().includes(search) ||
+                      String(item.id).includes(search)
+                    );
                   })
                   .map((entry, index) => (
                     <tr key={index}>

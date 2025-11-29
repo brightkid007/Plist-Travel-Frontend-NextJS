@@ -22,6 +22,7 @@ const index = () => {
   const [deleting, setDeleting] = useState(false);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch commissions from backend
   useEffect(() => {
@@ -174,6 +175,23 @@ const index = () => {
               Manage commission rates for vendors and agents
             </div>
           </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search commissions..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
           {/* <div className="d-flex items-center gap-2">
             {activeTab === "vendor" && (
               <select className="form-select border-light h-45 px-15 w-140">
@@ -229,9 +247,19 @@ const index = () => {
                 ) : (
                   entries
                     .filter((item) => {
-                      return activeTab === "all"
+                      const tabMatch = activeTab === "all"
                         ? true
                         : item.role.toLowerCase() === activeTab;
+                      if (!tabMatch) return false;
+                      if (!searchTerm) return true;
+                      const search = searchTerm.toLowerCase();
+                      return (
+                        item.name?.toLowerCase().includes(search) ||
+                        item.role?.toLowerCase().includes(search) ||
+                        item.listing_type?.toLowerCase().includes(search) ||
+                        item.plan?.toLowerCase().includes(search) ||
+                        String(item.id).includes(search)
+                      );
                     })
                     .map((entry, index) => (
                       <tr key={index}>

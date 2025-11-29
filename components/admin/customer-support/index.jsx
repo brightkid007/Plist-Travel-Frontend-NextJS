@@ -291,8 +291,24 @@ const index = () => {
     filters.startDate !== null ||
     filters.endDate !== null;
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Apply filters to tickets
   const filteredTickets = tickets.filter((ticket) => {
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      const matchesSearch = 
+        ticket.ticket_id?.toLowerCase().includes(search) ||
+        ticket.customer_name?.toLowerCase().includes(search) ||
+        ticket.customer_email?.toLowerCase().includes(search) ||
+        ticket.issue?.toLowerCase().includes(search) ||
+        ticket.ticket_type?.toLowerCase().includes(search) ||
+        ticket.status?.toLowerCase().includes(search) ||
+        ticket.priority?.toLowerCase().includes(search);
+      if (!matchesSearch) return false;
+    }
+    
     // Status filter
     if (filters.status !== "all") {
       const ticketStatus = ticket.status?.toLowerCase();
@@ -412,14 +428,35 @@ const index = () => {
 
       <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100">
         {activeTab === "tickets" ? (
-          <TicketList 
-            tickets={filteredTickets}
-            loading={loadingTickets}
-            onSelectTicket={(conversationId) => {
-              setSelectedTicketId(conversationId);
-              setActiveTab("conversation");
-            }} 
-          />
+          <>
+            <div className="d-flex items-center justify-end mb-10">
+              <div className="position-relative d-flex items-center w-180 sm:w-full">
+                <input
+                  type="text"
+                  placeholder="Search tickets..."
+                  className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <i
+                  className="icon-search text-light-1 position-absolute"
+                  style={{
+                    left: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                ></i>
+              </div>
+            </div>
+            <TicketList 
+              tickets={filteredTickets}
+              loading={loadingTickets}
+              onSelectTicket={(conversationId) => {
+                setSelectedTicketId(conversationId);
+                setActiveTab("conversation");
+              }} 
+            />
+          </>
         ) : (
           <Conversation 
             ticketId={selectedTicketId}

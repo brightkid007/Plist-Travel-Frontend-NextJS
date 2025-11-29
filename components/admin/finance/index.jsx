@@ -35,6 +35,7 @@ const index = () => {
   const [refundModalOpen, setRefundModalOpen] = useState(false);
   const [entryToRefund, setEntryToRefund] = useState(null);
   const [refunding, setRefunding] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const exportFinanceCSV = () => {
     try {
       const cols = [
@@ -171,10 +172,31 @@ const index = () => {
         </div>
       </div>
       <div className="bg-white rounded-8 border-light px-20 py-15">
-        {/* <h1 className="text-24 lh-14 fw-500"> Manual Entries</h1>
-        <div className="text-14 lh-14 text-light-1">
-          Review and approve manually entered listing from vendors
-        </div> */}
+        <div className="d-flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-24 lh-14 fw-500">Transactions</h1>
+            <div className="text-14 lh-14 text-light-1">
+              View and manage all financial transactions
+            </div>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search transactions..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
+        </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
             <table className="table-2 text-14 col-12">
@@ -200,9 +222,18 @@ const index = () => {
                   </tr>
                 ) : (() => {
                   const filteredEntries = entries.filter((item) => {
-                    return activeTab === "all"
+                    const tabMatch = activeTab === "all"
                       ? true
                       : item.status.toLowerCase() === activeTab;
+                    if (!tabMatch) return false;
+                    if (!searchTerm) return true;
+                    const search = searchTerm.toLowerCase();
+                    return (
+                      item.invoice?.toLowerCase().includes(search) ||
+                      item.customer?.toLowerCase().includes(search) ||
+                      item.amount?.toLowerCase().includes(search) ||
+                      item.status?.toLowerCase().includes(search)
+                    );
                   });
                   
                   if (filteredEntries.length === 0) {

@@ -182,6 +182,7 @@ const index = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
   const [viewingRole, setViewingRole] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const isAdminTab = activeTab === 0;
   const roles = isAdminTab ? adminRoles : vendorRoles;
@@ -327,6 +328,23 @@ const index = () => {
               Manage {isAdminTab ? "admin" : "vendor"} roles and permissions
             </div>
           </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search roles..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
         </div>
         <div className="bg-white rounded-8 border-light px-15 py-5 mt-10">
           <div className="overflow-scroll scroll-bar-1">
@@ -351,17 +369,37 @@ const index = () => {
                       </div>
                     </td>
                   </tr>
-                ) : roles.length === 0 ? (
+                ) : roles
+                    .filter((role) => {
+                      if (!searchTerm) return true;
+                      const search = searchTerm.toLowerCase();
+                      return (
+                        role.name?.toLowerCase().includes(search) ||
+                        role.description?.toLowerCase().includes(search)
+                      );
+                    })
+                    .length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-20 text-14 text-light-1">
                       <div className="d-flex flex-column items-center justify-center gap-2">
                         <Tag size={18} />
-                        <div className="text-14 text-light-1">No roles found</div>
+                        <div className="text-14 text-light-1">
+                          {searchTerm ? "No roles found matching your search" : "No roles found"}
+                        </div>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  roles.map((role, index) => (
+                  roles
+                    .filter((role) => {
+                      if (!searchTerm) return true;
+                      const search = searchTerm.toLowerCase();
+                      return (
+                        role.name?.toLowerCase().includes(search) ||
+                        role.description?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map((role, index) => (
                     <tr key={role.id}>
                       <td className="align-middle">
                         <div className="text-12 fw-500">{index + 1}</div>
