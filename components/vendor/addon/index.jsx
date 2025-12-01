@@ -29,6 +29,7 @@ const index = () => {
   const [selectedServiceForCalendar, setSelectedServiceForCalendar] = useState(null);
   const [loadingCalendar, setLoadingCalendar] = useState(false);
   const [calendarActiveTab, setCalendarActiveTab] = useState("events");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Load add-on services from backend
   useEffect(() => {
@@ -80,6 +81,22 @@ const index = () => {
       setLoading(false);
     }
   };
+
+  // Filter add-on services based on search term
+  const filteredAddOnServices = useMemo(() => {
+    if (!searchTerm) return addOnServices;
+    const search = searchTerm.toLowerCase();
+    return addOnServices.filter((service) => {
+      return (
+        service.name?.toLowerCase().includes(search) ||
+        service.description?.toLowerCase().includes(search) ||
+        service.type?.toLowerCase().includes(search) ||
+        service.basePrice?.toLowerCase().includes(search) ||
+        service.hourAvailable?.toLowerCase().includes(search) ||
+        service.availabilityPerTimeframe?.toLowerCase().includes(search)
+      );
+    });
+  }, [addOnServices, searchTerm]);
 
   const handleMenuOpen = (event, addOnServiceId) => {
     setAnchorEl(event.currentTarget);
@@ -155,6 +172,31 @@ const index = () => {
       </div>
 
       <div className="px-15 px-15 py-10 rounded-8 bg-white shadow-3 mb-10">
+        <div className="d-flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-24 lh-14 fw-500">Add-On Services</h1>
+            <div className="text-14 lh-14 text-light-1">
+              View and manage all your add-on services
+            </div>
+          </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search add-on services..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
+        </div>
         <div className="overflow-scroll scroll-bar-1 pt-0">
           <table className="table-2 col-12 text-14">
             <thead className="text-nowrap">
@@ -178,17 +220,24 @@ const index = () => {
                     </div>
                   </td>
                 </tr>
-              ) : addOnServices.length === 0 ? (
+              ) : filteredAddOnServices.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-40">
                     <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
-                      <Tag size={32} />
-                      No add-on services found. Create your first add-on service to get started.
+                      {searchTerm ? (
+                        <>
+                          <span>No add-on services found matching "{searchTerm}"</span>
+                        </>
+                      ) : (
+                        <>
+                          No add-on services found. Create your first add-on service to get started.
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
               ) : (
-                addOnServices.map((row) => (
+                filteredAddOnServices.map((row) => (
                   <tr key={row.id}>
                     <td className="align-middle">{row.name}</td>
                     <td className="align-middle">{row.description}</td>

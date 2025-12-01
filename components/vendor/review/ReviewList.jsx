@@ -28,27 +28,27 @@ const ReviewList = ({ detail = false, filters = {} }) => {
       setLoading(true);
       // Build query parameters from filters
       const params = {};
-      
+
       if (filterParams.status && filterParams.status !== "all") {
         params.status = filterParams.status;
       }
-      
+
       if (filterParams.rating && filterParams.rating !== "all") {
         params.rating = filterParams.rating;
       }
-      
+
       if (filterParams.listing_id && filterParams.listing_id !== "all") {
         params.listing_id = filterParams.listing_id;
       }
-      
+
       if (filterParams.search) {
         params.search = filterParams.search;
       }
-      
+
       if (filterParams.date_from) {
         params.date_from = filterParams.date_from;
       }
-      
+
       if (filterParams.date_to) {
         params.date_to = filterParams.date_to;
       }
@@ -117,7 +117,7 @@ const ReviewList = ({ detail = false, filters = {} }) => {
     setRate({});
     setSelectedReview(null);
   };
-  
+
   const handleClose = () => {
     setShowModal(false);
     initModalContent();
@@ -184,13 +184,13 @@ const ReviewList = ({ detail = false, filters = {} }) => {
       // because the rating endpoint doesn't accept comment, but comment is required
       await createReviewReply(payload);
       toast.success("Guest rating and reply submitted successfully");
-      
+
       // Refresh reviews to get updated data with replies
       const response = await getReviews(filters);
       const reviewsData = response?.data?.reviews || response?.reviews || response?.data || response || [];
       const reviewsArray = Array.isArray(reviewsData) ? reviewsData : [];
       setReviews(reviewsArray);
-      
+
       // Update selected review if it's still open
       if (selectedReview) {
         const updatedReview = reviewsArray.find(r => r.id === selectedReview.id);
@@ -210,7 +210,7 @@ const ReviewList = ({ detail = false, filters = {} }) => {
           }
         }
       }
-      
+
       // Close modal after successful submission
       handleClose();
     } catch (error) {
@@ -273,65 +273,65 @@ const ReviewList = ({ detail = false, filters = {} }) => {
             </tr>
           ) : (
             reviews.map((review) => (
-            <tr key={review.id}>
-              <td className="align-middle text-12">
-                {review.user
-                  ? `${review.user.first_name || ""} ${review.user.last_name || ""}`.trim() || review.user.email || "N/A"
-                  : "N/A"}
-              </td>
-              <td className="align-middle text-12">
-                {review.listing?.title || listingTitles[review.listing_id] || review.listing_id || "N/A"}
-              </td>
-              <td className="align-middle text-12">
-                {Array(5)
-                  .fill(null)
-                  .map((_, index) => (
-                    <span key={index} className="text-20 text-yellow-1 lh-14">
-                      {index < (review.rating || 0) ? "★" : "☆"}
-                    </span>
-                  ))}
-              </td>
-              <td className="align-middle text-12">
-                <div className="max-w-300">
-                  <div className="fw-500">{review.title || "No title"}</div>
-                  <div className="text-light-1 text-11 mt-5">
-                    {review.comment ? (review.comment.length > 100 ? `${review.comment.substring(0, 100)}...` : review.comment) : "No comment"}
+              <tr key={review.id}>
+                <td className="align-middle text-12">
+                  {review.user
+                    ? `${review.user.first_name || ""} ${review.user.last_name || ""}`.trim() || review.user.email || "N/A"
+                    : "N/A"}
+                </td>
+                <td className="align-middle text-12">
+                  {review.listing?.title || listingTitles[review.listing_id] || review.listing_id || "N/A"}
+                </td>
+                <td className="align-middle text-12">
+                  {Array(5)
+                    .fill(null)
+                    .map((_, index) => (
+                      <span key={index} className="text-20 text-yellow-1 lh-14">
+                        {index < (review.rating || 0) ? "★" : "☆"}
+                      </span>
+                    ))}
+                </td>
+                <td className="align-middle text-12">
+                  <div className="max-w-300">
+                    <div className="fw-500">{review.title || "No title"}</div>
+                    <div className="text-light-1 text-11 mt-5">
+                      {review.comment ? (review.comment.length > 100 ? `${review.comment.substring(0, 100)}...` : review.comment) : "No comment"}
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td className="align-middle">
-                <span
-                  className={`rounded-100 px-10 text-center text-12 ${getStatusBadge(review.status || "pending")}`}
-                >
-                  {(review.status || "pending").charAt(0).toUpperCase() + (review.status || "pending").slice(1)}
-                </span>
-              </td>
-              <td className="align-middle text-12">{formatDate(review.created_at || review.createdAt)}</td>
-              <td className="align-middle">
-                <div className="position-relative">
-                  <button
-                    className="border-0 bg-transparent cursor-pointer px-5 py-5"
-                    onClick={(e) => handleMenuOpen(e, review.id)}
+                </td>
+                <td className="align-middle">
+                  <span
+                    className={`rounded-100 px-10 text-center text-12 ${getStatusBadge(review.status || "pending")}`}
                   >
-                    <MoreVertical size={16} />
-                  </button>
-                  <Menu
-                    anchorEl={menuAnchor[review.id]}
-                    open={Boolean(menuAnchor[review.id])}
-                    onClose={() => handleMenuClose(review.id)}
-                  >
-                    <MenuItem 
-                      onClick={() => {
-                        handleOpenModal(review);
-                        handleMenuClose(review.id);
-                      }}
+                    {(review.status || "pending").charAt(0).toUpperCase() + (review.status || "pending").slice(1)}
+                  </span>
+                </td>
+                <td className="align-middle text-12">{formatDate(review.created_at || review.createdAt)}</td>
+                <td className="align-middle">
+                  <div className="position-relative">
+                    <button
+                      className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                      onClick={(e) => handleMenuOpen(e, review.id)}
                     >
-                      View Details
-                    </MenuItem>
-                  </Menu>
-                </div>
-              </td>
-            </tr>
+                      <MoreVertical size={16} />
+                    </button>
+                    <Menu
+                      anchorEl={menuAnchor[review.id]}
+                      open={Boolean(menuAnchor[review.id])}
+                      onClose={() => handleMenuClose(review.id)}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          handleOpenModal(review);
+                          handleMenuClose(review.id);
+                        }}
+                      >
+                        View Details
+                      </MenuItem>
+                    </Menu>
+                  </div>
+                </td>
+              </tr>
             ))
           )}
         </tbody>
@@ -516,7 +516,7 @@ const CombinedRatingReplyForm = ({ rate, setRate, replyText, setReplyText, onSub
       <div className="text-12 lh-12 text-light-1 mb-10">
         Provide a reply comment to the guest's review. Click on tokens below to insert dynamic fields.
       </div>
-      
+
       {/* Dynamic Fields/Tokens */}
       <div className="mb-10">
         <div className="row x-gap-5 y-gap-5">
@@ -543,7 +543,7 @@ const CombinedRatingReplyForm = ({ rate, setRate, replyText, setReplyText, onSub
           ))}
         </div>
       </div>
-      
+
       <textarea
         className="text-14 border-light rounded-8 bg-white px-10 py-10 mb-20 w-full"
         placeholder="Enter your reply to the guest review..."

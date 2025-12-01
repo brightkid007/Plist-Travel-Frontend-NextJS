@@ -28,7 +28,7 @@ const Sidebar = () => {
       permission: { resource: "user_management", action: "view" },
     },
     {
-      icon: "/img/dashboard/sidebar/sneakers.svg",
+      icon: "/img/dashboard/sidebar/taxi.svg",
       title: "Listings Management",
       permission: { resource: "listings_management", action: "view" },
       links: [

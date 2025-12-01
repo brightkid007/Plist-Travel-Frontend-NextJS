@@ -7,10 +7,11 @@ import DashboardCard from "../common/DashboardCard";
 import data from "./data";
 import Filter from "../common/Filter";
 import BookingList from "./BookingList";
-import { getAdminBookings, deleteBooking, updateBookingStatus, refundTransaction } from "@/helpers/backend_helper";
+import { getAdminBookings, deleteBooking, updateBookingStatus, refundTransaction, getTransactionById } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider, CircularProgress } from "@mui/material";
 
 const index = () => {
   const { hasPermission } = usePermissions();
@@ -38,7 +39,10 @@ const index = () => {
 
   // Refund confirmation modal state
   const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [invoiceDetailModalOpen, setInvoiceDetailModalOpen] = useState(false);
   const [bookingToRefund, setBookingToRefund] = useState(null);
+  const [transactionDetails, setTransactionDetails] = useState(null);
+  const [loadingTransaction, setLoadingTransaction] = useState(false);
   const [refunding, setRefunding] = useState(false);
 
   // Action loading state
@@ -309,14 +313,35 @@ const index = () => {
     setBookingToReject(null);
   };
 
-  // Handle refund booking
-  const handleRefundClick = (id, name, transactionId) => {
+  // Handle refund booking - show invoice details first
+  const handleRefundClick = async (id, name, transactionId) => {
     if (!hasPermission("booking_oversight", "update")) {
       toast.error("You don't have permission to process refunds");
       return;
     }
+    if (!transactionId) {
+      toast.error("Transaction ID not found for this booking");
+      return;
+    }
+    
     setBookingToRefund({ id, name, transactionId });
-    setRefundModalOpen(true);
+    
+    // Fetch transaction details
+    try {
+      setLoadingTransaction(true);
+      const txRes = await getTransactionById(transactionId);
+      const transaction = txRes?.data || txRes || {};
+      setTransactionDetails(transaction);
+      setInvoiceDetailModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching transaction details:", error);
+      toast.error("Failed to load transaction details");
+      // Still allow refund if transaction fetch fails
+      setTransactionDetails(null);
+      setInvoiceDetailModalOpen(true);
+    } finally {
+      setLoadingTransaction(false);
+    }
   };
 
   const handleRefundConfirm = async () => {
@@ -440,16 +465,165 @@ const index = () => {
         confirmingLabel="Rejecting..."
       />
 
+      {/* Invoice Detail Modal - Shows before refund confirmation */}
+      <Dialog
+        open={invoiceDetailModalOpen}
+        onClose={() => {
+          setInvoiceDetailModalOpen(false);
+          setBookingToRefund(null);
+          setTransactionDetails(null);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle className="text-20 fw-600">
+          Invoice Details
+          <div className="text-14 text-light-1 fw-400 mt-5">
+            Review invoice details before processing refund
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          {loadingTransaction ? (
+            <div className="d-flex items-center justify-center py-20">
+              <CircularProgress size={24} />
+              <span className="ml-10 text-14 text-light-1">Loading transaction details...</span>
+            </div>
+          ) : transactionDetails ? (
+            <div className="d-flex flex-column gap-3 py-10">
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Booking Name:</span>
+                <span className="text-14 fw-600">
+                  {bookingToRefund?.name || `Booking #${bookingToRefund?.id}`}
+                </span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Invoice Number:</span>
+                <span className="text-14 fw-600">
+                  {transactionDetails.invoice_number || 
+                   transactionDetails.reference_id || 
+                   `TXN-${transactionDetails.id}`}
+                </span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Transaction ID:</span>
+                <span className="text-14 fw-500">#{transactionDetails.id}</span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Customer/Vendor:</span>
+                <span className="text-14 fw-500">
+                  {transactionDetails.customer_name || 'N/A'}
+                </span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Transaction Type:</span>
+                <span className="text-14 fw-500 capitalize">
+                  {transactionDetails.type || 'N/A'}
+                </span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Amount:</span>
+                <span className="text-16 fw-600 text-blue-1">
+                  {transactionDetails.currency || 'USD'} {Number(transactionDetails.amount || 0).toLocaleString(undefined, { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                  })}
+                </span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Status:</span>
+                <span className={`text-14 fw-500 px-10 py-4 rounded-100 ${
+                  transactionDetails.status === 'completed' ? 'bg-green-4 text-green-3' :
+                  transactionDetails.status === 'pending' ? 'bg-yellow-4 text-yellow-3' :
+                  transactionDetails.status === 'failed' ? 'bg-red-3 text-red-2' :
+                  'bg-gray-4 text-gray-3'
+                }`}>
+                  {transactionDetails.status === 'completed' ? 'Paid' :
+                   transactionDetails.status === 'pending' ? 'Pending' :
+                   transactionDetails.status === 'failed' ? 'Failed' :
+                   transactionDetails.status === 'refunded' ? 'Refunded' :
+                   transactionDetails.status}
+                </span>
+              </div>
+              <Divider />
+              <div className="d-flex justify-between items-center">
+                <span className="text-14 text-light-1">Date:</span>
+                <span className="text-14 fw-500">
+                  {new Date(transactionDetails.paid_at || 
+                           transactionDetails.created_at || 
+                           transactionDetails.createdAt).toLocaleString()}
+                </span>
+              </div>
+              {transactionDetails.booking_id && (
+                <>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Booking ID:</span>
+                    <span className="text-14 fw-500">#{transactionDetails.booking_id}</span>
+                  </div>
+                </>
+              )}
+              {transactionDetails.description && (
+                <>
+                  <Divider />
+                  <div className="d-flex flex-column gap-2">
+                    <span className="text-14 text-light-1">Description:</span>
+                    <span className="text-14 fw-500">
+                      {transactionDetails.description}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="d-flex flex-column gap-3 py-10">
+              <div className="text-14 text-light-1">
+                Transaction details could not be loaded. Booking ID: {bookingToRefund?.id}, Transaction ID: {bookingToRefund?.transactionId}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions className="px-20 py-15">
+          <Button
+            onClick={() => {
+              setInvoiceDetailModalOpen(false);
+              setBookingToRefund(null);
+              setTransactionDetails(null);
+            }}
+            className="text-14"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setInvoiceDetailModalOpen(false);
+              setRefundModalOpen(true);
+            }}
+            variant="contained"
+            className="bg-blue-1 text-white text-14"
+            disabled={!transactionDetails}
+          >
+            Proceed to Refund
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Refund Confirmation Modal */}
       <ConfirmationModal
         open={refundModalOpen}
         onClose={handleRefundCancel}
         onConfirm={handleRefundConfirm}
-        title="Refund Booking"
+        title="Confirm Refund"
         message={`Are you sure you want to process a refund for the booking "${bookingToRefund?.name || `#${bookingToRefund?.id}`}"? This action cannot be undone.`}
         itemName={bookingToRefund?.name || `Booking #${bookingToRefund?.id}`}
         loading={refunding}
-        confirmLabel="Refund"
-        confirmingLabel="Refunding..."
+        confirmLabel="Confirm Refund"
+        confirmingLabel="Processing Refund..."
       />
     </AdminDashboardLayout>
   );

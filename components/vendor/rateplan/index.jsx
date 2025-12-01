@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Checkbox } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-toastify";
@@ -30,6 +30,7 @@ const index = () => {
   const [ratePlanToDelete, setRatePlanToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Menu handlers for dropdown actions
   const handleMenuOpen = (event, ratePlanId) => {
@@ -189,6 +190,30 @@ const index = () => {
     setRatePlanToDelete(null);
   };
 
+  // Filter rate plans based on search term
+  const filteredRatePlans = useMemo(() => {
+    if (!searchTerm) return ratePlans;
+    const search = searchTerm.toLowerCase();
+    return ratePlans.filter((plan) => {
+      const title = (plan.title || plan.name || "").toLowerCase();
+      const prepayId = formatPrepayId(plan).toLowerCase();
+      const cancellationPolicy = formatCancellationPolicy(plan.cancellation_policy_id).toLowerCase();
+      const rateDetails = formatRateDetails(plan).toLowerCase();
+      const meals = formatMeals(plan).toLowerCase();
+      const status = (plan.is_active ? "active" : "inactive").toLowerCase();
+
+      return (
+        title.includes(search) ||
+        prepayId.includes(search) ||
+        cancellationPolicy.includes(search) ||
+        rateDetails.includes(search) ||
+        meals.includes(search) ||
+        status.includes(search) ||
+        String(plan.id).includes(search)
+      );
+    });
+  }, [ratePlans, searchTerm]);
+
   return (
     <VendorDashboardLayout>
       <div className="row y-gap-10 justify-between items-end mb-10">
@@ -289,101 +314,130 @@ const index = () => {
               Add
             </button>
           </div>
+        </div>
 
-          <div className="overflow-scroll scroll-bar-1 pt-10">
-            <table className="table-2 col-12 text-14">
-              <thead className="text-nowrap">
-                <tr>
-                  <th style={{ width: "25%" }}>Rate plan name</th>
-                  <th>Cancellation policy</th>
-                  <th>Rate, room status & restrictions</th>
-                  <th>Meals</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="6" className="text-center py-40">
-                      <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
-                        <CircularProgress size={30} />
-                        <span>Loading rate plans...</span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : ratePlans.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="text-center py-40">
-                      <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
-                        <Tag size={32} />
-                        <span>No rate plans found</span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  ratePlans.map((ratePlan) => (
-                    <tr key={ratePlan.id}>
-                      <td className="text-12">
-                        <div className="text-blue-1">{ratePlan.title || ratePlan.name || "Rate Plan"}</div>
-                        <div className="text-light-1">{formatPrepayId(ratePlan)}</div>
-                      </td>
-                      <td className="text-12">
-                        {formatCancellationPolicy(ratePlan.cancellation_policy_id)}
-                      </td>
-                      <td className="text-12">{formatRateDetails(ratePlan)}</td>
-                      <td className="text-12">{formatMeals(ratePlan)}</td>
-                      <td>
-                        <span
-                          className={
-                            "rounded-100 px-10 text-center col-12 text-12 fw-500 " +
-                            (ratePlan.is_active
-                              ? "bg-dark-blue text-white"
-                              : "bg-light-2 text-light-1")
-                          }
-                        >
-                          {ratePlan.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="position-relative">
-                          <button
-                            className="border-0 bg-transparent cursor-pointer px-5 py-5"
-                            onClick={(e) => handleMenuOpen(e, ratePlan.id)}
-                          >
-                            <MoreVertical size={16} />
-                          </button>
-                          <Menu
-                            anchorEl={menuAnchor[ratePlan.id]}
-                            open={Boolean(menuAnchor[ratePlan.id])}
-                            onClose={() => handleMenuClose(ratePlan.id)}
-                          >
-                            <MenuItem
-                              onClick={() => {
-                                handleEdit(ratePlan);
-                                handleMenuClose(ratePlan.id);
-                              }}
-                            >
-                              Edit
-                            </MenuItem>
-                            <MenuItem
-                              onClick={() => {
-                                handleDeleteClick(ratePlan);
-                                handleMenuClose(ratePlan.id);
-                              }}
-                              className="text-red-2"
-                            >
-                              Delete
-                            </MenuItem>
-                          </Menu>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        <div className="d-flex items-center justify-between mb-10 mt-15">
+          <div>
+            <h1 className="text-24 lh-14 fw-500">Rate Plans</h1>
+            <div className="text-14 lh-14 text-light-1">
+              View and manage all your rate plans
+            </div>
           </div>
+          <div className="position-relative d-flex items-center w-180 sm:w-full">
+            <input
+              type="text"
+              placeholder="Search rate plans..."
+              className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <i
+              className="icon-search text-light-1 position-absolute"
+              style={{
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            ></i>
+          </div>
+        </div>
+
+        <div className="overflow-scroll scroll-bar-1 pt-10">
+          <table className="table-2 col-12 text-14">
+            <thead className="text-nowrap">
+              <tr>
+                <th style={{ width: "25%" }}>Rate plan name</th>
+                <th>Cancellation policy</th>
+                <th>Rate, room status & restrictions</th>
+                <th>Meals</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-40">
+                    <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                      <CircularProgress size={30} />
+                      <span>Loading rate plans...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredRatePlans.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-40">
+                    <div className="d-flex flex-column items-center justify-center gap-2 text-14 text-light-1">
+                      {searchTerm ? (
+                        <span>No rate plans found matching "{searchTerm}"</span>
+                      ) : (
+                        <span>No rate plans found</span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredRatePlans.map((ratePlan) => (
+                  <tr key={ratePlan.id}>
+                    <td className="text-12">
+                      <div className="text-blue-1">{ratePlan.title || ratePlan.name || "Rate Plan"}</div>
+                      <div className="text-light-1">{formatPrepayId(ratePlan)}</div>
+                    </td>
+                    <td className="text-12">
+                      {formatCancellationPolicy(ratePlan.cancellation_policy_id)}
+                    </td>
+                    <td className="text-12">{formatRateDetails(ratePlan)}</td>
+                    <td className="text-12">{formatMeals(ratePlan)}</td>
+                    <td>
+                      <span
+                        className={
+                          "rounded-100 px-10 text-center col-12 text-12 fw-500 " +
+                          (ratePlan.is_active
+                            ? "bg-dark-blue text-white"
+                            : "bg-light-2 text-light-1")
+                        }
+                      >
+                        {ratePlan.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="position-relative">
+                        <button
+                          className="border-0 bg-transparent cursor-pointer px-5 py-5"
+                          onClick={(e) => handleMenuOpen(e, ratePlan.id)}
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                        <Menu
+                          anchorEl={menuAnchor[ratePlan.id]}
+                          open={Boolean(menuAnchor[ratePlan.id])}
+                          onClose={() => handleMenuClose(ratePlan.id)}
+                        >
+                          <MenuItem
+                            onClick={() => {
+                              handleEdit(ratePlan);
+                              handleMenuClose(ratePlan.id);
+                            }}
+                          >
+                            Edit
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              handleDeleteClick(ratePlan);
+                              handleMenuClose(ratePlan.id);
+                            }}
+                            className="text-red-2"
+                          >
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 

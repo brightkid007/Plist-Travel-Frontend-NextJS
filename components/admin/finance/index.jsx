@@ -4,7 +4,7 @@ import AdminDashboardLayout from "../common/layout";
 import { useRouter } from "next/navigation";
 import { BookOpen, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CircularProgress, Menu, MenuItem } from "@mui/material";
+import { CircularProgress, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from "@mui/material";
 import DashboardCard from "./components/DashboardCard";
 import { getTransactions, getPaymentAnalytics, refundTransaction } from "@/helpers/backend_helper";
 import { toast } from "react-toastify";
@@ -33,7 +33,10 @@ const index = () => {
   const [loading, setLoading] = useState(true);
   const [menuAnchor, setMenuAnchor] = useState({});
   const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [invoiceDetailModalOpen, setInvoiceDetailModalOpen] = useState(false);
   const [entryToRefund, setEntryToRefund] = useState(null);
+  const [viewingEntry, setViewingEntry] = useState(null);
+  const [isRefundMode, setIsRefundMode] = useState(false);
   const [refunding, setRefunding] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const exportFinanceCSV = () => {
@@ -73,11 +76,23 @@ const index = () => {
       const list = txRes?.transactions || txRes?.data?.transactions || txRes?.data || [];
       const mapped = list.map((t) => ({
         id: t.id,
-        invoice: t.invoice_number || t.reference_id || '-', 'customer': t.customer_name || '-',
+        invoice: t.invoice_number || t.reference_id || '-',
+        customer: t.customer_name || '-',
         amount: `$${Number(t.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         status: ({ completed: 'Paid', pending: 'Pending', failed: 'Overdue', refunded: 'Refunded' }[t.status] || t.status || '-'),
         date: t.paid_at || t.created_at,
-        action: 'View'
+        action: 'View',
+        // Store full transaction data for detail view
+        transactionData: {
+          ...t,
+          rawAmount: t.amount,
+          currency: t.currency || 'USD',
+          description: t.description,
+          type: t.type,
+          booking_id: t.booking_id,
+          user_id: t.user_id,
+          wallet_id: t.wallet_id,
+        }
       }));
       setEntries(mapped);
       setSummaryCards([
@@ -293,6 +308,17 @@ const index = () => {
                           >
                             <MenuItem
                               onClick={() => {
+                                setViewingEntry(entry);
+                                setIsRefundMode(false);
+                                handleMenuClose(entry.id || index);
+                                setInvoiceDetailModalOpen(true);
+                              }}
+                              className="text-14"
+                            >
+                              View Invoice
+                            </MenuItem>
+                            <MenuItem
+                              onClick={() => {
                                 const canRefund = hasPermission("financial_management", "update") && 
                                                  entry?.status !== "Overdue" && 
                                                  entry?.status !== "Refunded";
@@ -306,13 +332,15 @@ const index = () => {
                                   return;
                                 }
                                 setEntryToRefund(entry);
+                                setViewingEntry(entry);
+                                setIsRefundMode(true);
                                 handleMenuClose(entry.id || index);
-                                setRefundModalOpen(true);
+                                setInvoiceDetailModalOpen(true);
                               }}
                               disabled={!hasPermission("financial_management", "update") || 
                                       entry?.status === "Overdue" || 
                                       entry?.status === "Refunded"}
-                              className="text-blue-1"
+                              className="text-blue-1 text-14"
                             >
                               Refund
                             </MenuItem>
@@ -327,6 +355,143 @@ const index = () => {
           </div>
         </div>
 
+        {/* Invoice Detail Modal - Shows invoice details for viewing or before refund confirmation */}
+        <Dialog
+          open={invoiceDetailModalOpen}
+          onClose={() => {
+            setInvoiceDetailModalOpen(false);
+            setEntryToRefund(null);
+            setViewingEntry(null);
+            setIsRefundMode(false);
+          }}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle className="text-20 fw-600">
+            Invoice Details
+            <div className="text-14 text-light-1 fw-400 mt-5">
+              {isRefundMode ? "Review invoice details before processing refund" : "View invoice information"}
+            </div>
+          </DialogTitle>
+          <DialogContent>
+            {(entryToRefund?.transactionData || viewingEntry?.transactionData) && (() => {
+              const transactionData = entryToRefund?.transactionData || viewingEntry?.transactionData;
+              return (
+                <div className="d-flex flex-column gap-3 py-10">
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Invoice Number:</span>
+                    <span className="text-14 fw-600">
+                      {transactionData.invoice_number || 
+                       transactionData.reference_id || 
+                       `TXN-${transactionData.id}`}
+                    </span>
+                  </div>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Transaction ID:</span>
+                    <span className="text-14 fw-500">#{transactionData.id}</span>
+                  </div>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Customer/Vendor:</span>
+                    <span className="text-14 fw-500">
+                      {transactionData.customer_name || 'N/A'}
+                    </span>
+                  </div>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Transaction Type:</span>
+                    <span className="text-14 fw-500 capitalize">
+                      {transactionData.type || 'N/A'}
+                    </span>
+                  </div>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Amount:</span>
+                    <span className="text-16 fw-600 text-blue-1">
+                      {transactionData.currency || 'USD'} {Number(transactionData.rawAmount || 0).toLocaleString(undefined, { 
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 2 
+                      })}
+                    </span>
+                  </div>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Status:</span>
+                    <span className={`text-14 fw-500 px-10 py-4 rounded-100 ${
+                      transactionData.status === 'completed' ? 'bg-green-4 text-green-3' :
+                      transactionData.status === 'pending' ? 'bg-yellow-4 text-yellow-3' :
+                      transactionData.status === 'failed' ? 'bg-red-3 text-red-2' :
+                      'bg-gray-4 text-gray-3'
+                    }`}>
+                      {transactionData.status === 'completed' ? 'Paid' :
+                       transactionData.status === 'pending' ? 'Pending' :
+                       transactionData.status === 'failed' ? 'Failed' :
+                       transactionData.status === 'refunded' ? 'Refunded' :
+                       transactionData.status}
+                    </span>
+                  </div>
+                  <Divider />
+                  <div className="d-flex justify-between items-center">
+                    <span className="text-14 text-light-1">Date:</span>
+                    <span className="text-14 fw-500">
+                      {new Date(transactionData.paid_at || 
+                               transactionData.created_at || 
+                               transactionData.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  {transactionData.booking_id && (
+                    <>
+                      <Divider />
+                      <div className="d-flex justify-between items-center">
+                        <span className="text-14 text-light-1">Booking ID:</span>
+                        <span className="text-14 fw-500">#{transactionData.booking_id}</span>
+                      </div>
+                    </>
+                  )}
+                  {transactionData.description && (
+                    <>
+                      <Divider />
+                      <div className="d-flex flex-column gap-2">
+                        <span className="text-14 text-light-1">Description:</span>
+                        <span className="text-14 fw-500">
+                          {transactionData.description}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
+          </DialogContent>
+          <DialogActions className="px-20 py-15">
+            <Button
+              onClick={() => {
+                setInvoiceDetailModalOpen(false);
+                setEntryToRefund(null);
+                setViewingEntry(null);
+                setIsRefundMode(false);
+              }}
+              className="text-14"
+            >
+              {isRefundMode ? 'Cancel' : 'Close'}
+            </Button>
+            {isRefundMode && (
+              <Button
+                onClick={() => {
+                  setInvoiceDetailModalOpen(false);
+                  setRefundModalOpen(true);
+                }}
+                variant="contained"
+                className="bg-blue-1 text-white text-14"
+              >
+                Proceed to Refund
+              </Button>
+            )}
+          </DialogActions>
+        </Dialog>
+
+        {/* Refund Confirmation Modal */}
         <ConfirmationModal
           open={refundModalOpen}
           onClose={() => {
@@ -348,12 +513,12 @@ const index = () => {
               setRefunding(false);
             }
           }}
-          title="Refund Transaction"
+          title="Confirm Refund"
           message={`Are you sure you want to refund ${entryToRefund?.invoice ? `invoice "${entryToRefund.invoice}"` : 'this transaction'}? This action cannot be undone.`}
           itemName={entryToRefund?.invoice || `Transaction #${entryToRefund?.id}`}
           loading={refunding}
-          confirmLabel="Refund"
-          confirmingLabel="Refunding..."
+          confirmLabel="Confirm Refund"
+          confirmingLabel="Processing Refund..."
         />
       </div>
     </AdminDashboardLayout>

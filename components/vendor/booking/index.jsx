@@ -337,8 +337,8 @@ const index = () => {
 
       <BookingCard data={cardData} />
 
-      <div className="py-20 px-30 rounded-8 bg-white shadow-3 h-100 mt-20">
-        <div className="row y-gap-20 x-gap-10 justify-between items-center mb-10">
+      <div className="py-15 px-15 rounded-8 bg-white shadow-3 h-100 mt-20">
+        <div className="row y-gap-20 x-gap-10 justify-between items-center">
           <div className="col-md-auto position-relative d-flex items-center">
             <input
               type="text"

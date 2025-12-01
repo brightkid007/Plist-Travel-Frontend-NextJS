@@ -18,6 +18,27 @@ const ReviewFilter = ({ filters = {}, onFilterChange }) => {
 
   return (
     <div className="row y-gap-10 x-gap-10 items-center mb-5 mt-10">
+      {/* Search Filter */}
+      <div className="col-sm-auto">
+        <div className="position-relative d-flex items-center w-180 sm:w-full">
+          <input
+            type="text"
+            placeholder="Search reviews..."
+            className="border-light bg-white rounded-8 px-10 py-5 pl-30"
+            value={filters.search || ""}
+            onChange={(e) => handleFilterChange("search", e.target.value)}
+          />
+          <i
+            className="icon-search text-light-1 position-absolute"
+            style={{
+              left: "10px",
+              top: "50%",
+              transform: "translateY(-50%)",
+            }}
+          ></i>
+        </div>
+      </div>
+
       {/* Status Filter */}
       <div className="col-sm-auto">
         <select
